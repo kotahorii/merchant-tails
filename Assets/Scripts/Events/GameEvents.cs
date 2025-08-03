@@ -10,14 +10,14 @@ namespace MerchantTails.Events
     {
         public GameState PreviousState { get; }
         public GameState NewState { get; }
-        
+
         public GameStateChangedEvent(GameState previousState, GameState newState)
         {
             PreviousState = previousState;
             NewState = newState;
         }
     }
-    
+
     /// <summary>
     /// 時間フェーズが変更されたときのイベント
     /// </summary>
@@ -26,7 +26,7 @@ namespace MerchantTails.Events
         public DayPhase PreviousPhase { get; }
         public DayPhase NewPhase { get; }
         public int CurrentDay { get; }
-        
+
         public PhaseChangedEvent(DayPhase previousPhase, DayPhase newPhase, int currentDay)
         {
             PreviousPhase = previousPhase;
@@ -34,7 +34,7 @@ namespace MerchantTails.Events
             CurrentDay = currentDay;
         }
     }
-    
+
     /// <summary>
     /// 季節が変更されたときのイベント
     /// </summary>
@@ -43,7 +43,7 @@ namespace MerchantTails.Events
         public Season PreviousSeason { get; }
         public Season NewSeason { get; }
         public int Year { get; }
-        
+
         public SeasonChangedEvent(Season previousSeason, Season newSeason, int year)
         {
             PreviousSeason = previousSeason;
@@ -51,7 +51,7 @@ namespace MerchantTails.Events
             Year = year;
         }
     }
-    
+
     /// <summary>
     /// 価格が変更されたときのイベント
     /// </summary>
@@ -61,7 +61,7 @@ namespace MerchantTails.Events
         public float PreviousPrice { get; }
         public float NewPrice { get; }
         public float ChangePercentage { get; }
-        
+
         public PriceChangedEvent(ItemType itemType, float previousPrice, float newPrice)
         {
             ItemType = itemType;
@@ -70,7 +70,7 @@ namespace MerchantTails.Events
             ChangePercentage = previousPrice > 0 ? ((newPrice - previousPrice) / previousPrice) * 100f : 0f;
         }
     }
-    
+
     /// <summary>
     /// プレイヤーのお金が変更されたときのイベント
     /// </summary>
@@ -80,7 +80,7 @@ namespace MerchantTails.Events
         public int NewAmount { get; }
         public int ChangeAmount { get; }
         public string Reason { get; }
-        
+
         public MoneyChangedEvent(int previousAmount, int newAmount, string reason = "")
         {
             PreviousAmount = previousAmount;
@@ -89,7 +89,7 @@ namespace MerchantTails.Events
             Reason = reason;
         }
     }
-    
+
     /// <summary>
     /// プレイヤーのランクが変更されたときのイベント
     /// </summary>
@@ -98,7 +98,7 @@ namespace MerchantTails.Events
         public MerchantRank PreviousRank { get; }
         public MerchantRank NewRank { get; }
         public bool IsRankUp { get; }
-        
+
         public RankChangedEvent(MerchantRank previousRank, MerchantRank newRank)
         {
             PreviousRank = previousRank;
@@ -106,7 +106,7 @@ namespace MerchantTails.Events
             IsRankUp = newRank > previousRank;
         }
     }
-    
+
     /// <summary>
     /// 取引が完了したときのイベント
     /// </summary>
@@ -118,7 +118,7 @@ namespace MerchantTails.Events
         public float TotalPrice { get; }
         public bool IsPurchase { get; }
         public float Profit { get; }
-        
+
         public TransactionCompletedEvent(ItemType itemType, int quantity, float unitPrice, bool isPurchase, float profit = 0f)
         {
             ItemType = itemType;
@@ -129,7 +129,7 @@ namespace MerchantTails.Events
             Profit = profit;
         }
     }
-    
+
     /// <summary>
     /// イベント（収穫祭、ドラゴン討伐など）が発生したときのイベント
     /// </summary>
@@ -140,7 +140,7 @@ namespace MerchantTails.Events
         public ItemType[] AffectedItems { get; }
         public float[] PriceModifiers { get; }
         public int Duration { get; }
-        
+
         public GameEventTriggeredEvent(string eventName, string description, ItemType[] affectedItems, float[] priceModifiers, int duration)
         {
             EventName = eventName;
@@ -150,7 +150,7 @@ namespace MerchantTails.Events
             Duration = duration;
         }
     }
-    
+
     /// <summary>
     /// チュートリアルステップが完了したときのイベント
     /// </summary>
@@ -159,7 +159,7 @@ namespace MerchantTails.Events
         public int StepNumber { get; }
         public string StepName { get; }
         public bool IsLastStep { get; }
-        
+
         public TutorialStepCompletedEvent(int stepNumber, string stepName, bool isLastStep)
         {
             StepNumber = stepNumber;
@@ -167,7 +167,7 @@ namespace MerchantTails.Events
             IsLastStep = isLastStep;
         }
     }
-    
+
     /// <summary>
     /// セーブ/ロード操作が完了したときのイベント
     /// </summary>
@@ -176,12 +176,46 @@ namespace MerchantTails.Events
         public bool IsLoadOperation { get; }
         public bool Success { get; }
         public string ErrorMessage { get; }
-        
+
         public SaveLoadEvent(bool isLoadOperation, bool success, string errorMessage = "")
         {
             IsLoadOperation = isLoadOperation;
             Success = success;
             ErrorMessage = errorMessage;
+        }
+    }
+
+    /// <summary>
+    /// 日が変更されたときのイベント
+    /// </summary>
+    public class DayChangedEvent : BaseGameEvent
+    {
+        public int PreviousDay { get; }
+        public int NewDay { get; }
+        public Season CurrentSeason { get; }
+        public int CurrentYear { get; }
+
+        public DayChangedEvent(int previousDay, int newDay, Season currentSeason, int currentYear)
+        {
+            PreviousDay = previousDay;
+            NewDay = newDay;
+            CurrentSeason = currentSeason;
+            CurrentYear = currentYear;
+        }
+    }
+
+    /// <summary>
+    /// 年が変更されたときのイベント
+    /// </summary>
+    public class YearChangedEvent : BaseGameEvent
+    {
+        public int PreviousYear { get; }
+        public int NewYear { get; }
+
+        public YearChangedEvent(int previousYear, int newYear)
+        {
+            PreviousYear = previousYear;
+            NewYear = newYear;
         }
     }
 }
