@@ -1,9 +1,9 @@
 using System;
 using System.Collections.Generic;
+using MerchantTails.Core;
+using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
-using TMPro;
-using MerchantTails.Core;
 
 namespace MerchantTails.UI
 {
@@ -16,20 +16,37 @@ namespace MerchantTails.UI
         public static ModalManager Instance => instance;
 
         [Header("Modal Prefabs")]
-        [SerializeField] private GameObject confirmModalPrefab;
-        [SerializeField] private GameObject alertModalPrefab;
-        [SerializeField] private GameObject inputModalPrefab;
-        [SerializeField] private GameObject customModalPrefab;
+        [SerializeField]
+        private GameObject confirmModalPrefab;
+
+        [SerializeField]
+        private GameObject alertModalPrefab;
+
+        [SerializeField]
+        private GameObject inputModalPrefab;
+
+        [SerializeField]
+        private GameObject customModalPrefab;
 
         [Header("Modal Container")]
-        [SerializeField] private Transform modalContainer;
-        [SerializeField] private GameObject modalBackground;
+        [SerializeField]
+        private Transform modalContainer;
+
+        [SerializeField]
+        private GameObject modalBackground;
 
         [Header("Animation Settings")]
-        [SerializeField] private float showAnimationDuration = 0.3f;
-        [SerializeField] private float hideAnimationDuration = 0.2f;
-        [SerializeField] private AnimationCurve showAnimationCurve = AnimationCurve.EaseInOut(0, 0, 1, 1);
-        [SerializeField] private AnimationCurve hideAnimationCurve = AnimationCurve.EaseInOut(0, 0, 1, 1);
+        [SerializeField]
+        private float showAnimationDuration = 0.3f;
+
+        [SerializeField]
+        private float hideAnimationDuration = 0.2f;
+
+        [SerializeField]
+        private AnimationCurve showAnimationCurve = AnimationCurve.EaseInOut(0, 0, 1, 1);
+
+        [SerializeField]
+        private AnimationCurve hideAnimationCurve = AnimationCurve.EaseInOut(0, 0, 1, 1);
 
         private Stack<ModalDialog> modalStack = new Stack<ModalDialog>();
         private bool isAnimating = false;
@@ -77,20 +94,23 @@ namespace MerchantTails.UI
             string cancelText = "いいえ"
         )
         {
-            ErrorHandler.SafeExecute(() =>
-            {
-                if (confirmModalPrefab == null || modalContainer == null)
-                    return;
-
-                var modalGO = Instantiate(confirmModalPrefab, modalContainer);
-                var modal = modalGO.GetComponent<ConfirmModal>();
-
-                if (modal != null)
+            ErrorHandler.SafeExecute(
+                () =>
                 {
-                    modal.Setup(title, message, confirmText, cancelText, onConfirm, onCancel);
-                    ShowModal(modal);
-                }
-            }, "ModalManager.ShowConfirmModal");
+                    if (confirmModalPrefab == null || modalContainer == null)
+                        return;
+
+                    var modalGO = Instantiate(confirmModalPrefab, modalContainer);
+                    var modal = modalGO.GetComponent<ConfirmModal>();
+
+                    if (modal != null)
+                    {
+                        modal.Setup(title, message, confirmText, cancelText, onConfirm, onCancel);
+                        ShowModal(modal);
+                    }
+                },
+                "ModalManager.ShowConfirmModal"
+            );
         }
 
         /// <summary>
@@ -98,20 +118,23 @@ namespace MerchantTails.UI
         /// </summary>
         public void ShowAlertModal(string title, string message, Action onClose = null, string closeText = "OK")
         {
-            ErrorHandler.SafeExecute(() =>
-            {
-                if (alertModalPrefab == null || modalContainer == null)
-                    return;
-
-                var modalGO = Instantiate(alertModalPrefab, modalContainer);
-                var modal = modalGO.GetComponent<AlertModal>();
-
-                if (modal != null)
+            ErrorHandler.SafeExecute(
+                () =>
                 {
-                    modal.Setup(title, message, closeText, onClose);
-                    ShowModal(modal);
-                }
-            }, "ModalManager.ShowAlertModal");
+                    if (alertModalPrefab == null || modalContainer == null)
+                        return;
+
+                    var modalGO = Instantiate(alertModalPrefab, modalContainer);
+                    var modal = modalGO.GetComponent<AlertModal>();
+
+                    if (modal != null)
+                    {
+                        modal.Setup(title, message, closeText, onClose);
+                        ShowModal(modal);
+                    }
+                },
+                "ModalManager.ShowAlertModal"
+            );
         }
 
         /// <summary>
@@ -127,20 +150,23 @@ namespace MerchantTails.UI
             string cancelText = "キャンセル"
         )
         {
-            ErrorHandler.SafeExecute(() =>
-            {
-                if (inputModalPrefab == null || modalContainer == null)
-                    return;
-
-                var modalGO = Instantiate(inputModalPrefab, modalContainer);
-                var modal = modalGO.GetComponent<InputModal>();
-
-                if (modal != null)
+            ErrorHandler.SafeExecute(
+                () =>
                 {
-                    modal.Setup(title, message, placeholder, submitText, cancelText, onSubmit, onCancel);
-                    ShowModal(modal);
-                }
-            }, "ModalManager.ShowInputModal");
+                    if (inputModalPrefab == null || modalContainer == null)
+                        return;
+
+                    var modalGO = Instantiate(inputModalPrefab, modalContainer);
+                    var modal = modalGO.GetComponent<InputModal>();
+
+                    if (modal != null)
+                    {
+                        modal.Setup(title, message, placeholder, submitText, cancelText, onSubmit, onCancel);
+                        ShowModal(modal);
+                    }
+                },
+                "ModalManager.ShowInputModal"
+            );
         }
 
         /// <summary>
@@ -148,19 +174,22 @@ namespace MerchantTails.UI
         /// </summary>
         public void ShowCustomModal(GameObject modalPrefab)
         {
-            ErrorHandler.SafeExecute(() =>
-            {
-                if (modalPrefab == null || modalContainer == null)
-                    return;
-
-                var modalGO = Instantiate(modalPrefab, modalContainer);
-                var modal = modalGO.GetComponent<ModalDialog>();
-
-                if (modal != null)
+            ErrorHandler.SafeExecute(
+                () =>
                 {
-                    ShowModal(modal);
-                }
-            }, "ModalManager.ShowCustomModal");
+                    if (modalPrefab == null || modalContainer == null)
+                        return;
+
+                    var modalGO = Instantiate(modalPrefab, modalContainer);
+                    var modal = modalGO.GetComponent<ModalDialog>();
+
+                    if (modal != null)
+                    {
+                        ShowModal(modal);
+                    }
+                },
+                "ModalManager.ShowCustomModal"
+            );
         }
 
         private void ShowModal(ModalDialog modal)
@@ -312,13 +341,21 @@ namespace MerchantTails.UI
     public abstract class ModalDialog : MonoBehaviour
     {
         [Header("Base Modal Elements")]
-        [SerializeField] protected TextMeshProUGUI titleText;
-        [SerializeField] protected TextMeshProUGUI messageText;
-        [SerializeField] protected Button closeButton;
+        [SerializeField]
+        protected TextMeshProUGUI titleText;
+
+        [SerializeField]
+        protected TextMeshProUGUI messageText;
+
+        [SerializeField]
+        protected Button closeButton;
 
         [Header("Modal Settings")]
-        [SerializeField] private bool allowEscapeClose = true;
-        [SerializeField] private bool closeOnBackgroundClick = false;
+        [SerializeField]
+        private bool allowEscapeClose = true;
+
+        [SerializeField]
+        private bool closeOnBackgroundClick = false;
 
         public bool AllowEscapeClose => allowEscapeClose;
         public event Action OnCloseRequested;
@@ -367,10 +404,17 @@ namespace MerchantTails.UI
     public class ConfirmModal : ModalDialog
     {
         [Header("Confirm Modal Elements")]
-        [SerializeField] private Button confirmButton;
-        [SerializeField] private Button cancelButton;
-        [SerializeField] private TextMeshProUGUI confirmButtonText;
-        [SerializeField] private TextMeshProUGUI cancelButtonText;
+        [SerializeField]
+        private Button confirmButton;
+
+        [SerializeField]
+        private Button cancelButton;
+
+        [SerializeField]
+        private TextMeshProUGUI confirmButtonText;
+
+        [SerializeField]
+        private TextMeshProUGUI cancelButtonText;
 
         private Action onConfirmAction;
         private Action onCancelAction;
@@ -446,8 +490,11 @@ namespace MerchantTails.UI
     public class AlertModal : ModalDialog
     {
         [Header("Alert Modal Elements")]
-        [SerializeField] private Button okButton;
-        [SerializeField] private TextMeshProUGUI okButtonText;
+        [SerializeField]
+        private Button okButton;
+
+        [SerializeField]
+        private TextMeshProUGUI okButtonText;
 
         private Action onCloseAction;
 
@@ -495,11 +542,20 @@ namespace MerchantTails.UI
     public class InputModal : ModalDialog
     {
         [Header("Input Modal Elements")]
-        [SerializeField] private TMP_InputField inputField;
-        [SerializeField] private Button submitButton;
-        [SerializeField] private Button cancelButton;
-        [SerializeField] private TextMeshProUGUI submitButtonText;
-        [SerializeField] private TextMeshProUGUI cancelButtonText;
+        [SerializeField]
+        private TMP_InputField inputField;
+
+        [SerializeField]
+        private Button submitButton;
+
+        [SerializeField]
+        private Button cancelButton;
+
+        [SerializeField]
+        private TextMeshProUGUI submitButtonText;
+
+        [SerializeField]
+        private TextMeshProUGUI cancelButtonText;
 
         private Action<string> onSubmitAction;
         private Action onCancelAction;

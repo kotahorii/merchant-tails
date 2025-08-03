@@ -1,8 +1,8 @@
 using System;
 using System.Collections;
+using MerchantTails.Core;
 using UnityEngine;
 using UnityEngine.UI;
-using MerchantTails.Core;
 
 namespace MerchantTails.UI
 {
@@ -15,16 +15,30 @@ namespace MerchantTails.UI
         public static ScreenTransitionManager Instance => instance;
 
         [Header("Transition Elements")]
-        [SerializeField] private Canvas transitionCanvas;
-        [SerializeField] private Image fadeImage;
-        [SerializeField] private Image circleWipeImage;
-        [SerializeField] private Image slideImage;
-        [SerializeField] private Material circleWipeMaterial;
+        [SerializeField]
+        private Canvas transitionCanvas;
+
+        [SerializeField]
+        private Image fadeImage;
+
+        [SerializeField]
+        private Image circleWipeImage;
+
+        [SerializeField]
+        private Image slideImage;
+
+        [SerializeField]
+        private Material circleWipeMaterial;
 
         [Header("Transition Settings")]
-        [SerializeField] private float defaultTransitionDuration = 0.5f;
-        [SerializeField] private AnimationCurve defaultTransitionCurve = AnimationCurve.EaseInOut(0, 0, 1, 1);
-        [SerializeField] private Color fadeColor = Color.black;
+        [SerializeField]
+        private float defaultTransitionDuration = 0.5f;
+
+        [SerializeField]
+        private AnimationCurve defaultTransitionCurve = AnimationCurve.EaseInOut(0, 0, 1, 1);
+
+        [SerializeField]
+        private Color fadeColor = Color.black;
 
         private bool isTransitioning = false;
         private Coroutine currentTransition;
@@ -80,7 +94,8 @@ namespace MerchantTails.UI
         /// </summary>
         public void DoFadeTransition(Action onTransitionMiddle = null, float duration = -1)
         {
-            if (isTransitioning) return;
+            if (isTransitioning)
+                return;
 
             if (currentTransition != null)
                 StopCoroutine(currentTransition);
@@ -99,7 +114,8 @@ namespace MerchantTails.UI
             float duration = -1
         )
         {
-            if (isTransitioning) return;
+            if (isTransitioning)
+                return;
 
             if (currentTransition != null)
                 StopCoroutine(currentTransition);
@@ -116,19 +132,20 @@ namespace MerchantTails.UI
         /// <summary>
         /// スライド遷移を実行
         /// </summary>
-        public void DoSlideTransition(
-            SlideDirection direction,
-            Action onTransitionMiddle = null,
-            float duration = -1
-        )
+        public void DoSlideTransition(SlideDirection direction, Action onTransitionMiddle = null, float duration = -1)
         {
-            if (isTransitioning) return;
+            if (isTransitioning)
+                return;
 
             if (currentTransition != null)
                 StopCoroutine(currentTransition);
 
             currentTransition = StartCoroutine(
-                SlideTransitionCoroutine(direction, onTransitionMiddle, duration > 0 ? duration : defaultTransitionDuration)
+                SlideTransitionCoroutine(
+                    direction,
+                    onTransitionMiddle,
+                    duration > 0 ? duration : defaultTransitionDuration
+                )
             );
         }
 
@@ -171,10 +188,7 @@ namespace MerchantTails.UI
             circleWipeImage.material = new Material(circleWipeMaterial); // マテリアルのコピーを作成
 
             // 画面座標を正規化座標に変換
-            Vector2 normalizedCenter = new Vector2(
-                centerPosition.x / Screen.width,
-                centerPosition.y / Screen.height
-            );
+            Vector2 normalizedCenter = new Vector2(centerPosition.x / Screen.width, centerPosition.y / Screen.height);
 
             circleWipeImage.material.SetVector("_Center", normalizedCenter);
 
@@ -213,7 +227,9 @@ namespace MerchantTails.UI
             rect.sizeDelta = Vector2.zero;
 
             // スライド方向に応じた初期位置と目標位置を設定
-            Vector2 startPos, middlePos, endPos;
+            Vector2 startPos,
+                middlePos,
+                endPos;
             switch (direction)
             {
                 case SlideDirection.Left:
@@ -333,7 +349,7 @@ namespace MerchantTails.UI
             Left,
             Right,
             Up,
-            Down
+            Down,
         }
     }
 }

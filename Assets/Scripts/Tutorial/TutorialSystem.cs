@@ -1,11 +1,11 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
-using UnityEngine;
-using MerchantTails.Events;
 using MerchantTails.Core;
-using MerchantTails.UI;
 using MerchantTails.Data;
+using MerchantTails.Events;
+using MerchantTails.UI;
+using UnityEngine;
 
 namespace MerchantTails.Tutorial
 {
@@ -18,14 +18,17 @@ namespace MerchantTails.Tutorial
         private static TutorialSystem instance;
         public static TutorialSystem Instance => instance;
 
-        [SerializeField] private TutorialStep[] tutorialSteps;
-        [SerializeField] private float defaultStepDelay = 0.5f;
-        
+        [SerializeField]
+        private TutorialStep[] tutorialSteps;
+
+        [SerializeField]
+        private float defaultStepDelay = 0.5f;
+
         private int currentStepIndex = -1;
         private bool isActive = false;
         private bool isWaitingForAction = false;
         private bool canSkip = true;
-        
+
         public bool IsActive => isActive;
         public bool IsCompleted => currentStepIndex >= tutorialSteps.Length - 1;
         public int CurrentStep => currentStepIndex;
@@ -44,7 +47,7 @@ namespace MerchantTails.Tutorial
                 return;
             }
             instance = this;
-            
+
             InitializeTutorialSteps();
             LoadTutorialProgress();
         }
@@ -71,7 +74,7 @@ namespace MerchantTails.Tutorial
                         description = "あなたは新米商人として、この街で道具屋を営むことになりました。",
                         targetUI = UIType.MainMenu,
                         requiredAction = TutorialAction.None,
-                        highlightArea = new Rect(Screen.width * 0.5f - 200, Screen.height * 0.5f - 100, 400, 200)
+                        highlightArea = new Rect(Screen.width * 0.5f - 200, Screen.height * 0.5f - 100, 400, 200),
                     },
                     new TutorialStep
                     {
@@ -80,7 +83,7 @@ namespace MerchantTails.Tutorial
                         description = "ここがあなたのお店です。商品を仕入れて、お客様に販売しましょう。",
                         targetUI = UIType.ShopManagement,
                         requiredAction = TutorialAction.OpenShop,
-                        highlightArea = new Rect(50, 50, 300, 400)
+                        highlightArea = new Rect(50, 50, 300, 400),
                     },
                     new TutorialStep
                     {
@@ -89,7 +92,7 @@ namespace MerchantTails.Tutorial
                         description = "商品の価格は日々変動します。安く仕入れて高く売るのが商売の基本です。",
                         targetUI = UIType.MarketAnalysis,
                         requiredAction = TutorialAction.OpenMarket,
-                        highlightArea = new Rect(100, 100, 600, 400)
+                        highlightArea = new Rect(100, 100, 600, 400),
                     },
                     new TutorialStep
                     {
@@ -100,7 +103,7 @@ namespace MerchantTails.Tutorial
                         requiredAction = TutorialAction.BuyItem,
                         requiredItemType = ItemType.Fruit,
                         requiredQuantity = 10,
-                        highlightArea = new Rect(200, 200, 400, 300)
+                        highlightArea = new Rect(200, 200, 400, 300),
                     },
                     new TutorialStep
                     {
@@ -109,7 +112,7 @@ namespace MerchantTails.Tutorial
                         description = "仕入れた商品を店頭に移動させて、お客様が買えるようにしましょう。",
                         targetUI = UIType.Inventory,
                         requiredAction = TutorialAction.MoveToStorefront,
-                        highlightArea = new Rect(300, 300, 200, 100)
+                        highlightArea = new Rect(300, 300, 200, 100),
                     },
                     new TutorialStep
                     {
@@ -118,7 +121,7 @@ namespace MerchantTails.Tutorial
                         description = "時間を進めると、お客様が来店して商品を購入していきます。",
                         targetUI = UIType.ShopManagement,
                         requiredAction = TutorialAction.AdvanceTime,
-                        highlightArea = new Rect(Screen.width - 250, 50, 200, 100)
+                        highlightArea = new Rect(Screen.width - 250, 50, 200, 100),
                     },
                     new TutorialStep
                     {
@@ -127,7 +130,7 @@ namespace MerchantTails.Tutorial
                         description = "商人手帳で今日の売上と利益を確認できます。",
                         targetUI = UIType.ShopManagement,
                         requiredAction = TutorialAction.CheckProfit,
-                        highlightArea = new Rect(50, Screen.height - 150, 300, 100)
+                        highlightArea = new Rect(50, Screen.height - 150, 300, 100),
                     },
                     new TutorialStep
                     {
@@ -136,8 +139,8 @@ namespace MerchantTails.Tutorial
                         description = "基本的な商売の流れを理解しました。さあ、一人前の商人を目指しましょう！",
                         targetUI = UIType.ShopManagement,
                         requiredAction = TutorialAction.None,
-                        isLastStep = true
-                    }
+                        isLastStep = true,
+                    },
                 };
             }
         }
@@ -147,19 +150,20 @@ namespace MerchantTails.Tutorial
         /// </summary>
         public void StartTutorial(bool fromBeginning = true)
         {
-            if (isActive) return;
+            if (isActive)
+                return;
 
             ErrorHandler.LogInfo("Starting tutorial", "TutorialSystem");
-            
+
             isActive = true;
             if (fromBeginning)
             {
                 currentStepIndex = -1;
             }
-            
+
             // Subscribe to game events
             SubscribeToEvents();
-            
+
             // Start first step
             NextStep();
         }
@@ -169,19 +173,20 @@ namespace MerchantTails.Tutorial
         /// </summary>
         public void SkipTutorial()
         {
-            if (!isActive || !canSkip) return;
+            if (!isActive || !canSkip)
+                return;
 
             ErrorHandler.LogInfo("Skipping tutorial", "TutorialSystem");
-            
+
             isActive = false;
             currentStepIndex = tutorialSteps.Length - 1;
-            
+
             UnsubscribeFromEvents();
             SaveTutorialProgress();
-            
+
             OnTutorialSkipped?.Invoke();
             OnTutorialCompleted?.Invoke();
-            
+
             // Unlock all basic features
             UnlockBasicFeatures();
         }
@@ -191,10 +196,11 @@ namespace MerchantTails.Tutorial
         /// </summary>
         public void NextStep()
         {
-            if (!isActive || isWaitingForAction) return;
+            if (!isActive || isWaitingForAction)
+                return;
 
             currentStepIndex++;
-            
+
             if (currentStepIndex >= tutorialSteps.Length)
             {
                 CompleteTutorial();
@@ -207,18 +213,18 @@ namespace MerchantTails.Tutorial
         private IEnumerator ShowStepCoroutine()
         {
             var step = tutorialSteps[currentStepIndex];
-            
+
             ErrorHandler.LogInfo($"Starting tutorial step: {step.stepName}", "TutorialSystem");
-            
+
             // Notify step started
             OnStepStarted?.Invoke(currentStepIndex);
-            
+
             // Wait for delay
             yield return new WaitForSeconds(defaultStepDelay);
-            
+
             // Show tutorial UI
             ShowTutorialUI(step);
-            
+
             // If this step requires an action, wait for it
             if (step.requiredAction != TutorialAction.None)
             {
@@ -239,7 +245,7 @@ namespace MerchantTails.Tutorial
             {
                 TutorialPanel.Instance.ShowStep(step);
             }
-            
+
             // Navigate to target UI if needed
             if (step.targetUI != UIType.None && UIManager.Instance != null)
             {
@@ -252,32 +258,29 @@ namespace MerchantTails.Tutorial
         /// </summary>
         public void CompleteCurrentStep()
         {
-            if (!isActive || currentStepIndex < 0) return;
+            if (!isActive || currentStepIndex < 0)
+                return;
 
             var step = tutorialSteps[currentStepIndex];
-            
+
             ErrorHandler.LogInfo($"Completing tutorial step: {step.stepName}", "TutorialSystem");
-            
+
             isWaitingForAction = false;
-            
+
             // Hide tutorial UI
             if (TutorialPanel.Instance != null)
             {
                 TutorialPanel.Instance.Hide();
             }
-            
+
             // Notify step completed
             OnStepCompleted?.Invoke(currentStepIndex);
-            
+
             // Publish event
-            EventBus.Publish(new TutorialStepCompletedEvent(
-                currentStepIndex,
-                step.stepName,
-                step.isLastStep
-            ));
-            
+            EventBus.Publish(new TutorialStepCompletedEvent(currentStepIndex, step.stepName, step.isLastStep));
+
             SaveTutorialProgress();
-            
+
             if (step.isLastStep)
             {
                 CompleteTutorial();
@@ -292,15 +295,15 @@ namespace MerchantTails.Tutorial
         private void CompleteTutorial()
         {
             ErrorHandler.LogInfo("Tutorial completed!", "TutorialSystem");
-            
+
             isActive = false;
             UnsubscribeFromEvents();
-            
+
             OnTutorialCompleted?.Invoke();
-            
+
             // Unlock all basic features
             UnlockBasicFeatures();
-            
+
             SaveTutorialProgress();
         }
 
@@ -331,10 +334,11 @@ namespace MerchantTails.Tutorial
 
         private void OnTransactionCompleted(TransactionCompletedEvent e)
         {
-            if (!isActive || !isWaitingForAction) return;
+            if (!isActive || !isWaitingForAction)
+                return;
 
             var step = tutorialSteps[currentStepIndex];
-            
+
             // Check if this transaction completes the current step
             if (step.requiredAction == TutorialAction.BuyItem && e.IsPurchase)
             {
@@ -350,10 +354,11 @@ namespace MerchantTails.Tutorial
 
         private void OnGameStateChanged(GameStateChangedEvent e)
         {
-            if (!isActive || !isWaitingForAction) return;
+            if (!isActive || !isWaitingForAction)
+                return;
 
             var step = tutorialSteps[currentStepIndex];
-            
+
             // Check state-based actions
             switch (step.requiredAction)
             {
@@ -361,7 +366,7 @@ namespace MerchantTails.Tutorial
                     if (e.NewState == GameState.StoreManagement)
                         CompleteCurrentStep();
                     break;
-                    
+
                 case TutorialAction.OpenMarket:
                     if (e.NewState == GameState.MarketView)
                         CompleteCurrentStep();
@@ -371,10 +376,11 @@ namespace MerchantTails.Tutorial
 
         private void OnPhaseChanged(PhaseChangedEvent e)
         {
-            if (!isActive || !isWaitingForAction) return;
+            if (!isActive || !isWaitingForAction)
+                return;
 
             var step = tutorialSteps[currentStepIndex];
-            
+
             if (step.requiredAction == TutorialAction.AdvanceTime)
             {
                 CompleteCurrentStep();
@@ -396,7 +402,7 @@ namespace MerchantTails.Tutorial
         {
             currentStepIndex = PlayerPrefs.GetInt("Tutorial_CurrentStep", -1);
             bool completed = PlayerPrefs.GetInt("Tutorial_Completed", 0) == 1;
-            
+
             if (completed)
             {
                 currentStepIndex = tutorialSteps.Length - 1;
@@ -410,8 +416,9 @@ namespace MerchantTails.Tutorial
         /// </summary>
         public bool IsActionRequired(TutorialAction action)
         {
-            if (!isActive || !isWaitingForAction || currentStepIndex < 0) return false;
-            
+            if (!isActive || !isWaitingForAction || currentStepIndex < 0)
+                return false;
+
             return tutorialSteps[currentStepIndex].requiredAction == action;
         }
 
@@ -422,7 +429,7 @@ namespace MerchantTails.Tutorial
         {
             if (currentStepIndex < 0 || currentStepIndex >= tutorialSteps.Length)
                 return null;
-                
+
             return tutorialSteps[currentStepIndex];
         }
     }
@@ -461,6 +468,6 @@ namespace MerchantTails.Tutorial
         AdvanceTime,
         CheckProfit,
         OpenSettings,
-        SaveGame
+        SaveGame,
     }
 }

@@ -1,6 +1,6 @@
 using System;
-using UnityEngine;
 using MerchantTails.Events;
+using UnityEngine;
 
 namespace MerchantTails.Core
 {
@@ -23,7 +23,7 @@ namespace MerchantTails.Core
             Info,
             Warning,
             Error,
-            Critical
+            Critical,
         }
 
         public struct LogEntry
@@ -152,7 +152,8 @@ namespace MerchantTails.Core
         /// </summary>
         public static void LogCritical(string message, Exception exception = null, string context = "")
         {
-            string fullMessage = $"CRITICAL ERROR - {(string.IsNullOrEmpty(context) ? message : $"[{context}] {message}")}";
+            string fullMessage =
+                $"CRITICAL ERROR - {(string.IsNullOrEmpty(context) ? message : $"[{context}] {message}")}";
 
             if (exception != null)
             {
@@ -303,7 +304,7 @@ namespace MerchantTails.Core
                 timestamp = DateTime.Now,
                 message = message,
                 level = level,
-                stackTrace = stackTrace ?? ""
+                stackTrace = stackTrace ?? "",
             };
 
             logHistory.Enqueue(entry);
@@ -325,7 +326,7 @@ namespace MerchantTails.Core
                 LogType.Exception => LogLevel.Critical,
                 LogType.Warning => LogLevel.Warning,
                 LogType.Log => LogLevel.Info,
-                _ => LogLevel.Debug
+                _ => LogLevel.Debug,
             };
 
             // Only log if it's not already handled by our system

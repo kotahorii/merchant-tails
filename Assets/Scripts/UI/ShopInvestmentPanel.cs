@@ -1,8 +1,8 @@
 using System.Collections.Generic;
+using MerchantTails.Core;
+using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
-using TMPro;
-using MerchantTails.Core;
 
 namespace MerchantTails.UI
 {
@@ -12,27 +12,48 @@ namespace MerchantTails.UI
     public class ShopInvestmentPanel : MonoBehaviour
     {
         [Header("Overview")]
-        [SerializeField] private TextMeshProUGUI totalInvestmentText;
-        [SerializeField] private TextMeshProUGUI currentMoneyText;
-        
+        [SerializeField]
+        private TextMeshProUGUI totalInvestmentText;
+
+        [SerializeField]
+        private TextMeshProUGUI currentMoneyText;
+
         [Header("Current Bonuses")]
-        [SerializeField] private TextMeshProUGUI storageBonusText;
-        [SerializeField] private TextMeshProUGUI efficiencyBonusText;
-        [SerializeField] private TextMeshProUGUI customerBonusText;
-        [SerializeField] private TextMeshProUGUI qualityBonusText;
+        [SerializeField]
+        private TextMeshProUGUI storageBonusText;
+
+        [SerializeField]
+        private TextMeshProUGUI efficiencyBonusText;
+
+        [SerializeField]
+        private TextMeshProUGUI customerBonusText;
+
+        [SerializeField]
+        private TextMeshProUGUI qualityBonusText;
 
         [Header("Category Tabs")]
-        [SerializeField] private Toggle[] categoryTabs;
-        [SerializeField] private TextMeshProUGUI[] categoryProgressTexts;
+        [SerializeField]
+        private Toggle[] categoryTabs;
+
+        [SerializeField]
+        private TextMeshProUGUI[] categoryProgressTexts;
 
         [Header("Upgrade List")]
-        [SerializeField] private Transform upgradeListContainer;
-        [SerializeField] private GameObject upgradeItemPrefab;
+        [SerializeField]
+        private Transform upgradeListContainer;
+
+        [SerializeField]
+        private GameObject upgradeItemPrefab;
 
         [Header("UI Settings")]
-        [SerializeField] private Color maxedColor = new Color(1f, 0.8f, 0.2f);
-        [SerializeField] private Color unavailableColor = new Color(0.5f, 0.5f, 0.5f);
-        [SerializeField] private Color purchasableColor = Color.white;
+        [SerializeField]
+        private Color maxedColor = new Color(1f, 0.8f, 0.2f);
+
+        [SerializeField]
+        private Color unavailableColor = new Color(0.5f, 0.5f, 0.5f);
+
+        [SerializeField]
+        private Color purchasableColor = Color.white;
 
         private ShopInvestmentSystem investmentSystem;
         private PlayerData playerData;
@@ -65,14 +86,17 @@ namespace MerchantTails.UI
             for (int i = 0; i < categoryTabs.Length; i++)
             {
                 int index = i;
-                categoryTabs[i].onValueChanged.AddListener((isOn) =>
-                {
-                    if (isOn)
-                    {
-                        currentCategory = (UpgradeCategory)index;
-                        RefreshUpgradeList();
-                    }
-                });
+                categoryTabs[i]
+                    .onValueChanged.AddListener(
+                        (isOn) =>
+                        {
+                            if (isOn)
+                            {
+                                currentCategory = (UpgradeCategory)index;
+                                RefreshUpgradeList();
+                            }
+                        }
+                    );
             }
         }
 
@@ -129,28 +153,34 @@ namespace MerchantTails.UI
 
         private void UpdateBonuses()
         {
-            if (investmentSystem == null) return;
+            if (investmentSystem == null)
+                return;
 
             if (storageBonusText != null)
                 storageBonusText.text = $"保管容量: +{(investmentSystem.StorageCapacityMultiplier - 1) * 100:F0}%";
-            
+
             if (efficiencyBonusText != null)
-                efficiencyBonusText.text = $"取引効率: +{(investmentSystem.TransactionEfficiencyMultiplier - 1) * 100:F0}%";
-            
+                efficiencyBonusText.text =
+                    $"取引効率: +{(investmentSystem.TransactionEfficiencyMultiplier - 1) * 100:F0}%";
+
             if (customerBonusText != null)
                 customerBonusText.text = $"来客数: +{(investmentSystem.CustomerFlowMultiplier - 1) * 100:F0}%";
-            
+
             if (qualityBonusText != null)
                 qualityBonusText.text = $"品質保持: +{(investmentSystem.ItemQualityMultiplier - 1) * 100:F0}%";
         }
 
         private void UpdateCategoryProgress()
         {
-            for (int i = 0; i < categoryProgressTexts.Length && i < System.Enum.GetValues(typeof(UpgradeCategory)).Length; i++)
+            for (
+                int i = 0;
+                i < categoryProgressTexts.Length && i < System.Enum.GetValues(typeof(UpgradeCategory)).Length;
+                i++
+            )
             {
                 var category = (UpgradeCategory)i;
                 var upgrades = investmentSystem.GetUpgradesByCategory(category);
-                
+
                 int totalLevels = 0;
                 int maxPossibleLevels = 0;
 
@@ -205,20 +235,29 @@ namespace MerchantTails.UI
         {
             GameObject itemObj = Instantiate(upgradeItemPrefab, upgradeListContainer);
             ShopUpgradeItemUI itemUI = itemObj.GetComponent<ShopUpgradeItemUI>();
-            
+
             if (itemUI == null)
             {
                 itemUI = itemObj.AddComponent<ShopUpgradeItemUI>();
             }
 
             var progress = investmentSystem.GetProgress(upgrade.id);
-            int nextCost = progress.currentLevel < upgrade.maxLevel ? 
-                investmentSystem.CalculateUpgradeCost(upgrade, progress.currentLevel) : 0;
-            
-            itemUI.Setup(upgrade, progress, playerData?.CurrentMoney ?? 0, nextCost, 
-                purchasableColor, unavailableColor, maxedColor);
+            int nextCost =
+                progress.currentLevel < upgrade.maxLevel
+                    ? investmentSystem.CalculateUpgradeCost(upgrade, progress.currentLevel)
+                    : 0;
+
+            itemUI.Setup(
+                upgrade,
+                progress,
+                playerData?.CurrentMoney ?? 0,
+                nextCost,
+                purchasableColor,
+                unavailableColor,
+                maxedColor
+            );
             itemUI.OnPurchase += OnPurchaseUpgrade;
-            
+
             upgradeItems.Add(itemUI);
         }
 
@@ -282,7 +321,7 @@ namespace MerchantTails.UI
         private void OnMoneyChanged(int newAmount)
         {
             UpdateOverview();
-            
+
             // 購入可能状態を更新
             foreach (var item in upgradeItems)
             {
@@ -297,17 +336,38 @@ namespace MerchantTails.UI
     public class ShopUpgradeItemUI : MonoBehaviour
     {
         [Header("UI References")]
-        [SerializeField] private Image icon;
-        [SerializeField] private TextMeshProUGUI nameText;
-        [SerializeField] private TextMeshProUGUI descriptionText;
-        [SerializeField] private TextMeshProUGUI levelText;
-        [SerializeField] private Slider levelProgressBar;
-        [SerializeField] private TextMeshProUGUI effectText;
-        [SerializeField] private TextMeshProUGUI costText;
-        [SerializeField] private Button purchaseButton;
-        [SerializeField] private GameObject maxedIndicator;
-        [SerializeField] private GameObject rankRequirementIndicator;
-        [SerializeField] private TextMeshProUGUI rankRequirementText;
+        [SerializeField]
+        private Image icon;
+
+        [SerializeField]
+        private TextMeshProUGUI nameText;
+
+        [SerializeField]
+        private TextMeshProUGUI descriptionText;
+
+        [SerializeField]
+        private TextMeshProUGUI levelText;
+
+        [SerializeField]
+        private Slider levelProgressBar;
+
+        [SerializeField]
+        private TextMeshProUGUI effectText;
+
+        [SerializeField]
+        private TextMeshProUGUI costText;
+
+        [SerializeField]
+        private Button purchaseButton;
+
+        [SerializeField]
+        private GameObject maxedIndicator;
+
+        [SerializeField]
+        private GameObject rankRequirementIndicator;
+
+        [SerializeField]
+        private TextMeshProUGUI rankRequirementText;
 
         private ShopUpgrade upgrade;
         private ShopUpgradeProgress progress;
@@ -318,8 +378,15 @@ namespace MerchantTails.UI
 
         public event System.Action<string> OnPurchase;
 
-        public void Setup(ShopUpgrade shopUpgrade, ShopUpgradeProgress upgradeProgress, 
-            int playerMoney, int cost, Color purchasable, Color unavailable, Color maxed)
+        public void Setup(
+            ShopUpgrade shopUpgrade,
+            ShopUpgradeProgress upgradeProgress,
+            int playerMoney,
+            int cost,
+            Color purchasable,
+            Color unavailable,
+            Color maxed
+        )
         {
             upgrade = shopUpgrade;
             progress = upgradeProgress;
@@ -329,12 +396,14 @@ namespace MerchantTails.UI
             maxedColor = maxed;
 
             // 基本情報
-            if (nameText != null) nameText.text = upgrade.name;
-            if (descriptionText != null) descriptionText.text = upgrade.description;
+            if (nameText != null)
+                nameText.text = upgrade.name;
+            if (descriptionText != null)
+                descriptionText.text = upgrade.description;
 
             // レベル表示
             bool isMaxed = progress.currentLevel >= upgrade.maxLevel;
-            
+
             if (levelText != null)
             {
                 levelText.text = $"Lv.{progress.currentLevel}/{upgrade.maxLevel}";
@@ -356,7 +425,7 @@ namespace MerchantTails.UI
             {
                 float currentEffect = upgrade.effectPerLevel * progress.currentLevel * 100;
                 float nextEffect = upgrade.effectPerLevel * (progress.currentLevel + 1) * 100;
-                
+
                 if (isMaxed)
                 {
                     effectText.text = $"効果: +{currentEffect:F0}%";
@@ -398,10 +467,12 @@ namespace MerchantTails.UI
 
             // ランク要件
             bool meetsRankRequirement = GameManager.Instance?.PlayerData?.CurrentRank >= upgrade.requiredRank;
-            
+
             if (rankRequirementIndicator != null)
             {
-                rankRequirementIndicator.SetActive(!meetsRankRequirement && upgrade.requiredRank > MerchantRank.Apprentice);
+                rankRequirementIndicator.SetActive(
+                    !meetsRankRequirement && upgrade.requiredRank > MerchantRank.Apprentice
+                );
             }
 
             if (rankRequirementText != null && !meetsRankRequirement)
@@ -420,7 +491,7 @@ namespace MerchantTails.UI
         {
             bool canAfford = playerMoney >= nextCost;
             bool isMaxed = progress.currentLevel >= upgrade.maxLevel;
-            
+
             if (purchaseButton != null)
             {
                 purchaseButton.interactable = !isMaxed && canAfford;
@@ -439,10 +510,14 @@ namespace MerchantTails.UI
 
         private void SetUIColor(Color color)
         {
-            if (nameText != null) nameText.color = color;
-            if (descriptionText != null) descriptionText.color = color;
-            if (effectText != null) effectText.color = color;
-            if (icon != null) icon.color = color;
+            if (nameText != null)
+                nameText.color = color;
+            if (descriptionText != null)
+                descriptionText.color = color;
+            if (effectText != null)
+                effectText.color = color;
+            if (icon != null)
+                icon.color = color;
         }
     }
 }

@@ -1,8 +1,8 @@
 using System.Collections;
+using MerchantTails.Core;
+using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
-using TMPro;
-using MerchantTails.Core;
 
 namespace MerchantTails.Testing
 {
@@ -13,19 +13,39 @@ namespace MerchantTails.Testing
     public class TestRunner : MonoBehaviour
     {
         [Header("UI References")]
-        [SerializeField] private Canvas testCanvas;
-        [SerializeField] private TextMeshProUGUI statusDisplay;
-        [SerializeField] private Button runIntegrationTestsButton;
-        [SerializeField] private Button runSystemTestsButton;
-        [SerializeField] private Button runStabilityTestsButton;
-        [SerializeField] private Button runErrorRecoveryTestsButton;
-        [SerializeField] private Button healthCheckButton;
+        [SerializeField]
+        private Canvas testCanvas;
+
+        [SerializeField]
+        private TextMeshProUGUI statusDisplay;
+
+        [SerializeField]
+        private Button runIntegrationTestsButton;
+
+        [SerializeField]
+        private Button runSystemTestsButton;
+
+        [SerializeField]
+        private Button runStabilityTestsButton;
+
+        [SerializeField]
+        private Button runErrorRecoveryTestsButton;
+
+        [SerializeField]
+        private Button healthCheckButton;
 
         [Header("Components")]
-        [SerializeField] private SystemTestController systemTestController;
-        [SerializeField] private IntegrationTest integrationTest;
-        [SerializeField] private StabilityTest stabilityTest;
-        [SerializeField] private ErrorRecoveryTest errorRecoveryTest;
+        [SerializeField]
+        private SystemTestController systemTestController;
+
+        [SerializeField]
+        private IntegrationTest integrationTest;
+
+        [SerializeField]
+        private StabilityTest stabilityTest;
+
+        [SerializeField]
+        private ErrorRecoveryTest errorRecoveryTest;
 
         private bool testsRunning = false;
 
@@ -73,7 +93,8 @@ namespace MerchantTails.Testing
 
         public void RunIntegrationTests()
         {
-            if (testsRunning) return;
+            if (testsRunning)
+                return;
 
             if (integrationTest != null)
             {
@@ -90,7 +111,8 @@ namespace MerchantTails.Testing
 
         public void RunSystemTests()
         {
-            if (testsRunning) return;
+            if (testsRunning)
+                return;
 
             if (systemTestController != null)
             {
@@ -112,7 +134,8 @@ namespace MerchantTails.Testing
 
         public void RunStabilityTests()
         {
-            if (testsRunning) return;
+            if (testsRunning)
+                return;
 
             if (stabilityTest != null)
             {
@@ -129,7 +152,8 @@ namespace MerchantTails.Testing
 
         public void RunErrorRecoveryTests()
         {
-            if (testsRunning) return;
+            if (testsRunning)
+                return;
 
             if (errorRecoveryTest != null)
             {
@@ -174,7 +198,9 @@ namespace MerchantTails.Testing
             }
 
             var report = stabilityTest.GetLastReport();
-            UpdateStatus($"Stability tests complete: {report.successRate:F1}% success rate, {report.criticalErrors.Count} errors");
+            UpdateStatus(
+                $"Stability tests complete: {report.successRate:F1}% success rate, {report.criticalErrors.Count} errors"
+            );
             testsRunning = false;
         }
 

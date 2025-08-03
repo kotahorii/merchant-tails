@@ -1,10 +1,10 @@
 using System.Collections;
-using UnityEngine;
 using MerchantTails.Core;
 using MerchantTails.Data;
 using MerchantTails.Events;
-using MerchantTails.Market;
 using MerchantTails.Inventory;
+using MerchantTails.Market;
+using UnityEngine;
 
 namespace MerchantTails.Testing
 {
@@ -15,8 +15,11 @@ namespace MerchantTails.Testing
     public class IntegrationTest : MonoBehaviour
     {
         [Header("Test Settings")]
-        [SerializeField] private bool runOnStart = false;
-        [SerializeField] private float testTimeout = 30f;
+        [SerializeField]
+        private bool runOnStart = false;
+
+        [SerializeField]
+        private float testTimeout = 30f;
 
         private bool testInProgress = false;
         private int passedTests = 0;
@@ -66,7 +69,10 @@ namespace MerchantTails.Testing
             yield return StartCoroutine(TestErrorRecovery());
 
             // Report results
-            ErrorHandler.LogInfo($"Integration tests completed: {passedTests} passed, {failedTests} failed", "IntegrationTest");
+            ErrorHandler.LogInfo(
+                $"Integration tests completed: {passedTests} passed, {failedTests} failed",
+                "IntegrationTest"
+            );
             testInProgress = false;
         }
 
@@ -75,10 +81,12 @@ namespace MerchantTails.Testing
             float waitTime = 0f;
             while (waitTime < testTimeout)
             {
-                if (GameManager.Instance != null &&
-                    TimeManager.Instance != null &&
-                    MarketSystem.Instance != null &&
-                    InventorySystem.Instance != null)
+                if (
+                    GameManager.Instance != null
+                    && TimeManager.Instance != null
+                    && MarketSystem.Instance != null
+                    && InventorySystem.Instance != null
+                )
                 {
                     yield return new WaitForSeconds(0.5f); // Extra wait for initialization
                     yield break;
@@ -111,9 +119,9 @@ namespace MerchantTails.Testing
                 bool priceChanged = !Mathf.Approximately(initialPrice, newPrice);
 
                 testResult.passed = priceChanged;
-                testResult.message = priceChanged ?
-                    $"Price changed from {initialPrice:F2} to {newPrice:F2}" :
-                    "Price did not change with time advancement";
+                testResult.message = priceChanged
+                    ? $"Price changed from {initialPrice:F2} to {newPrice:F2}"
+                    : "Price did not change with time advancement";
 
                 testResult.duration = Time.time - startTime;
                 LogTestResult(testResult);
@@ -147,13 +155,21 @@ namespace MerchantTails.Testing
                     // Simulate transaction
                     float currentPrice = MarketSystem.Instance.GetCurrentPrice(ItemType.Potion);
                     var transactionEvent = new TransactionCompletedEvent(
-                        ItemType.Potion, 3, currentPrice, false, currentPrice * 3 * 0.1f);
+                        ItemType.Potion,
+                        3,
+                        currentPrice,
+                        false,
+                        currentPrice * 3 * 0.1f
+                    );
 
                     EventBus.Publish(transactionEvent);
                     yield return new WaitForSeconds(0.1f);
 
                     // Check if inventory was affected
-                    int remainingItems = InventorySystem.Instance.GetItemCount(ItemType.Potion, InventoryLocation.Trading);
+                    int remainingItems = InventorySystem.Instance.GetItemCount(
+                        ItemType.Potion,
+                        InventoryLocation.Trading
+                    );
 
                     testResult.passed = true; // Transaction event was published successfully
                     testResult.message = $"Transaction processed, remaining items: {remainingItems}";
@@ -189,7 +205,11 @@ namespace MerchantTails.Testing
 
                 // 3. Move items to storefront
                 bool moveResult = InventorySystem.Instance.MoveItem(
-                    ItemType.Weapon, 2, InventoryLocation.Trading, InventoryLocation.Storefront);
+                    ItemType.Weapon,
+                    2,
+                    InventoryLocation.Trading,
+                    InventoryLocation.Storefront
+                );
 
                 // 4. Advance time significantly
                 for (int i = 0; i < 8; i++) // Advance 2 days (4 phases each)
@@ -207,15 +227,18 @@ namespace MerchantTails.Testing
                 bool priceExists = weaponPrice > 0;
 
                 // 7. Verify inventory state
-                int storefrontCount = InventorySystem.Instance.GetItemCount(ItemType.Weapon, InventoryLocation.Storefront);
+                int storefrontCount = InventorySystem.Instance.GetItemCount(
+                    ItemType.Weapon,
+                    InventoryLocation.Storefront
+                );
                 int tradingCount = InventorySystem.Instance.GetItemCount(ItemType.Weapon, InventoryLocation.Trading);
 
                 bool allOperationsSuccessful = addResult && moveResult && dayAdvanced && priceExists;
 
                 testResult.passed = allOperationsSuccessful;
-                testResult.message = allOperationsSuccessful ?
-                    $"Complete cycle: Day {initialDay}->{newDay}, Price {weaponPrice:F2}, Items S:{storefrontCount} T:{tradingCount}" :
-                    $"Cycle incomplete: Add:{addResult} Move:{moveResult} DayAdv:{dayAdvanced} Price:{priceExists}";
+                testResult.message = allOperationsSuccessful
+                    ? $"Complete cycle: Day {initialDay}->{newDay}, Price {weaponPrice:F2}, Items S:{storefrontCount} T:{tradingCount}"
+                    : $"Cycle incomplete: Add:{addResult} Move:{moveResult} DayAdv:{dayAdvanced} Price:{priceExists}";
 
                 testResult.duration = Time.time - startTime;
                 LogTestResult(testResult);
@@ -290,7 +313,9 @@ namespace MerchantTails.Testing
             {
                 // Test time data persistence
                 var timeData = TimeManager.Instance.GetTimeData();
-                bool timeDataValid = timeData.currentDay > 0 && timeData.currentSeason != Season.Spring || timeData.currentSeason == Season.Spring;
+                bool timeDataValid =
+                    timeData.currentDay > 0 && timeData.currentSeason != Season.Spring
+                    || timeData.currentSeason == Season.Spring;
 
                 // Test inventory data persistence
                 var inventoryData = InventorySystem.Instance.GetInventoryData();
@@ -323,20 +348,29 @@ namespace MerchantTails.Testing
                 bool healthCheckPassed = ErrorHandler.CheckSystemHealth();
 
                 // Test safe execution
-                bool safeExecutionWorked = ErrorHandler.SafeExecute(() => {
-                    // This should not throw
-                    var price = MarketSystem.Instance.GetCurrentPrice(ItemType.Fruit);
-                }, "TestSafeExecution");
+                bool safeExecutionWorked = ErrorHandler.SafeExecute(
+                    () =>
+                    {
+                        // This should not throw
+                        var price = MarketSystem.Instance.GetCurrentPrice(ItemType.Fruit);
+                    },
+                    "TestSafeExecution"
+                );
 
                 // Test safe execution with exception
-                bool safeExecutionHandledException = !ErrorHandler.SafeExecute(() => {
-                    throw new System.Exception("Test exception");
-                }, "TestException");
+                bool safeExecutionHandledException = !ErrorHandler.SafeExecute(
+                    () =>
+                    {
+                        throw new System.Exception("Test exception");
+                    },
+                    "TestException"
+                );
 
                 bool allRecoveryTestsPassed = healthCheckPassed && safeExecutionWorked && safeExecutionHandledException;
 
                 testResult.passed = allRecoveryTestsPassed;
-                testResult.message = $"Recovery tests - Health: {healthCheckPassed}, Safe: {safeExecutionWorked}, Exception: {safeExecutionHandledException}";
+                testResult.message =
+                    $"Recovery tests - Health: {healthCheckPassed}, Safe: {safeExecutionWorked}, Exception: {safeExecutionHandledException}";
                 testResult.duration = Time.time - startTime;
                 LogTestResult(testResult);
 
@@ -356,12 +390,19 @@ namespace MerchantTails.Testing
             if (result.passed)
             {
                 passedTests++;
-                ErrorHandler.LogInfo($"✓ {result.testName}: {result.message} ({result.duration:F2}s)", "IntegrationTest");
+                ErrorHandler.LogInfo(
+                    $"✓ {result.testName}: {result.message} ({result.duration:F2}s)",
+                    "IntegrationTest"
+                );
             }
             else
             {
                 failedTests++;
-                ErrorHandler.LogError($"✗ {result.testName}: {result.message} ({result.duration:F2}s)", null, "IntegrationTest");
+                ErrorHandler.LogError(
+                    $"✗ {result.testName}: {result.message} ({result.duration:F2}s)",
+                    null,
+                    "IntegrationTest"
+                );
             }
         }
 

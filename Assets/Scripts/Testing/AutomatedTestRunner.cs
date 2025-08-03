@@ -1,9 +1,9 @@
 using System.Collections;
-using UnityEngine;
-using UnityEngine.TestTools;
-using NUnit.Framework;
 using MerchantTails.Core;
 using MerchantTails.Testing;
+using NUnit.Framework;
+using UnityEngine;
+using UnityEngine.TestTools;
 
 namespace MerchantTails.Tests
 {
@@ -128,10 +128,21 @@ namespace MerchantTails.Tests
             var report = stabilityTest.GetLastReport();
 
             // Assert stability criteria
-            Assert.GreaterOrEqual(report.successRate, 95f, $"Stability test success rate too low: {report.successRate}%");
-            Assert.AreEqual(0, report.criticalErrors.Count, $"Critical errors detected: {string.Join(", ", report.criticalErrors)}");
+            Assert.GreaterOrEqual(
+                report.successRate,
+                95f,
+                $"Stability test success rate too low: {report.successRate}%"
+            );
+            Assert.AreEqual(
+                0,
+                report.criticalErrors.Count,
+                $"Critical errors detected: {string.Join(", ", report.criticalErrors)}"
+            );
 
-            ErrorHandler.LogInfo($"✓ Stability tests passed: {report.successRate:F1}% success rate", "AutomatedTestRunner");
+            ErrorHandler.LogInfo(
+                $"✓ Stability tests passed: {report.successRate:F1}% success rate",
+                "AutomatedTestRunner"
+            );
         }
 
         [UnityTest]
@@ -156,7 +167,10 @@ namespace MerchantTails.Tests
             // Assert recovery criteria
             Assert.GreaterOrEqual(successRate, 80f, $"Error recovery success rate too low: {successRate}%");
 
-            ErrorHandler.LogInfo($"✓ Error recovery tests passed: {successRate:F1}% success rate", "AutomatedTestRunner");
+            ErrorHandler.LogInfo(
+                $"✓ Error recovery tests passed: {successRate:F1}% success rate",
+                "AutomatedTestRunner"
+            );
         }
 
         [UnityTest]
@@ -176,10 +190,17 @@ namespace MerchantTails.Tests
             Assert.Greater(fruitPrice, 0, "Market system not functioning - invalid fruit price");
 
             // Test inventory system
-            bool addResult = InventorySystem.Instance.AddItem(MerchantTails.Data.ItemType.Fruit, 10, MerchantTails.Data.InventoryLocation.Trading);
+            bool addResult = InventorySystem.Instance.AddItem(
+                MerchantTails.Data.ItemType.Fruit,
+                10,
+                MerchantTails.Data.InventoryLocation.Trading
+            );
             Assert.IsTrue(addResult, "Inventory system not functioning - failed to add items");
 
-            int itemCount = InventorySystem.Instance.GetItemCount(MerchantTails.Data.ItemType.Fruit, MerchantTails.Data.InventoryLocation.Trading);
+            int itemCount = InventorySystem.Instance.GetItemCount(
+                MerchantTails.Data.ItemType.Fruit,
+                MerchantTails.Data.InventoryLocation.Trading
+            );
             Assert.AreEqual(10, itemCount, "Inventory system not functioning - incorrect item count");
 
             // Test event system
@@ -215,7 +236,10 @@ namespace MerchantTails.Tests
 
             Assert.Less(memoryUsage, memoryThreshold, $"Memory usage too high: {memoryUsage / 1024 / 1024}MB");
 
-            ErrorHandler.LogInfo($"✓ Memory usage verification passed: {memoryUsage / 1024 / 1024}MB", "AutomatedTestRunner");
+            ErrorHandler.LogInfo(
+                $"✓ Memory usage verification passed: {memoryUsage / 1024 / 1024}MB",
+                "AutomatedTestRunner"
+            );
         }
 
         [Test]

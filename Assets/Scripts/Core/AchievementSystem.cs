@@ -1,9 +1,9 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using UnityEngine;
 using MerchantTails.Data;
 using MerchantTails.Events;
+using UnityEngine;
 
 namespace MerchantTails.Core
 {
@@ -17,8 +17,11 @@ namespace MerchantTails.Core
         public static AchievementSystem Instance => instance;
 
         [Header("Achievement Settings")]
-        [SerializeField] private List<Achievement> achievements = new List<Achievement>();
-        [SerializeField] private bool saveAchievementsGlobally = true; // アカウント単位で保存
+        [SerializeField]
+        private List<Achievement> achievements = new List<Achievement>();
+
+        [SerializeField]
+        private bool saveAchievementsGlobally = true; // アカウント単位で保存
 
         private Dictionary<string, AchievementProgress> progressData = new Dictionary<string, AchievementProgress>();
         private PlayerData playerData;
@@ -90,7 +93,6 @@ namespace MerchantTails.Core
                         category = AchievementCategory.Trading,
                         maxProgress = 1,
                     },
-
                     // 資産関連の実績
                     new Achievement
                     {
@@ -112,7 +114,6 @@ namespace MerchantTails.Core
                         maxProgress = 5000,
                         showProgressBar = true,
                     },
-
                     // ランク関連の実績
                     new Achievement
                     {
@@ -132,7 +133,6 @@ namespace MerchantTails.Core
                         category = AchievementCategory.Progression,
                         maxProgress = 1,
                     },
-
                     // 季節関連の実績
                     new Achievement
                     {
@@ -153,7 +153,6 @@ namespace MerchantTails.Core
                         category = AchievementCategory.Seasonal,
                         maxProgress = 1,
                     },
-
                     // アイテム関連の実績
                     new Achievement
                     {
@@ -185,7 +184,6 @@ namespace MerchantTails.Core
                         maxProgress = 6,
                         showProgressBar = true,
                     },
-
                     // イベント関連の実績
                     new Achievement
                     {
@@ -207,7 +205,6 @@ namespace MerchantTails.Core
                         maxProgress = 1,
                         hidden = true, // 隠し実績
                     },
-
                     // その他の実績
                     new Achievement
                     {
@@ -386,13 +383,16 @@ namespace MerchantTails.Core
         /// </summary>
         public void UpdateProgress(string achievementId, float newProgress)
         {
-            if (!progressData.ContainsKey(achievementId)) return;
+            if (!progressData.ContainsKey(achievementId))
+                return;
 
             var progress = progressData[achievementId];
-            if (progress.unlocked) return; // 既に解除済み
+            if (progress.unlocked)
+                return; // 既に解除済み
 
             var achievement = GetAchievement(achievementId);
-            if (achievement == null) return;
+            if (achievement == null)
+                return;
 
             float previousProgress = progress.currentProgress;
             progress.currentProgress = Mathf.Min(newProgress, achievement.maxProgress);
@@ -415,7 +415,8 @@ namespace MerchantTails.Core
         /// </summary>
         public void IncrementProgress(string achievementId, float amount)
         {
-            if (!progressData.ContainsKey(achievementId)) return;
+            if (!progressData.ContainsKey(achievementId))
+                return;
 
             var currentProgress = progressData[achievementId].currentProgress;
             UpdateProgress(achievementId, currentProgress + amount);
@@ -426,13 +427,16 @@ namespace MerchantTails.Core
         /// </summary>
         private void UnlockAchievement(string achievementId)
         {
-            if (!progressData.ContainsKey(achievementId)) return;
+            if (!progressData.ContainsKey(achievementId))
+                return;
 
             var progress = progressData[achievementId];
-            if (progress.unlocked) return;
+            if (progress.unlocked)
+                return;
 
             var achievement = GetAchievement(achievementId);
-            if (achievement == null) return;
+            if (achievement == null)
+                return;
 
             progress.unlocked = true;
             progress.unlockedDate = DateTime.Now;
@@ -502,7 +506,8 @@ namespace MerchantTails.Core
         /// </summary>
         public float GetCompletionPercentage()
         {
-            if (achievements.Count == 0) return 0f;
+            if (achievements.Count == 0)
+                return 0f;
 
             int unlockedCount = 0;
             foreach (var achievement in achievements)
@@ -538,7 +543,9 @@ namespace MerchantTails.Core
         {
             foreach (var kvp in progressData)
             {
-                string key = saveAchievementsGlobally ? $"Achievement_{kvp.Key}" : $"Save_{GameManager.Instance.PlayerData.PlayerName}_Achievement_{kvp.Key}";
+                string key = saveAchievementsGlobally
+                    ? $"Achievement_{kvp.Key}"
+                    : $"Save_{GameManager.Instance.PlayerData.PlayerName}_Achievement_{kvp.Key}";
                 string json = JsonUtility.ToJson(kvp.Value);
                 PlayerPrefs.SetString(key, json);
             }
@@ -549,7 +556,9 @@ namespace MerchantTails.Core
         {
             foreach (var achievement in achievements)
             {
-                string key = saveAchievementsGlobally ? $"Achievement_{achievement.id}" : $"Save_{GameManager.Instance?.PlayerData?.PlayerName}_Achievement_{achievement.id}";
+                string key = saveAchievementsGlobally
+                    ? $"Achievement_{achievement.id}"
+                    : $"Save_{GameManager.Instance?.PlayerData?.PlayerName}_Achievement_{achievement.id}";
                 if (PlayerPrefs.HasKey(key))
                 {
                     string json = PlayerPrefs.GetString(key);
@@ -581,13 +590,13 @@ namespace MerchantTails.Core
     /// </summary>
     public enum AchievementCategory
     {
-        Trading,     // 取引
-        Wealth,      // 資産
+        Trading, // 取引
+        Wealth, // 資産
         Progression, // 進行
-        Seasonal,    // 季節
-        Specialist,  // 専門
-        Events,      // イベント
-        Special,     // 特別
+        Seasonal, // 季節
+        Specialist, // 専門
+        Events, // イベント
+        Special, // 特別
     }
 
     /// <summary>

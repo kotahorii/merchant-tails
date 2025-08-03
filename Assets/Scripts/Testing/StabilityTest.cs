@@ -1,11 +1,11 @@
 using System.Collections;
 using System.Collections.Generic;
-using UnityEngine;
 using MerchantTails.Core;
 using MerchantTails.Data;
 using MerchantTails.Events;
-using MerchantTails.Market;
 using MerchantTails.Inventory;
+using MerchantTails.Market;
+using UnityEngine;
 
 namespace MerchantTails.Testing
 {
@@ -16,9 +16,14 @@ namespace MerchantTails.Testing
     public class StabilityTest : MonoBehaviour
     {
         [Header("Stability Test Settings")]
-        [SerializeField] private bool runStabilityTests = false;
-        [SerializeField] private int stressTestCycles = 100;
-        [SerializeField] private float memoryCheckInterval = 10f;
+        [SerializeField]
+        private bool runStabilityTests = false;
+
+        [SerializeField]
+        private int stressTestCycles = 100;
+
+        [SerializeField]
+        private float memoryCheckInterval = 10f;
 
         private bool stabilityTestRunning = false;
         private List<string> errorLog = new List<string>();
@@ -88,10 +93,12 @@ namespace MerchantTails.Testing
 
             while (elapsed < timeout)
             {
-                if (GameManager.Instance != null &&
-                    TimeManager.Instance != null &&
-                    MarketSystem.Instance != null &&
-                    InventorySystem.Instance != null)
+                if (
+                    GameManager.Instance != null
+                    && TimeManager.Instance != null
+                    && MarketSystem.Instance != null
+                    && InventorySystem.Instance != null
+                )
                 {
                     ErrorHandler.LogInfo("All systems initialized for stability testing", "StabilityTest");
                     yield break;
@@ -143,28 +150,31 @@ namespace MerchantTails.Testing
         {
             totalOperations++;
 
-            bool success = ErrorHandler.SafeExecute(() =>
-            {
-                // Test rapid price queries
-                for (int i = 0; i < 100; i++)
+            bool success = ErrorHandler.SafeExecute(
+                () =>
                 {
-                    foreach (ItemType itemType in System.Enum.GetValues(typeof(ItemType)))
+                    // Test rapid price queries
+                    for (int i = 0; i < 100; i++)
                     {
-                        var price = MarketSystem.Instance.GetCurrentPrice(itemType);
-                        var marketData = MarketSystem.Instance.GetMarketData(itemType);
+                        foreach (ItemType itemType in System.Enum.GetValues(typeof(ItemType)))
+                        {
+                            var price = MarketSystem.Instance.GetCurrentPrice(itemType);
+                            var marketData = MarketSystem.Instance.GetMarketData(itemType);
+                        }
                     }
-                }
 
-                // Test event generation
-                var testEvent = new GameEventTriggeredEvent(
-                    "Stress Test Event",
-                    "Testing market stability",
-                    new ItemType[] { ItemType.Fruit },
-                    new float[] { 1.1f },
-                    1
-                );
-                EventBus.Publish(testEvent);
-            }, "StressTestMarket");
+                    // Test event generation
+                    var testEvent = new GameEventTriggeredEvent(
+                        "Stress Test Event",
+                        "Testing market stability",
+                        new ItemType[] { ItemType.Fruit },
+                        new float[] { 1.1f },
+                        1
+                    );
+                    EventBus.Publish(testEvent);
+                },
+                "StressTestMarket"
+            );
 
             if (!success)
             {
@@ -179,30 +189,40 @@ namespace MerchantTails.Testing
         {
             totalOperations++;
 
-            bool success = ErrorHandler.SafeExecute(() =>
-            {
-                // Test rapid inventory operations
-                foreach (ItemType itemType in System.Enum.GetValues(typeof(ItemType)))
+            bool success = ErrorHandler.SafeExecute(
+                () =>
                 {
-                    // Add items
-                    InventorySystem.Instance.AddItem(itemType, 10, InventoryLocation.Trading);
+                    // Test rapid inventory operations
+                    foreach (ItemType itemType in System.Enum.GetValues(typeof(ItemType)))
+                    {
+                        // Add items
+                        InventorySystem.Instance.AddItem(itemType, 10, InventoryLocation.Trading);
 
-                    // Move items
-                    InventorySystem.Instance.MoveItem(itemType, 5,
-                        InventoryLocation.Trading, InventoryLocation.Storefront);
+                        // Move items
+                        InventorySystem.Instance.MoveItem(
+                            itemType,
+                            5,
+                            InventoryLocation.Trading,
+                            InventoryLocation.Storefront
+                        );
 
-                    // Check counts
-                    var tradingCount = InventorySystem.Instance.GetItemCount(itemType, InventoryLocation.Trading);
-                    var storefrontCount = InventorySystem.Instance.GetItemCount(itemType, InventoryLocation.Storefront);
+                        // Check counts
+                        var tradingCount = InventorySystem.Instance.GetItemCount(itemType, InventoryLocation.Trading);
+                        var storefrontCount = InventorySystem.Instance.GetItemCount(
+                            itemType,
+                            InventoryLocation.Storefront
+                        );
 
-                    // Remove items
-                    InventorySystem.Instance.RemoveItem(itemType, 3, InventoryLocation.Trading);
-                    InventorySystem.Instance.RemoveItem(itemType, 2, InventoryLocation.Storefront);
-                }
+                        // Remove items
+                        InventorySystem.Instance.RemoveItem(itemType, 3, InventoryLocation.Trading);
+                        InventorySystem.Instance.RemoveItem(itemType, 2, InventoryLocation.Storefront);
+                    }
 
-                // Test data persistence
-                var inventoryData = InventorySystem.Instance.GetInventoryData();
-            }, "StressTestInventory");
+                    // Test data persistence
+                    var inventoryData = InventorySystem.Instance.GetInventoryData();
+                },
+                "StressTestInventory"
+            );
 
             if (!success)
             {
@@ -217,19 +237,22 @@ namespace MerchantTails.Testing
         {
             totalOperations++;
 
-            bool success = ErrorHandler.SafeExecute(() =>
-            {
-                // Test rapid time queries
-                for (int i = 0; i < 50; i++)
+            bool success = ErrorHandler.SafeExecute(
+                () =>
                 {
-                    var currentTime = TimeManager.Instance.GetFormattedTime();
-                    var phaseProgress = TimeManager.Instance.GetPhaseProgress();
-                    var timeData = TimeManager.Instance.GetTimeData();
-                }
+                    // Test rapid time queries
+                    for (int i = 0; i < 50; i++)
+                    {
+                        var currentTime = TimeManager.Instance.GetFormattedTime();
+                        var phaseProgress = TimeManager.Instance.GetPhaseProgress();
+                        var timeData = TimeManager.Instance.GetTimeData();
+                    }
 
-                // Test time advancement
-                TimeManager.Instance.SkipToNextPhase();
-            }, "StressTestTime");
+                    // Test time advancement
+                    TimeManager.Instance.SkipToNextPhase();
+                },
+                "StressTestTime"
+            );
 
             if (!success)
             {
@@ -273,11 +296,14 @@ namespace MerchantTails.Testing
             long finalMemory = System.GC.GetTotalMemory(true);
             long memoryDifference = finalMemory - initialMemory;
 
-            ErrorHandler.LogInfo($"Memory test: Initial={initialMemory/1024}KB, Final={finalMemory/1024}KB, Diff={memoryDifference/1024}KB", "StabilityTest");
+            ErrorHandler.LogInfo(
+                $"Memory test: Initial={initialMemory / 1024}KB, Final={finalMemory / 1024}KB, Diff={memoryDifference / 1024}KB",
+                "StabilityTest"
+            );
 
             if (memoryDifference > 10 * 1024 * 1024) // 10MB threshold
             {
-                errorLog.Add($"Potential memory leak detected: {memoryDifference/1024/1024}MB increase");
+                errorLog.Add($"Potential memory leak detected: {memoryDifference / 1024 / 1024}MB increase");
             }
         }
 
@@ -294,16 +320,19 @@ namespace MerchantTails.Testing
             System.Action<PriceChangedEvent> testHandler = (evt) => eventsReceived++;
             EventBus.Subscribe<PriceChangedEvent>(testHandler);
 
-            bool success = ErrorHandler.SafeExecute(() =>
-            {
-                // Send many events rapidly
-                for (int i = 0; i < 500; i++)
+            bool success = ErrorHandler.SafeExecute(
+                () =>
                 {
-                    var priceEvent = new PriceChangedEvent(ItemType.Fruit, 100f, 100f + i);
-                    EventBus.Publish(priceEvent);
-                    eventsSent++;
-                }
-            }, "EventStressTest");
+                    // Send many events rapidly
+                    for (int i = 0; i < 500; i++)
+                    {
+                        var priceEvent = new PriceChangedEvent(ItemType.Fruit, 100f, 100f + i);
+                        EventBus.Publish(priceEvent);
+                        eventsSent++;
+                    }
+                },
+                "EventStressTest"
+            );
 
             yield return new WaitForSeconds(1f); // Wait for event processing
 
@@ -332,19 +361,22 @@ namespace MerchantTails.Testing
                 totalOperations++;
                 operationCount++;
 
-                bool success = ErrorHandler.SafeExecute(() =>
-                {
-                    // Simulate normal game operations
-                    var currentPrice = MarketSystem.Instance.GetCurrentPrice(ItemType.Weapon);
-                    InventorySystem.Instance.AddItem(ItemType.Weapon, 1, InventoryLocation.Trading);
-                    var timeData = TimeManager.Instance.GetTimeData();
-
-                    // Occasionally advance time
-                    if (operationCount % 50 == 0)
+                bool success = ErrorHandler.SafeExecute(
+                    () =>
                     {
-                        TimeManager.Instance.SkipToNextPhase();
-                    }
-                }, "LongDurationTest");
+                        // Simulate normal game operations
+                        var currentPrice = MarketSystem.Instance.GetCurrentPrice(ItemType.Weapon);
+                        InventorySystem.Instance.AddItem(ItemType.Weapon, 1, InventoryLocation.Trading);
+                        var timeData = TimeManager.Instance.GetTimeData();
+
+                        // Occasionally advance time
+                        if (operationCount % 50 == 0)
+                        {
+                            TimeManager.Instance.SkipToNextPhase();
+                        }
+                    },
+                    "LongDurationTest"
+                );
 
                 if (!success)
                 {
@@ -370,8 +402,8 @@ namespace MerchantTails.Testing
 
         private void GenerateStabilityReport()
         {
-            float successRate = totalOperations > 0 ?
-                (float)(totalOperations - failedOperations) / totalOperations * 100f : 100f;
+            float successRate =
+                totalOperations > 0 ? (float)(totalOperations - failedOperations) / totalOperations * 100f : 100f;
 
             long currentMemory = System.GC.GetTotalMemory(false);
 
@@ -381,7 +413,7 @@ namespace MerchantTails.Testing
                 failedOperations = failedOperations,
                 successRate = successRate,
                 averageMemoryUsage = currentMemory,
-                criticalErrors = new List<string>(errorLog)
+                criticalErrors = new List<string>(errorLog),
             };
 
             ErrorHandler.LogInfo($"=== STABILITY TEST REPORT ===", "StabilityTest");
@@ -417,10 +449,10 @@ namespace MerchantTails.Testing
             {
                 totalOperations = totalOperations,
                 failedOperations = failedOperations,
-                successRate = totalOperations > 0 ?
-                    (float)(totalOperations - failedOperations) / totalOperations * 100f : 100f,
+                successRate =
+                    totalOperations > 0 ? (float)(totalOperations - failedOperations) / totalOperations * 100f : 100f,
                 averageMemoryUsage = System.GC.GetTotalMemory(false),
-                criticalErrors = new List<string>(errorLog)
+                criticalErrors = new List<string>(errorLog),
             };
         }
     }

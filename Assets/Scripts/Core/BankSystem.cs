@@ -1,8 +1,8 @@
 using System;
 using System.Collections.Generic;
-using UnityEngine;
 using MerchantTails.Data;
 using MerchantTails.Events;
+using UnityEngine;
 
 namespace MerchantTails.Core
 {
@@ -16,14 +16,24 @@ namespace MerchantTails.Core
         public static BankSystem Instance => instance;
 
         [Header("Bank Settings")]
-        [SerializeField] private float baseInterestRate = 0.02f; // 基本利率 2%/日
-        [SerializeField] private float veteranBonusRate = 0.01f; // ベテランボーナス 1%
-        [SerializeField] private float masterBonusRate = 0.02f;  // マスターボーナス 2%
-        [SerializeField] private int compoundFrequency = 1; // 複利計算頻度（日）
-        [SerializeField] private float withdrawalFee = 0.01f; // 引き出し手数料 1%
+        [SerializeField]
+        private float baseInterestRate = 0.02f; // 基本利率 2%/日
+
+        [SerializeField]
+        private float veteranBonusRate = 0.01f; // ベテランボーナス 1%
+
+        [SerializeField]
+        private float masterBonusRate = 0.02f; // マスターボーナス 2%
+
+        [SerializeField]
+        private int compoundFrequency = 1; // 複利計算頻度（日）
+
+        [SerializeField]
+        private float withdrawalFee = 0.01f; // 引き出し手数料 1%
 
         [Header("Term Deposit Settings")]
-        [SerializeField] private List<TermDepositType> termDepositTypes = new List<TermDepositType>();
+        [SerializeField]
+        private List<TermDepositType> termDepositTypes = new List<TermDepositType>();
 
         private PlayerData playerData;
         private FeatureUnlockSystem featureUnlockSystem;
@@ -39,7 +49,8 @@ namespace MerchantTails.Core
         public float TotalDeposits => GetTotalDeposits();
         public float TotalInterestEarned => totalInterestEarned;
         public float CurrentInterestRate => GetCurrentInterestRate();
-        public bool IsUnlocked => featureUnlockSystem != null && featureUnlockSystem.IsFeatureUnlocked(GameFeature.BankAccount);
+        public bool IsUnlocked =>
+            featureUnlockSystem != null && featureUnlockSystem.IsFeatureUnlocked(GameFeature.BankAccount);
 
         // イベント
         public event Action<float> OnDepositChanged;
@@ -125,7 +136,8 @@ namespace MerchantTails.Core
 
         private void OnDayChanged(DayChangedEvent e)
         {
-            if (!IsUnlocked) return;
+            if (!IsUnlocked)
+                return;
 
             // 複利計算
             if (e.NewDay - lastCompoundDay >= compoundFrequency)
@@ -167,7 +179,10 @@ namespace MerchantTails.Core
             // プレイヤーの所持金をチェック
             if (playerData.CurrentMoney < amount)
             {
-                ErrorHandler.LogWarning($"Insufficient funds for deposit. Required: {amount}, Available: {playerData.CurrentMoney}", "BankSystem");
+                ErrorHandler.LogWarning(
+                    $"Insufficient funds for deposit. Required: {amount}, Available: {playerData.CurrentMoney}",
+                    "BankSystem"
+                );
                 return false;
             }
 
@@ -192,11 +207,15 @@ namespace MerchantTails.Core
         /// </summary>
         public bool Withdraw(float amount)
         {
-            if (!IsUnlocked) return false;
+            if (!IsUnlocked)
+                return false;
 
             if (amount <= 0 || regularDeposit < amount)
             {
-                ErrorHandler.LogWarning($"Invalid withdrawal amount: {amount}, Available: {regularDeposit}", "BankSystem");
+                ErrorHandler.LogWarning(
+                    $"Invalid withdrawal amount: {amount}, Available: {regularDeposit}",
+                    "BankSystem"
+                );
                 return false;
             }
 
@@ -206,7 +225,10 @@ namespace MerchantTails.Core
 
             if (regularDeposit < totalWithdrawal)
             {
-                ErrorHandler.LogWarning($"Insufficient funds including fee. Total required: {totalWithdrawal}", "BankSystem");
+                ErrorHandler.LogWarning(
+                    $"Insufficient funds including fee. Total required: {totalWithdrawal}",
+                    "BankSystem"
+                );
                 return false;
             }
 
@@ -227,7 +249,8 @@ namespace MerchantTails.Core
         /// </summary>
         public bool CreateTermDeposit(int typeIndex, float amount)
         {
-            if (!IsUnlocked) return false;
+            if (!IsUnlocked)
+                return false;
 
             if (typeIndex < 0 || typeIndex >= termDepositTypes.Count)
             {
@@ -282,7 +305,8 @@ namespace MerchantTails.Core
         public bool BreakTermDeposit(string depositId, bool isEarlyWithdrawal = false)
         {
             var deposit = termDeposits.Find(td => td.id == depositId);
-            if (deposit == null) return false;
+            if (deposit == null)
+                return false;
 
             var type = termDepositTypes[deposit.typeIndex];
             float returnAmount = deposit.principal;
@@ -314,7 +338,8 @@ namespace MerchantTails.Core
         /// </summary>
         private void CalculateCompoundInterest()
         {
-            if (regularDeposit <= 0) return;
+            if (regularDeposit <= 0)
+                return;
 
             float rate = GetCurrentInterestRate();
             float interest = regularDeposit * rate;
@@ -326,7 +351,10 @@ namespace MerchantTails.Core
             OnInterestEarned?.Invoke(interest);
 
             EventBus.Publish(new InterestEarnedEvent(interest, regularDeposit, rate));
-            ErrorHandler.LogInfo($"Interest earned: {interest}G at {rate*100}% rate. New balance: {regularDeposit}G", "BankSystem");
+            ErrorHandler.LogInfo(
+                $"Interest earned: {interest}G at {rate * 100}% rate. New balance: {regularDeposit}G",
+                "BankSystem"
+            );
         }
 
         /// <summary>
@@ -567,7 +595,5 @@ namespace MerchantTails.Core
         }
     }
 
-    public class BankUnlockedEvent : BaseGameEvent
-    {
-    }
+    public class BankUnlockedEvent : BaseGameEvent { }
 }

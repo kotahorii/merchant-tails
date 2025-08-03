@@ -1,12 +1,12 @@
 using System.Collections;
-using UnityEngine;
-using UnityEngine.UI;
-using TMPro;
 using MerchantTails.Core;
 using MerchantTails.Data;
 using MerchantTails.Events;
-using MerchantTails.Market;
 using MerchantTails.Inventory;
+using MerchantTails.Market;
+using TMPro;
+using UnityEngine;
+using UnityEngine.UI;
 
 namespace MerchantTails.Testing
 {
@@ -17,16 +17,30 @@ namespace MerchantTails.Testing
     public class SystemTestController : MonoBehaviour
     {
         [Header("UI References")]
-        [SerializeField] private Canvas debugCanvas;
-        [SerializeField] private TextMeshProUGUI statusText;
-        [SerializeField] private Button timeAdvanceButton;
-        [SerializeField] private Button marketTestButton;
-        [SerializeField] private Button inventoryTestButton;
-        [SerializeField] private Button logAllStatesButton;
+        [SerializeField]
+        private Canvas debugCanvas;
+
+        [SerializeField]
+        private TextMeshProUGUI statusText;
+
+        [SerializeField]
+        private Button timeAdvanceButton;
+
+        [SerializeField]
+        private Button marketTestButton;
+
+        [SerializeField]
+        private Button inventoryTestButton;
+
+        [SerializeField]
+        private Button logAllStatesButton;
 
         [Header("Test Settings")]
-        [SerializeField] private bool autoRunTests = true;
-        [SerializeField] private float testInterval = 2.0f;
+        [SerializeField]
+        private bool autoRunTests = true;
+
+        [SerializeField]
+        private float testInterval = 2.0f;
 
         private bool testSystemsReady = false;
         private Coroutine autoTestCoroutine;
@@ -49,7 +63,9 @@ namespace MerchantTails.Testing
             bool marketSystemReady = MarketSystem.Instance != null;
             bool inventorySystemReady = InventorySystem.Instance != null;
 
-            UpdateStatus($"Systems Ready: GM:{gameManagerReady} TM:{timeManagerReady} MS:{marketSystemReady} IS:{inventorySystemReady}");
+            UpdateStatus(
+                $"Systems Ready: GM:{gameManagerReady} TM:{timeManagerReady} MS:{marketSystemReady} IS:{inventorySystemReady}"
+            );
 
             if (gameManagerReady && timeManagerReady && marketSystemReady && inventorySystemReady)
             {
@@ -128,7 +144,8 @@ namespace MerchantTails.Testing
 
         private void TestBasicFunctionality()
         {
-            if (!testSystemsReady) return;
+            if (!testSystemsReady)
+                return;
 
             // Test basic system availability
             bool allSystemsOk = true;
@@ -155,7 +172,8 @@ namespace MerchantTails.Testing
 
         public void TestTimeAdvancement()
         {
-            if (!testSystemsReady) return;
+            if (!testSystemsReady)
+                return;
 
             Debug.Log("[SystemTestController] Testing time advancement...");
 
@@ -165,7 +183,8 @@ namespace MerchantTails.Testing
 
         public void TestMarketSystem()
         {
-            if (!testSystemsReady) return;
+            if (!testSystemsReady)
+                return;
 
             Debug.Log("[SystemTestController] Testing market system...");
 
@@ -176,8 +195,10 @@ namespace MerchantTails.Testing
                 float basePrice = MarketSystem.Instance.GetBasePrice(itemType);
                 var marketData = MarketSystem.Instance.GetMarketData(itemType);
 
-                Debug.Log($"[MarketTest] {itemType}: Current={currentPrice:F2}G, Base={basePrice:F2}G, " +
-                         $"Demand={marketData.demand:F2}, Supply={marketData.supply:F2}");
+                Debug.Log(
+                    $"[MarketTest] {itemType}: Current={currentPrice:F2}G, Base={basePrice:F2}G, "
+                        + $"Demand={marketData.demand:F2}, Supply={marketData.supply:F2}"
+                );
             }
 
             // Test market event simulation
@@ -195,7 +216,8 @@ namespace MerchantTails.Testing
 
         public void TestInventorySystem()
         {
-            if (!testSystemsReady) return;
+            if (!testSystemsReady)
+                return;
 
             Debug.Log("[SystemTestController] Testing inventory system...");
 
@@ -204,8 +226,12 @@ namespace MerchantTails.Testing
             Debug.Log($"[InventoryTest] Add 5 fruits to trading: {addResult}");
 
             // Test moving items
-            bool moveResult = InventorySystem.Instance.MoveItem(ItemType.Fruit, 2,
-                InventoryLocation.Trading, InventoryLocation.Storefront);
+            bool moveResult = InventorySystem.Instance.MoveItem(
+                ItemType.Fruit,
+                2,
+                InventoryLocation.Trading,
+                InventoryLocation.Storefront
+            );
             Debug.Log($"[InventoryTest] Move 2 fruits to storefront: {moveResult}");
 
             // Test inventory counts
@@ -223,7 +249,8 @@ namespace MerchantTails.Testing
 
         public void LogAllSystemStates()
         {
-            if (!testSystemsReady) return;
+            if (!testSystemsReady)
+                return;
 
             Debug.Log("[SystemTestController] Logging all system states...");
 
@@ -258,15 +285,19 @@ namespace MerchantTails.Testing
         {
             if (Mathf.Abs(evt.ChangePercentage) > 5f) // Only log significant changes
             {
-                Debug.Log($"[SystemTestController] Price change: {evt.ItemType} " +
-                         $"{evt.PreviousPrice:F2}G -> {evt.NewPrice:F2}G ({evt.ChangePercentage:+F1}%)");
+                Debug.Log(
+                    $"[SystemTestController] Price change: {evt.ItemType} "
+                        + $"{evt.PreviousPrice:F2}G -> {evt.NewPrice:F2}G ({evt.ChangePercentage:+F1}%)"
+                );
             }
         }
 
         private void OnDayChanged(DayChangedEvent evt)
         {
-            Debug.Log($"[SystemTestController] Day changed: {evt.PreviousDay} -> {evt.NewDay} " +
-                     $"({evt.CurrentSeason}, Year {evt.CurrentYear})");
+            Debug.Log(
+                $"[SystemTestController] Day changed: {evt.PreviousDay} -> {evt.NewDay} "
+                    + $"({evt.CurrentSeason}, Year {evt.CurrentYear})"
+            );
         }
 
         private void UpdateStatus(string message)
@@ -282,7 +313,8 @@ namespace MerchantTails.Testing
         // Unity Editor GUI for testing
         private void OnGUI()
         {
-            if (!testSystemsReady) return;
+            if (!testSystemsReady)
+                return;
 
             GUILayout.BeginArea(new Rect(10, 10, 300, 200));
             GUILayout.Label("System Test Controller", GUI.skin.box);

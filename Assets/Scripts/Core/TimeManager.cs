@@ -1,8 +1,8 @@
 using System;
 using System.Collections;
-using UnityEngine;
 using MerchantTails.Data;
 using MerchantTails.Events;
+using UnityEngine;
 
 namespace MerchantTails.Core
 {
@@ -13,18 +13,31 @@ namespace MerchantTails.Core
     public class TimeManager : MonoBehaviour
     {
         [Header("Time Settings")]
-        [SerializeField] private float realTimePerGameDay = 120f; // 実時間2分 = ゲーム内1日
-        [SerializeField] private bool autoAdvanceTime = true;
-        [SerializeField] private bool pauseTimeProgression = false;
+        [SerializeField]
+        private float realTimePerGameDay = 120f; // 実時間2分 = ゲーム内1日
+
+        [SerializeField]
+        private bool autoAdvanceTime = true;
+
+        [SerializeField]
+        private bool pauseTimeProgression = false;
 
         [Header("Current Time State")]
-        [SerializeField] private Season currentSeason = Season.Spring;
-        [SerializeField] private int currentDay = 1;
-        [SerializeField] private DayPhase currentPhase = DayPhase.Morning;
-        [SerializeField] private int currentYear = 1;
+        [SerializeField]
+        private Season currentSeason = Season.Spring;
+
+        [SerializeField]
+        private int currentDay = 1;
+
+        [SerializeField]
+        private DayPhase currentPhase = DayPhase.Morning;
+
+        [SerializeField]
+        private int currentYear = 1;
 
         [Header("Season Settings")]
-        [SerializeField] private int daysPerSeason = 30;
+        [SerializeField]
+        private int daysPerSeason = 30;
 
         // Public Properties
         public Season CurrentSeason
@@ -91,7 +104,9 @@ namespace MerchantTails.Core
 
         private void InitializeTimeSystem()
         {
-            Debug.Log($"[TimeManager] Initializing time system - Day: {currentDay}, Season: {currentSeason}, Phase: {currentPhase}");
+            Debug.Log(
+                $"[TimeManager] Initializing time system - Day: {currentDay}, Season: {currentSeason}, Phase: {currentPhase}"
+            );
 
             // Publish initial state events
             EventBus.Publish(new PhaseChangedEvent(currentPhase, currentPhase, currentDay));
@@ -235,7 +250,7 @@ namespace MerchantTails.Core
                 DayPhase.Afternoon => DayPhase.Evening,
                 DayPhase.Evening => DayPhase.Night,
                 DayPhase.Night => DayPhase.Morning,
-                _ => DayPhase.Morning
+                _ => DayPhase.Morning,
             };
         }
 
@@ -247,7 +262,7 @@ namespace MerchantTails.Core
                 Season.Summer => Season.Autumn,
                 Season.Autumn => Season.Winter,
                 Season.Winter => Season.Spring,
-                _ => Season.Spring
+                _ => Season.Spring,
             };
         }
 
@@ -288,7 +303,9 @@ namespace MerchantTails.Core
 
         public bool IsBusinessHours()
         {
-            return currentPhase == DayPhase.Morning || currentPhase == DayPhase.Afternoon || currentPhase == DayPhase.Evening;
+            return currentPhase == DayPhase.Morning
+                || currentPhase == DayPhase.Afternoon
+                || currentPhase == DayPhase.Evening;
         }
 
         public bool IsSeasonTransitionDay()
@@ -306,7 +323,7 @@ namespace MerchantTails.Core
                 currentDay = this.currentDay,
                 currentPhase = this.currentPhase,
                 currentYear = this.currentYear,
-                phaseTimer = this.phaseTimer
+                phaseTimer = this.phaseTimer,
             };
         }
 

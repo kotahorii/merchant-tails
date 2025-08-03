@@ -1,22 +1,31 @@
 using System;
-using UnityEngine;
 using MerchantTails.Data;
+using UnityEngine;
 
 namespace MerchantTails.Core
 {
     public class GameManager : MonoBehaviour
     {
         [Header("Game State")]
-        [SerializeField] private GameState currentState = GameState.MainMenu;
+        [SerializeField]
+        private GameState currentState = GameState.MainMenu;
 
         [Header("Core Systems")]
-        [SerializeField] private TimeManager timeManager;
-        [SerializeField] private PlayerData playerData;
-        [SerializeField] private AssetCalculator assetCalculator;
-        [SerializeField] private FeatureUnlockSystem featureUnlockSystem;
+        [SerializeField]
+        private TimeManager timeManager;
+
+        [SerializeField]
+        private PlayerData playerData;
+
+        [SerializeField]
+        private AssetCalculator assetCalculator;
+
+        [SerializeField]
+        private FeatureUnlockSystem featureUnlockSystem;
 
         [Header("Tutorial")]
-        [SerializeField] private bool tutorialCompleted = false;
+        [SerializeField]
+        private bool tutorialCompleted = false;
 
         public static GameManager Instance { get; private set; }
 
@@ -73,7 +82,8 @@ namespace MerchantTails.Core
 
         public void ChangeState(GameState newState)
         {
-            if (currentState == newState) return;
+            if (currentState == newState)
+                return;
 
             Debug.Log($"[GameManager] State changed: {currentState} -> {newState}");
 

@@ -18,7 +18,8 @@ namespace MerchantTails.Core
         /// </summary>
         /// <typeparam name="T">イベントの型</typeparam>
         /// <param name="handler">イベントハンドラー</param>
-        public static void Subscribe<T>(Action<T> handler) where T : IGameEvent
+        public static void Subscribe<T>(Action<T> handler)
+            where T : IGameEvent
         {
             lock (lockObject)
             {
@@ -31,7 +32,9 @@ namespace MerchantTails.Core
 
                 eventHandlers[eventType].Add(handler);
 
-                Debug.Log($"[EventBus] Subscribed to {eventType.Name}. Total subscribers: {eventHandlers[eventType].Count}");
+                Debug.Log(
+                    $"[EventBus] Subscribed to {eventType.Name}. Total subscribers: {eventHandlers[eventType].Count}"
+                );
             }
         }
 
@@ -40,7 +43,8 @@ namespace MerchantTails.Core
         /// </summary>
         /// <typeparam name="T">イベントの型</typeparam>
         /// <param name="handler">イベントハンドラー</param>
-        public static void Unsubscribe<T>(Action<T> handler) where T : IGameEvent
+        public static void Unsubscribe<T>(Action<T> handler)
+            where T : IGameEvent
         {
             lock (lockObject)
             {
@@ -65,7 +69,8 @@ namespace MerchantTails.Core
         /// </summary>
         /// <typeparam name="T">イベントの型</typeparam>
         /// <param name="gameEvent">発行するイベント</param>
-        public static void Publish<T>(T gameEvent) where T : IGameEvent
+        public static void Publish<T>(T gameEvent)
+            where T : IGameEvent
         {
             lock (lockObject)
             {
@@ -102,7 +107,8 @@ namespace MerchantTails.Core
         /// 指定した型のすべてのイベントハンドラーを削除する
         /// </summary>
         /// <typeparam name="T">イベントの型</typeparam>
-        public static void Clear<T>() where T : IGameEvent
+        public static void Clear<T>()
+            where T : IGameEvent
         {
             lock (lockObject)
             {

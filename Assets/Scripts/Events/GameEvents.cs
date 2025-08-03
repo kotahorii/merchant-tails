@@ -1,6 +1,6 @@
+using System.Collections.Generic;
 using MerchantTails.Core;
 using MerchantTails.Data;
-using System.Collections.Generic;
 
 namespace MerchantTails.Events
 {
@@ -120,7 +120,13 @@ namespace MerchantTails.Events
         public bool IsPurchase { get; }
         public float Profit { get; }
 
-        public TransactionCompletedEvent(ItemType itemType, int quantity, float unitPrice, bool isPurchase, float profit = 0f)
+        public TransactionCompletedEvent(
+            ItemType itemType,
+            int quantity,
+            float unitPrice,
+            bool isPurchase,
+            float profit = 0f
+        )
         {
             ItemType = itemType;
             Quantity = quantity;
@@ -142,7 +148,13 @@ namespace MerchantTails.Events
         public float[] PriceModifiers { get; }
         public int Duration { get; }
 
-        public GameEventTriggeredEvent(string eventName, string description, ItemType[] affectedItems, float[] priceModifiers, int duration)
+        public GameEventTriggeredEvent(
+            string eventName,
+            string description,
+            ItemType[] affectedItems,
+            float[] priceModifiers,
+            int duration
+        )
         {
             EventName = eventName;
             Description = description;
@@ -255,7 +267,11 @@ namespace MerchantTails.Events
         public string Description { get; }
         public Dictionary<ItemType, float> PriceModifiers { get; }
 
-        public MarketEventTriggeredEvent(string eventName, string description, Dictionary<ItemType, float> priceModifiers)
+        public MarketEventTriggeredEvent(
+            string eventName,
+            string description,
+            Dictionary<ItemType, float> priceModifiers
+        )
         {
             EventName = eventName;
             Description = description;

@@ -1,9 +1,9 @@
 using System.Collections.Generic;
-using UnityEngine;
-using UnityEngine.UI;
-using TMPro;
 using MerchantTails.Core;
 using MerchantTails.Events;
+using TMPro;
+using UnityEngine;
+using UnityEngine.UI;
 
 namespace MerchantTails.UI
 {
@@ -13,35 +13,72 @@ namespace MerchantTails.UI
     public class BankPanel : MonoBehaviour
     {
         [Header("Main UI References")]
-        [SerializeField] private TextMeshProUGUI currentMoneyText;
-        [SerializeField] private TextMeshProUGUI regularDepositText;
-        [SerializeField] private TextMeshProUGUI totalDepositText;
-        [SerializeField] private TextMeshProUGUI interestRateText;
-        [SerializeField] private TextMeshProUGUI totalInterestText;
+        [SerializeField]
+        private TextMeshProUGUI currentMoneyText;
+
+        [SerializeField]
+        private TextMeshProUGUI regularDepositText;
+
+        [SerializeField]
+        private TextMeshProUGUI totalDepositText;
+
+        [SerializeField]
+        private TextMeshProUGUI interestRateText;
+
+        [SerializeField]
+        private TextMeshProUGUI totalInterestText;
 
         [Header("Regular Deposit")]
-        [SerializeField] private TMP_InputField depositAmountInput;
-        [SerializeField] private Button depositButton;
-        [SerializeField] private TMP_InputField withdrawAmountInput;
-        [SerializeField] private Button withdrawButton;
-        [SerializeField] private TextMeshProUGUI withdrawFeeText;
+        [SerializeField]
+        private TMP_InputField depositAmountInput;
+
+        [SerializeField]
+        private Button depositButton;
+
+        [SerializeField]
+        private TMP_InputField withdrawAmountInput;
+
+        [SerializeField]
+        private Button withdrawButton;
+
+        [SerializeField]
+        private TextMeshProUGUI withdrawFeeText;
 
         [Header("Term Deposits")]
-        [SerializeField] private Transform termDepositTypeContainer;
-        [SerializeField] private GameObject termDepositTypePrefab;
-        [SerializeField] private Transform activeTermDepositsContainer;
-        [SerializeField] private GameObject activeTermDepositPrefab;
+        [SerializeField]
+        private Transform termDepositTypeContainer;
+
+        [SerializeField]
+        private GameObject termDepositTypePrefab;
+
+        [SerializeField]
+        private Transform activeTermDepositsContainer;
+
+        [SerializeField]
+        private GameObject activeTermDepositPrefab;
 
         [Header("Transaction History")]
-        [SerializeField] private Transform transactionHistoryContainer;
-        [SerializeField] private GameObject transactionItemPrefab;
-        [SerializeField] private int maxHistoryItems = 20;
+        [SerializeField]
+        private Transform transactionHistoryContainer;
+
+        [SerializeField]
+        private GameObject transactionItemPrefab;
+
+        [SerializeField]
+        private int maxHistoryItems = 20;
 
         [Header("UI Settings")]
-        [SerializeField] private Color depositColor = Color.green;
-        [SerializeField] private Color withdrawColor = Color.red;
-        [SerializeField] private Color interestColor = Color.cyan;
-        [SerializeField] private Color maturedColor = new Color(1f, 0.8f, 0.2f);
+        [SerializeField]
+        private Color depositColor = Color.green;
+
+        [SerializeField]
+        private Color withdrawColor = Color.red;
+
+        [SerializeField]
+        private Color interestColor = Color.cyan;
+
+        [SerializeField]
+        private Color maturedColor = new Color(1f, 0.8f, 0.2f);
 
         private BankSystem bankSystem;
         private PlayerData playerData;
@@ -335,7 +372,8 @@ namespace MerchantTails.UI
                     UIManager.Instance.ShowConfirmDialog(
                         "早期解約の確認",
                         "早期解約するとペナルティが発生します。本当に解約しますか？",
-                        () => {
+                        () =>
+                        {
                             bankSystem.BreakTermDeposit(depositId, true);
                             RefreshDisplay();
                         },
@@ -385,7 +423,8 @@ namespace MerchantTails.UI
                     break;
                 case BankTransactionType.Withdrawal:
                     message = $"引き出し: -{e.Amount:N0}G";
-                    if (e.Fee > 0) message += $" (手数料: {e.Fee:N0}G)";
+                    if (e.Fee > 0)
+                        message += $" (手数料: {e.Fee:N0}G)";
                     color = withdrawColor;
                     break;
             }
@@ -400,7 +439,8 @@ namespace MerchantTails.UI
 
         private void AddTransactionHistory(string message, Color color)
         {
-            if (transactionHistoryContainer == null || transactionItemPrefab == null) return;
+            if (transactionHistoryContainer == null || transactionItemPrefab == null)
+                return;
 
             GameObject item = Instantiate(transactionItemPrefab, transactionHistoryContainer);
             TextMeshProUGUI text = item.GetComponentInChildren<TextMeshProUGUI>();
@@ -430,12 +470,23 @@ namespace MerchantTails.UI
     /// </summary>
     public class TermDepositTypeUI : MonoBehaviour
     {
-        [SerializeField] private TextMeshProUGUI nameText;
-        [SerializeField] private TextMeshProUGUI durationText;
-        [SerializeField] private TextMeshProUGUI interestRateText;
-        [SerializeField] private TextMeshProUGUI minDepositText;
-        [SerializeField] private TMP_InputField amountInput;
-        [SerializeField] private Button createButton;
+        [SerializeField]
+        private TextMeshProUGUI nameText;
+
+        [SerializeField]
+        private TextMeshProUGUI durationText;
+
+        [SerializeField]
+        private TextMeshProUGUI interestRateText;
+
+        [SerializeField]
+        private TextMeshProUGUI minDepositText;
+
+        [SerializeField]
+        private TMP_InputField amountInput;
+
+        [SerializeField]
+        private Button createButton;
 
         private int typeIndex;
         private TermDepositType type;
@@ -449,10 +500,14 @@ namespace MerchantTails.UI
             type = depositType;
             playerMoney = currentMoney;
 
-            if (nameText != null) nameText.text = type.name;
-            if (durationText != null) durationText.text = $"期間: {type.durationDays}日";
-            if (interestRateText != null) interestRateText.text = $"利率: {type.interestRate * 100:F0}%";
-            if (minDepositText != null) minDepositText.text = $"最低預金額: {type.minDeposit:N0}G";
+            if (nameText != null)
+                nameText.text = type.name;
+            if (durationText != null)
+                durationText.text = $"期間: {type.durationDays}日";
+            if (interestRateText != null)
+                interestRateText.text = $"利率: {type.interestRate * 100:F0}%";
+            if (minDepositText != null)
+                minDepositText.text = $"最低預金額: {type.minDeposit:N0}G";
 
             if (amountInput != null)
             {
@@ -495,13 +550,26 @@ namespace MerchantTails.UI
     /// </summary>
     public class ActiveTermDepositUI : MonoBehaviour
     {
-        [SerializeField] private TextMeshProUGUI typeText;
-        [SerializeField] private TextMeshProUGUI principalText;
-        [SerializeField] private TextMeshProUGUI maturityText;
-        [SerializeField] private TextMeshProUGUI statusText;
-        [SerializeField] private Slider progressBar;
-        [SerializeField] private Button withdrawButton;
-        [SerializeField] private TextMeshProUGUI withdrawButtonText;
+        [SerializeField]
+        private TextMeshProUGUI typeText;
+
+        [SerializeField]
+        private TextMeshProUGUI principalText;
+
+        [SerializeField]
+        private TextMeshProUGUI maturityText;
+
+        [SerializeField]
+        private TextMeshProUGUI statusText;
+
+        [SerializeField]
+        private Slider progressBar;
+
+        [SerializeField]
+        private Button withdrawButton;
+
+        [SerializeField]
+        private TextMeshProUGUI withdrawButtonText;
 
         private TermDeposit deposit;
         private TermDepositType type;
@@ -515,8 +583,10 @@ namespace MerchantTails.UI
             type = depositType;
             isMatured = deposit.isMatured;
 
-            if (typeText != null) typeText.text = type.name;
-            if (principalText != null) principalText.text = $"元本: {deposit.principal:N0}G";
+            if (typeText != null)
+                typeText.text = type.name;
+            if (principalText != null)
+                principalText.text = $"元本: {deposit.principal:N0}G";
 
             // 満期情報
             int daysRemaining = deposit.maturityDay - currentDay;

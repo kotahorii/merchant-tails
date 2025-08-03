@@ -1,8 +1,8 @@
 using System;
 using System.Collections.Generic;
-using UnityEngine;
 using MerchantTails.Data;
 using MerchantTails.Events;
+using UnityEngine;
 
 namespace MerchantTails.Core
 {
@@ -16,12 +16,18 @@ namespace MerchantTails.Core
         public static MerchantInvestmentSystem Instance => instance;
 
         [Header("Investment Settings")]
-        [SerializeField] private int dividendFrequency = 7; // 配当頻度（日）
-        [SerializeField] private float baseReturnRate = 0.1f; // 基本リターン率 10%/週
-        [SerializeField] private float riskFactor = 0.3f; // リスク要因（配当のばらつき）
+        [SerializeField]
+        private int dividendFrequency = 7; // 配当頻度（日）
+
+        [SerializeField]
+        private float baseReturnRate = 0.1f; // 基本リターン率 10%/週
+
+        [SerializeField]
+        private float riskFactor = 0.3f; // リスク要因（配当のばらつき）
 
         [Header("Available Merchants")]
-        [SerializeField] private List<MerchantProfile> availableMerchants = new List<MerchantProfile>();
+        [SerializeField]
+        private List<MerchantProfile> availableMerchants = new List<MerchantProfile>();
 
         private Dictionary<string, MerchantInvestment> activeInvestments = new Dictionary<string, MerchantInvestment>();
         private PlayerData playerData;
@@ -32,7 +38,8 @@ namespace MerchantTails.Core
         // プロパティ
         public float TotalInvestmentValue => GetTotalInvestmentValue();
         public float TotalDividendsEarned => totalDividendsEarned;
-        public bool IsUnlocked => featureUnlockSystem != null && featureUnlockSystem.IsFeatureUnlocked(GameFeature.MerchantNetwork);
+        public bool IsUnlocked =>
+            featureUnlockSystem != null && featureUnlockSystem.IsFeatureUnlocked(GameFeature.MerchantNetwork);
 
         // イベント
         public event Action<MerchantProfile, float> OnInvestmentMade;
@@ -148,7 +155,8 @@ namespace MerchantTails.Core
 
         private void OnDayChanged(DayChangedEvent e)
         {
-            if (!IsUnlocked) return;
+            if (!IsUnlocked)
+                return;
 
             // 配当計算
             if (e.NewDay - lastDividendDay >= dividendFrequency)
@@ -190,7 +198,10 @@ namespace MerchantTails.Core
 
             if (amount < merchant.minInvestment)
             {
-                ErrorHandler.LogWarning($"Amount below minimum: {amount} < {merchant.minInvestment}", "MerchantInvestment");
+                ErrorHandler.LogWarning(
+                    $"Amount below minimum: {amount} < {merchant.minInvestment}",
+                    "MerchantInvestment"
+                );
                 return false;
             }
 
@@ -249,7 +260,10 @@ namespace MerchantTails.Core
 
             if (amount > investment.totalInvested)
             {
-                ErrorHandler.LogWarning($"Withdrawal amount exceeds investment: {amount} > {investment.totalInvested}", "MerchantInvestment");
+                ErrorHandler.LogWarning(
+                    $"Withdrawal amount exceeds investment: {amount} > {investment.totalInvested}",
+                    "MerchantInvestment"
+                );
                 return false;
             }
 
@@ -279,10 +293,12 @@ namespace MerchantTails.Core
         {
             foreach (var kvp in activeInvestments)
             {
-                if (!kvp.Value.isActive) continue;
+                if (!kvp.Value.isActive)
+                    continue;
 
                 var merchant = GetMerchant(kvp.Key);
-                if (merchant == null) continue;
+                if (merchant == null)
+                    continue;
 
                 // 基本配当計算
                 float baseReturn = kvp.Value.totalInvested * baseReturnRate * merchant.returnMultiplier;
@@ -354,8 +370,11 @@ namespace MerchantTails.Core
                         investment.isActive = false;
                         OnMerchantBankrupt?.Invoke(merchant);
                         EventBus.Publish(new MerchantBankruptEvent(merchant, investment.totalInvested));
-                        
-                        ErrorHandler.LogWarning($"{merchant.name} has gone bankrupt! Lost investment: {investment.totalInvested}G", "MerchantInvestment");
+
+                        ErrorHandler.LogWarning(
+                            $"{merchant.name} has gone bankrupt! Lost investment: {investment.totalInvested}G",
+                            "MerchantInvestment"
+                        );
                     }
                 }
             }
@@ -452,9 +471,9 @@ namespace MerchantTails.Core
     /// </summary>
     public enum RiskLevel
     {
-        Low,    // 低リスク・低リターン
+        Low, // 低リスク・低リターン
         Medium, // 中リスク・中リターン
-        High,   // 高リスク・高リターン
+        High, // 高リスク・高リターン
     }
 
     /// <summary>
@@ -483,9 +502,7 @@ namespace MerchantTails.Core
     }
 
     // イベント
-    public class MerchantNetworkUnlockedEvent : BaseGameEvent
-    {
-    }
+    public class MerchantNetworkUnlockedEvent : BaseGameEvent { }
 
     public class MerchantInvestmentMadeEvent : BaseGameEvent
     {

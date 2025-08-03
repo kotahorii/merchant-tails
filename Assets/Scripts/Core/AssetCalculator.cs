@@ -1,7 +1,7 @@
 using System.Collections.Generic;
-using UnityEngine;
 using MerchantTails.Data;
 using MerchantTails.Events;
+using UnityEngine;
 
 namespace MerchantTails.Core
 {
@@ -15,8 +15,11 @@ namespace MerchantTails.Core
         public static AssetCalculator Instance => instance;
 
         [Header("Asset Calculation Settings")]
-        [SerializeField] private float inventoryValueMultiplier = 0.8f; // 在庫は時価の80%で評価
-        [SerializeField] private bool includeDecayedItems = false; // 劣化した商品を含めるか
+        [SerializeField]
+        private float inventoryValueMultiplier = 0.8f; // 在庫は時価の80%で評価
+
+        [SerializeField]
+        private bool includeDecayedItems = false; // 劣化した商品を含めるか
 
         private PlayerData playerData;
         private InventorySystem inventorySystem;
@@ -135,7 +138,8 @@ namespace MerchantTails.Core
         /// </summary>
         private float CalculateInventoryValue()
         {
-            if (inventorySystem == null || marketSystem == null) return 0f;
+            if (inventorySystem == null || marketSystem == null)
+                return 0f;
 
             float inventoryValue = 0f;
             var allItems = inventorySystem.GetAllItems();
@@ -143,7 +147,8 @@ namespace MerchantTails.Core
             foreach (var item in allItems)
             {
                 // 劣化したアイテムを除外する場合
-                if (!includeDecayedItems && item.Value.condition <= 0f) continue;
+                if (!includeDecayedItems && item.Value.condition <= 0f)
+                    continue;
 
                 // 現在の市場価格を取得
                 float marketPrice = marketSystem.GetCurrentPrice(item.Key);
@@ -177,13 +182,13 @@ namespace MerchantTails.Core
         private float CalculateInvestmentValue()
         {
             float investmentValue = 0f;
-            
+
             // 店舗投資（設備投資は資産価値として計上）
             investmentValue += ShopInvestmentSystem.Instance?.GetTotalInvestment() ?? 0f;
-            
+
             // 他商人への出資
             investmentValue += MerchantInvestmentSystem.Instance?.GetTotalInvestmentValue() ?? 0f;
-            
+
             return investmentValue;
         }
 
@@ -198,7 +203,7 @@ namespace MerchantTails.Core
                 inventoryValue = CalculateInventoryValue(),
                 bankDeposits = CalculateBankDeposits(),
                 investments = CalculateInvestmentValue(),
-                totalAssets = lastCalculatedAssets
+                totalAssets = lastCalculatedAssets,
             };
 
             return breakdown;
@@ -209,15 +214,16 @@ namespace MerchantTails.Core
         /// </summary>
         public float GetRequiredAssetsForNextRank()
         {
-            if (playerData == null) return 0f;
+            if (playerData == null)
+                return 0f;
 
             return playerData.CurrentRank switch
             {
-                MerchantRank.Apprentice => 5000f,  // 一人前になるには5,000G
-                MerchantRank.Skilled => 10000f,    // ベテランになるには10,000G
-                MerchantRank.Veteran => 50000f,    // マスターになるには50,000G
+                MerchantRank.Apprentice => 5000f, // 一人前になるには5,000G
+                MerchantRank.Skilled => 10000f, // ベテランになるには10,000G
+                MerchantRank.Veteran => 50000f, // マスターになるには50,000G
                 MerchantRank.Master => float.MaxValue, // 既に最高ランク
-                _ => 0f
+                _ => 0f,
             };
         }
 
@@ -226,10 +232,12 @@ namespace MerchantTails.Core
         /// </summary>
         public float GetRankProgress()
         {
-            if (playerData == null) return 0f;
+            if (playerData == null)
+                return 0f;
 
             float requiredAssets = GetRequiredAssetsForNextRank();
-            if (requiredAssets == float.MaxValue) return 1f; // 既に最高ランク
+            if (requiredAssets == float.MaxValue)
+                return 1f; // 既に最高ランク
 
             float previousRankAssets = playerData.CurrentRank switch
             {
@@ -237,7 +245,7 @@ namespace MerchantTails.Core
                 MerchantRank.Skilled => 5000f,
                 MerchantRank.Veteran => 10000f,
                 MerchantRank.Master => 50000f,
-                _ => 0f
+                _ => 0f,
             };
 
             float progress = (lastCalculatedAssets - previousRankAssets) / (requiredAssets - previousRankAssets);
@@ -249,8 +257,10 @@ namespace MerchantTails.Core
         /// </summary>
         public bool CanRankUp()
         {
-            if (playerData == null) return false;
-            if (playerData.CurrentRank == MerchantRank.Master) return false;
+            if (playerData == null)
+                return false;
+            if (playerData.CurrentRank == MerchantRank.Master)
+                return false;
 
             return lastCalculatedAssets >= GetRequiredAssetsForNextRank();
         }
@@ -260,14 +270,15 @@ namespace MerchantTails.Core
         /// </summary>
         public void TryRankUp()
         {
-            if (!CanRankUp()) return;
+            if (!CanRankUp())
+                return;
 
             MerchantRank newRank = playerData.CurrentRank switch
             {
                 MerchantRank.Apprentice => MerchantRank.Skilled,
                 MerchantRank.Skilled => MerchantRank.Veteran,
                 MerchantRank.Veteran => MerchantRank.Master,
-                _ => playerData.CurrentRank
+                _ => playerData.CurrentRank,
             };
 
             var previousRank = playerData.CurrentRank;
@@ -290,7 +301,7 @@ namespace MerchantTails.Core
                 totalAssets = lastCalculatedAssets,
                 dailyProfit = DailyProfit,
                 profitPercentage = DailyProfitPercentage,
-                breakdown = GetAssetBreakdown()
+                breakdown = GetAssetBreakdown(),
             };
 
             EventBus.Publish(new DailyAssetReportEvent(report));

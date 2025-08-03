@@ -1,6 +1,6 @@
 using System;
-using UnityEngine;
 using MerchantTails.Data;
+using UnityEngine;
 
 namespace MerchantTails.Market
 {
@@ -17,9 +17,9 @@ namespace MerchantTails.Market
         public float currentPrice;
 
         [Header("Market Dynamics")]
-        public float volatility;    // 価格変動の激しさ (0.0 - 1.0)
-        public float demand;        // 需要係数 (1.0 = 通常)
-        public float supply;        // 供給係数 (1.0 = 通常)
+        public float volatility; // 価格変動の激しさ (0.0 - 1.0)
+        public float demand; // 需要係数 (1.0 = 通常)
+        public float supply; // 供給係数 (1.0 = 通常)
 
         [Header("Update Tracking")]
         public int lastUpdateDay;
@@ -39,10 +39,14 @@ namespace MerchantTails.Market
         {
             float ratio = demand / supply;
 
-            if (ratio >= 1.3f) return MarketCondition.HighDemand;
-            if (ratio >= 1.1f) return MarketCondition.ModeratelyHigh;
-            if (ratio <= 0.7f) return MarketCondition.LowDemand;
-            if (ratio <= 0.9f) return MarketCondition.ModeratelyLow;
+            if (ratio >= 1.3f)
+                return MarketCondition.HighDemand;
+            if (ratio >= 1.1f)
+                return MarketCondition.ModeratelyHigh;
+            if (ratio <= 0.7f)
+                return MarketCondition.LowDemand;
+            if (ratio <= 0.9f)
+                return MarketCondition.ModeratelyLow;
             return MarketCondition.Balanced;
         }
 
@@ -57,7 +61,7 @@ namespace MerchantTails.Market
                 >= 0.2f => PriceStability.Volatile,
                 >= 0.1f => PriceStability.Moderate,
                 >= 0.05f => PriceStability.Stable,
-                _ => PriceStability.VeryStable
+                _ => PriceStability.VeryStable,
             };
         }
     }
@@ -143,7 +147,7 @@ namespace MerchantTails.Market
                 ItemType.Accessory => accessoryBasePrice,
                 ItemType.MagicBook => magicBookBasePrice,
                 ItemType.Gem => gemBasePrice,
-                _ => 100f
+                _ => 100f,
             };
         }
 
@@ -157,7 +161,7 @@ namespace MerchantTails.Market
                 ItemType.Accessory => accessoryVolatility,
                 ItemType.MagicBook => magicBookVolatility,
                 ItemType.Gem => gemVolatility,
-                _ => 0.2f
+                _ => 0.2f,
             };
         }
     }
@@ -167,11 +171,11 @@ namespace MerchantTails.Market
     /// </summary>
     public enum MarketCondition
     {
-        LowDemand,      // 需要不足
-        ModeratelyLow,  // やや需要不足
-        Balanced,       // バランス良好
+        LowDemand, // 需要不足
+        ModeratelyLow, // やや需要不足
+        Balanced, // バランス良好
         ModeratelyHigh, // やや需要過多
-        HighDemand      // 需要過多
+        HighDemand, // 需要過多
     }
 
     /// <summary>
@@ -179,10 +183,10 @@ namespace MerchantTails.Market
     /// </summary>
     public enum PriceStability
     {
-        VeryStable,   // 非常に安定
-        Stable,       // 安定
-        Moderate,     // 普通
-        Volatile,     // 不安定
-        VeryVolatile  // 非常に不安定
+        VeryStable, // 非常に安定
+        Stable, // 安定
+        Moderate, // 普通
+        Volatile, // 不安定
+        VeryVolatile, // 非常に不安定
     }
 }

@@ -1,8 +1,8 @@
 using System;
 using System.Collections.Generic;
-using UnityEngine;
 using MerchantTails.Data;
 using MerchantTails.Events;
+using UnityEngine;
 
 namespace MerchantTails.Core
 {
@@ -16,7 +16,8 @@ namespace MerchantTails.Core
         public static ShopInvestmentSystem Instance => instance;
 
         [Header("Investment Categories")]
-        [SerializeField] private List<ShopUpgrade> availableUpgrades = new List<ShopUpgrade>();
+        [SerializeField]
+        private List<ShopUpgrade> availableUpgrades = new List<ShopUpgrade>();
 
         private Dictionary<string, ShopUpgradeProgress> upgradeProgress = new Dictionary<string, ShopUpgradeProgress>();
         private PlayerData playerData;
@@ -33,7 +34,8 @@ namespace MerchantTails.Core
         public float TransactionEfficiencyMultiplier => 1f + totalEfficiencyBonus;
         public float CustomerFlowMultiplier => 1f + totalCustomerBonus;
         public float ItemQualityMultiplier => 1f + totalQualityBonus;
-        public bool IsUnlocked => featureUnlockSystem != null && featureUnlockSystem.IsFeatureUnlocked(GameFeature.ShopInvestment);
+        public bool IsUnlocked =>
+            featureUnlockSystem != null && featureUnlockSystem.IsFeatureUnlocked(GameFeature.ShopInvestment);
 
         // イベント
         public event Action<ShopUpgrade, int> OnUpgradePurchased;
@@ -104,7 +106,6 @@ namespace MerchantTails.Core
                         effectPerLevel = 0.15f,
                         requiredRank = MerchantRank.Skilled,
                     },
-
                     // 効率化設備
                     new ShopUpgrade
                     {
@@ -130,7 +131,6 @@ namespace MerchantTails.Core
                         effectType = UpgradeEffectType.CustomerAttraction,
                         effectPerLevel = 0.08f,
                     },
-
                     // 集客設備
                     new ShopUpgrade
                     {
@@ -157,7 +157,6 @@ namespace MerchantTails.Core
                         effectPerLevel = 0.1f,
                         requiredRank = MerchantRank.Skilled,
                     },
-
                     // 特殊設備（ベテラン以上）
                     new ShopUpgrade
                     {
@@ -185,7 +184,6 @@ namespace MerchantTails.Core
                         effectPerLevel = 0.2f,
                         requiredRank = MerchantRank.Veteran,
                     },
-
                     // マスター専用設備
                     new ShopUpgrade
                     {
@@ -208,11 +206,7 @@ namespace MerchantTails.Core
             {
                 if (!upgradeProgress.ContainsKey(upgrade.id))
                 {
-                    upgradeProgress[upgrade.id] = new ShopUpgradeProgress
-                    {
-                        currentLevel = 0,
-                        totalInvested = 0,
-                    };
+                    upgradeProgress[upgrade.id] = new ShopUpgradeProgress { currentLevel = 0, totalInvested = 0 };
                 }
             }
         }
@@ -278,10 +272,13 @@ namespace MerchantTails.Core
 
             // コスト計算
             int cost = CalculateUpgradeCost(upgrade, progress.currentLevel);
-            
+
             if (playerData.CurrentMoney < cost)
             {
-                ErrorHandler.LogWarning($"Insufficient funds for upgrade. Required: {cost}, Available: {playerData.CurrentMoney}", "ShopInvestment");
+                ErrorHandler.LogWarning(
+                    $"Insufficient funds for upgrade. Required: {cost}, Available: {playerData.CurrentMoney}",
+                    "ShopInvestment"
+                );
                 return false;
             }
 
@@ -302,7 +299,10 @@ namespace MerchantTails.Core
                 }
 
                 EventBus.Publish(new ShopUpgradePurchasedEvent(upgrade, progress.currentLevel, cost));
-                ErrorHandler.LogInfo($"Purchased {upgrade.name} Level {progress.currentLevel} for {cost}G", "ShopInvestment");
+                ErrorHandler.LogInfo(
+                    $"Purchased {upgrade.name} Level {progress.currentLevel} for {cost}G",
+                    "ShopInvestment"
+                );
 
                 SaveUpgradeData();
                 return true;
@@ -340,11 +340,11 @@ namespace MerchantTails.Core
         /// </summary>
         public List<ShopUpgrade> GetAvailableUpgrades()
         {
-            if (!IsUnlocked) return new List<ShopUpgrade>();
+            if (!IsUnlocked)
+                return new List<ShopUpgrade>();
 
-            return availableUpgrades.FindAll(u => 
-                u.requiredRank <= playerData.CurrentRank &&
-                GetProgress(u.id).currentLevel < u.maxLevel
+            return availableUpgrades.FindAll(u =>
+                u.requiredRank <= playerData.CurrentRank && GetProgress(u.id).currentLevel < u.maxLevel
             );
         }
 
@@ -382,7 +382,8 @@ namespace MerchantTails.Core
             foreach (var upgrade in availableUpgrades)
             {
                 var progress = GetProgress(upgrade.id);
-                if (progress == null || progress.currentLevel == 0) continue;
+                if (progress == null || progress.currentLevel == 0)
+                    continue;
 
                 float effect = upgrade.effectPerLevel * progress.currentLevel;
 
@@ -414,16 +415,16 @@ namespace MerchantTails.Core
             }
 
             OnBonusesUpdated?.Invoke();
-            ErrorHandler.LogInfo($"Shop bonuses updated - Storage: +{totalStorageBonus*100}%, Efficiency: +{totalEfficiencyBonus*100}%, Customer: +{totalCustomerBonus*100}%, Quality: +{totalQualityBonus*100}%", "ShopInvestment");
+            ErrorHandler.LogInfo(
+                $"Shop bonuses updated - Storage: +{totalStorageBonus * 100}%, Efficiency: +{totalEfficiencyBonus * 100}%, Customer: +{totalCustomerBonus * 100}%, Quality: +{totalQualityBonus * 100}%",
+                "ShopInvestment"
+            );
         }
 
         // セーブ/ロード
         private void SaveUpgradeData()
         {
-            var data = new ShopInvestmentSaveData
-            {
-                upgradeProgress = upgradeProgress,
-            };
+            var data = new ShopInvestmentSaveData { upgradeProgress = upgradeProgress };
 
             string json = JsonUtility.ToJson(data);
             PlayerPrefs.SetString($"ShopInvestment_{playerData?.PlayerName}", json);
@@ -437,7 +438,7 @@ namespace MerchantTails.Core
             {
                 string json = PlayerPrefs.GetString(key);
                 var data = JsonUtility.FromJson<ShopInvestmentSaveData>(json);
-                
+
                 if (data.upgradeProgress != null)
                 {
                     upgradeProgress = data.upgradeProgress;
@@ -470,11 +471,11 @@ namespace MerchantTails.Core
     /// </summary>
     public enum UpgradeCategory
     {
-        Storage,     // 保管設備
-        Efficiency,  // 効率化
-        Customer,    // 集客
-        Special,     // 特殊
-        Master,      // マスター専用
+        Storage, // 保管設備
+        Efficiency, // 効率化
+        Customer, // 集客
+        Special, // 特殊
+        Master, // マスター専用
     }
 
     /// <summary>
@@ -482,15 +483,15 @@ namespace MerchantTails.Core
     /// </summary>
     public enum UpgradeEffectType
     {
-        StorageCapacity,      // 保管容量
-        TransactionSpeed,     // 取引速度
-        CustomerFlow,         // 来客数
-        CustomerAttraction,   // 商品魅力
+        StorageCapacity, // 保管容量
+        TransactionSpeed, // 取引速度
+        CustomerFlow, // 来客数
+        CustomerAttraction, // 商品魅力
         CustomerSatisfaction, // 顧客満足度
-        QualityPreservation,  // 品質保持
-        PremiumItems,         // 高級品取扱
-        Automation,           // 自動化
-        AllBonuses,          // 全効果
+        QualityPreservation, // 品質保持
+        PremiumItems, // 高級品取扱
+        Automation, // 自動化
+        AllBonuses, // 全効果
     }
 
     /// <summary>
@@ -513,9 +514,7 @@ namespace MerchantTails.Core
     }
 
     // イベント
-    public class ShopInvestmentUnlockedEvent : BaseGameEvent
-    {
-    }
+    public class ShopInvestmentUnlockedEvent : BaseGameEvent { }
 
     public class ShopUpgradePurchasedEvent : BaseGameEvent
     {

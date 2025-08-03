@@ -1,9 +1,9 @@
 using System.Collections;
-using UnityEngine;
 using MerchantTails.Core;
 using MerchantTails.Data;
-using MerchantTails.Market;
 using MerchantTails.Inventory;
+using MerchantTails.Market;
+using UnityEngine;
 
 namespace MerchantTails.Testing
 {
@@ -14,8 +14,11 @@ namespace MerchantTails.Testing
     public class ErrorRecoveryTest : MonoBehaviour
     {
         [Header("Error Recovery Test Settings")]
-        [SerializeField] private bool runRecoveryTests = false;
-        [SerializeField] private float testTimeout = 30f;
+        [SerializeField]
+        private bool runRecoveryTests = false;
+
+        [SerializeField]
+        private float testTimeout = 30f;
 
         private bool recoveryTestRunning = false;
         private int totalRecoveryTests = 0;
@@ -88,27 +91,36 @@ namespace MerchantTails.Testing
                 bool recovered = true;
 
                 // Test 1: Null component access
-                recovered &= ErrorHandler.SafeExecute(() =>
-                {
-                    GameObject nullObject = null;
-                    var component = nullObject.GetComponent<Transform>(); // This should fail safely
-                }, "NullComponentTest");
+                recovered &= ErrorHandler.SafeExecute(
+                    () =>
+                    {
+                        GameObject nullObject = null;
+                        var component = nullObject.GetComponent<Transform>(); // This should fail safely
+                    },
+                    "NullComponentTest"
+                );
 
                 // Test 2: Null manager instance
-                recovered &= ErrorHandler.SafeExecute(() =>
-                {
-                    if (GameManager.Instance == null)
+                recovered &= ErrorHandler.SafeExecute(
+                    () =>
                     {
-                        throw new System.NullReferenceException("GameManager is null");
-                    }
-                }, "NullManagerTest");
+                        if (GameManager.Instance == null)
+                        {
+                            throw new System.NullReferenceException("GameManager is null");
+                        }
+                    },
+                    "NullManagerTest"
+                );
 
                 // Test 3: Null collection access
-                recovered &= ErrorHandler.SafeExecute(() =>
-                {
-                    System.Collections.Generic.List<string> nullList = null;
-                    int count = nullList.Count; // This should fail safely
-                }, "NullCollectionTest");
+                recovered &= ErrorHandler.SafeExecute(
+                    () =>
+                    {
+                        System.Collections.Generic.List<string> nullList = null;
+                        int count = nullList.Count; // This should fail safely
+                    },
+                    "NullCollectionTest"
+                );
 
                 float recoveryTime = Time.time - startTime;
 
@@ -117,12 +129,15 @@ namespace MerchantTails.Testing
                     testName = "Null Reference Recovery",
                     recoverySuccessful = recovered,
                     recoveryTime = recoveryTime,
-                    errorDetails = recovered ? "All null references handled safely" : "Some null references not handled"
+                    errorDetails = recovered
+                        ? "All null references handled safely"
+                        : "Some null references not handled",
                 };
 
                 LogRecoveryResult(result);
 
-                if (recovered) successfulRecoveries++;
+                if (recovered)
+                    successfulRecoveries++;
             }
             catch (System.Exception e)
             {
@@ -177,12 +192,14 @@ namespace MerchantTails.Testing
                     testName = "System Recovery",
                     recoverySuccessful = allRecovered && systemsHealthy,
                     recoveryTime = recoveryTime,
-                    errorDetails = $"GM:{gameManagerRecovered} TM:{timeManagerRecovered} MS:{marketSystemRecovered} IS:{inventorySystemRecovered} Health:{systemsHealthy}"
+                    errorDetails =
+                        $"GM:{gameManagerRecovered} TM:{timeManagerRecovered} MS:{marketSystemRecovered} IS:{inventorySystemRecovered} Health:{systemsHealthy}",
                 };
 
                 LogRecoveryResult(result);
 
-                if (result.recoverySuccessful) successfulRecoveries++;
+                if (result.recoverySuccessful)
+                    successfulRecoveries++;
             }
             catch (System.Exception e)
             {
@@ -202,32 +219,44 @@ namespace MerchantTails.Testing
                 bool allHandled = true;
 
                 // Test ArgumentException handling
-                allHandled &= !ErrorHandler.SafeExecute(() =>
-                {
-                    throw new System.ArgumentException("Test argument exception");
-                }, "ArgumentExceptionTest");
+                allHandled &= !ErrorHandler.SafeExecute(
+                    () =>
+                    {
+                        throw new System.ArgumentException("Test argument exception");
+                    },
+                    "ArgumentExceptionTest"
+                );
 
                 // Test IndexOutOfRangeException handling
-                allHandled &= !ErrorHandler.SafeExecute(() =>
-                {
-                    int[] array = new int[5];
-                    int value = array[10]; // This should fail safely
-                }, "IndexExceptionTest");
+                allHandled &= !ErrorHandler.SafeExecute(
+                    () =>
+                    {
+                        int[] array = new int[5];
+                        int value = array[10]; // This should fail safely
+                    },
+                    "IndexExceptionTest"
+                );
 
                 // Test InvalidOperationException handling
-                allHandled &= !ErrorHandler.SafeExecute(() =>
-                {
-                    throw new System.InvalidOperationException("Test invalid operation");
-                }, "InvalidOperationTest");
+                allHandled &= !ErrorHandler.SafeExecute(
+                    () =>
+                    {
+                        throw new System.InvalidOperationException("Test invalid operation");
+                    },
+                    "InvalidOperationTest"
+                );
 
                 // Test that the system continues to function after exceptions
                 bool systemStillFunctional = true;
 
-                systemStillFunctional &= ErrorHandler.SafeExecute(() =>
-                {
-                    var currentTime = TimeManager.Instance?.GetFormattedTime();
-                    var fruitPrice = MarketSystem.Instance?.GetCurrentPrice(ItemType.Fruit);
-                }, "PostExceptionFunctionalTest");
+                systemStillFunctional &= ErrorHandler.SafeExecute(
+                    () =>
+                    {
+                        var currentTime = TimeManager.Instance?.GetFormattedTime();
+                        var fruitPrice = MarketSystem.Instance?.GetCurrentPrice(ItemType.Fruit);
+                    },
+                    "PostExceptionFunctionalTest"
+                );
 
                 float recoveryTime = Time.time - startTime;
 
@@ -236,12 +265,13 @@ namespace MerchantTails.Testing
                     testName = "Exception Handling",
                     recoverySuccessful = allHandled && systemStillFunctional,
                     recoveryTime = recoveryTime,
-                    errorDetails = $"Exceptions handled: {allHandled}, System functional: {systemStillFunctional}"
+                    errorDetails = $"Exceptions handled: {allHandled}, System functional: {systemStillFunctional}",
                 };
 
                 LogRecoveryResult(result);
 
-                if (result.recoverySuccessful) successfulRecoveries++;
+                if (result.recoverySuccessful)
+                    successfulRecoveries++;
             }
             catch (System.Exception e)
             {
@@ -265,19 +295,22 @@ namespace MerchantTails.Testing
                 // Create memory pressure
                 var memoryHogs = new System.Collections.Generic.List<byte[]>();
 
-                bool memoryHandled = ErrorHandler.SafeExecute(() =>
-                {
-                    for (int i = 0; i < 100; i++)
+                bool memoryHandled = ErrorHandler.SafeExecute(
+                    () =>
                     {
-                        memoryHogs.Add(new byte[1024 * 1024]); // 1MB each
-
-                        // Check if we should stop due to memory pressure
-                        if (System.GC.GetTotalMemory(false) > initialMemory + 100 * 1024 * 1024) // 100MB limit
+                        for (int i = 0; i < 100; i++)
                         {
-                            break;
+                            memoryHogs.Add(new byte[1024 * 1024]); // 1MB each
+
+                            // Check if we should stop due to memory pressure
+                            if (System.GC.GetTotalMemory(false) > initialMemory + 100 * 1024 * 1024) // 100MB limit
+                            {
+                                break;
+                            }
                         }
-                    }
-                }, "MemoryPressureTest");
+                    },
+                    "MemoryPressureTest"
+                );
 
                 // Cleanup
                 memoryHogs.Clear();
@@ -300,12 +333,14 @@ namespace MerchantTails.Testing
                     testName = "Memory Pressure Recovery",
                     recoverySuccessful = memoryHandled && memoryRecovered && systemsHealthy,
                     recoveryTime = recoveryTime,
-                    errorDetails = $"Memory handled: {memoryHandled}, Recovered: {memoryRecovered}, Systems healthy: {systemsHealthy}"
+                    errorDetails =
+                        $"Memory handled: {memoryHandled}, Recovered: {memoryRecovered}, Systems healthy: {systemsHealthy}",
                 };
 
                 LogRecoveryResult(result);
 
-                if (result.recoverySuccessful) successfulRecoveries++;
+                if (result.recoverySuccessful)
+                    successfulRecoveries++;
             }
             catch (System.Exception e)
             {
@@ -325,29 +360,38 @@ namespace MerchantTails.Testing
                 bool eventSystemRecovered = true;
 
                 // Test event handling with null handlers
-                eventSystemRecovered &= ErrorHandler.SafeExecute(() =>
-                {
-                    // Subscribe a null handler (should be handled safely)
-                    System.Action<Events.PriceChangedEvent> nullHandler = null;
-                    // This would normally cause issues, but should be handled
-                }, "NullEventHandlerTest");
+                eventSystemRecovered &= ErrorHandler.SafeExecute(
+                    () =>
+                    {
+                        // Subscribe a null handler (should be handled safely)
+                        System.Action<Events.PriceChangedEvent> nullHandler = null;
+                        // This would normally cause issues, but should be handled
+                    },
+                    "NullEventHandlerTest"
+                );
 
                 // Test event publishing with invalid data
-                eventSystemRecovered &= ErrorHandler.SafeExecute(() =>
-                {
-                    var invalidEvent = new Events.PriceChangedEvent(ItemType.Fruit, -1f, float.NaN);
-                    Events.EventBus.Publish(invalidEvent);
-                }, "InvalidEventTest");
+                eventSystemRecovered &= ErrorHandler.SafeExecute(
+                    () =>
+                    {
+                        var invalidEvent = new Events.PriceChangedEvent(ItemType.Fruit, -1f, float.NaN);
+                        Events.EventBus.Publish(invalidEvent);
+                    },
+                    "InvalidEventTest"
+                );
 
                 // Test rapid event publishing
-                eventSystemRecovered &= ErrorHandler.SafeExecute(() =>
-                {
-                    for (int i = 0; i < 1000; i++)
+                eventSystemRecovered &= ErrorHandler.SafeExecute(
+                    () =>
                     {
-                        var rapidEvent = new Events.PriceChangedEvent(ItemType.Potion, 100f, 100f + i);
-                        Events.EventBus.Publish(rapidEvent);
-                    }
-                }, "RapidEventTest");
+                        for (int i = 0; i < 1000; i++)
+                        {
+                            var rapidEvent = new Events.PriceChangedEvent(ItemType.Potion, 100f, 100f + i);
+                            Events.EventBus.Publish(rapidEvent);
+                        }
+                    },
+                    "RapidEventTest"
+                );
 
                 yield return new WaitForSeconds(0.5f);
 
@@ -374,12 +418,14 @@ namespace MerchantTails.Testing
                     testName = "Event System Recovery",
                     recoverySuccessful = eventSystemRecovered && eventSystemFunctional,
                     recoveryTime = recoveryTime,
-                    errorDetails = $"Recovery: {eventSystemRecovered}, Functional: {eventSystemFunctional}, Events received: {eventsReceived}"
+                    errorDetails =
+                        $"Recovery: {eventSystemRecovered}, Functional: {eventSystemFunctional}, Events received: {eventsReceived}",
                 };
 
                 LogRecoveryResult(result);
 
-                if (result.recoverySuccessful) successfulRecoveries++;
+                if (result.recoverySuccessful)
+                    successfulRecoveries++;
             }
             catch (System.Exception e)
             {
@@ -390,13 +436,15 @@ namespace MerchantTails.Testing
         private void LogRecoveryResult(RecoveryTestResult result)
         {
             string status = result.recoverySuccessful ? "✓ PASS" : "✗ FAIL";
-            ErrorHandler.LogInfo($"{status} {result.testName}: {result.errorDetails} ({result.recoveryTime:F2}s)", "ErrorRecoveryTest");
+            ErrorHandler.LogInfo(
+                $"{status} {result.testName}: {result.errorDetails} ({result.recoveryTime:F2}s)",
+                "ErrorRecoveryTest"
+            );
         }
 
         private void GenerateRecoveryReport()
         {
-            float successRate = totalRecoveryTests > 0 ?
-                (float)successfulRecoveries / totalRecoveryTests * 100f : 100f;
+            float successRate = totalRecoveryTests > 0 ? (float)successfulRecoveries / totalRecoveryTests * 100f : 100f;
 
             ErrorHandler.LogInfo("=== ERROR RECOVERY TEST REPORT ===", "ErrorRecoveryTest");
             ErrorHandler.LogInfo($"Total Recovery Tests: {totalRecoveryTests}", "ErrorRecoveryTest");
@@ -409,7 +457,11 @@ namespace MerchantTails.Testing
             }
             else
             {
-                ErrorHandler.LogError("✗ ERROR RECOVERY TESTS FAILED - System needs better error handling", null, "ErrorRecoveryTest");
+                ErrorHandler.LogError(
+                    "✗ ERROR RECOVERY TESTS FAILED - System needs better error handling",
+                    null,
+                    "ErrorRecoveryTest"
+                );
             }
         }
 
@@ -420,8 +472,7 @@ namespace MerchantTails.Testing
 
         public float GetRecoverySuccessRate()
         {
-            return totalRecoveryTests > 0 ?
-                (float)successfulRecoveries / totalRecoveryTests * 100f : 100f;
+            return totalRecoveryTests > 0 ? (float)successfulRecoveries / totalRecoveryTests * 100f : 100f;
         }
     }
 }

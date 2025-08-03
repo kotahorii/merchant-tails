@@ -1,10 +1,10 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using UnityEngine;
 using MerchantTails.Core;
 using MerchantTails.Data;
 using MerchantTails.Events;
+using UnityEngine;
 
 namespace MerchantTails.Market
 {
@@ -15,12 +15,18 @@ namespace MerchantTails.Market
     public class MarketSystem : MonoBehaviour
     {
         [Header("Market Configuration")]
-        [SerializeField] private MarketConfiguration marketConfig;
-        [SerializeField] private bool enablePriceFluctuations = true;
-        [SerializeField] private float fluctuationIntensity = 1.0f;
+        [SerializeField]
+        private MarketConfiguration marketConfig;
+
+        [SerializeField]
+        private bool enablePriceFluctuations = true;
+
+        [SerializeField]
+        private float fluctuationIntensity = 1.0f;
 
         [Header("Price History")]
-        [SerializeField] private int maxHistoryDays = 90;
+        [SerializeField]
+        private int maxHistoryDays = 90;
 
         // Market data storage
         private Dictionary<ItemType, MarketData> marketPrices;
@@ -89,7 +95,7 @@ namespace MerchantTails.Market
                 volatility = GetItemVolatility(itemType),
                 demand = 1.0f,
                 supply = 1.0f,
-                lastUpdateDay = 1
+                lastUpdateDay = 1,
             };
         }
 
@@ -101,7 +107,7 @@ namespace MerchantTails.Market
                 { Season.Spring, 1.0f },
                 { Season.Summer, 1.3f },
                 { Season.Autumn, 0.9f },
-                { Season.Winter, 0.7f }
+                { Season.Winter, 0.7f },
             };
 
             // ポーション (Potion) - 夏と冬に需要増
@@ -110,7 +116,7 @@ namespace MerchantTails.Market
                 { Season.Spring, 1.0f },
                 { Season.Summer, 1.2f },
                 { Season.Autumn, 1.0f },
-                { Season.Winter, 1.3f }
+                { Season.Winter, 1.3f },
             };
 
             // 武器 (Weapon) - 秋に需要増（戦争シーズン）
@@ -119,7 +125,7 @@ namespace MerchantTails.Market
                 { Season.Spring, 1.0f },
                 { Season.Summer, 0.9f },
                 { Season.Autumn, 1.4f },
-                { Season.Winter, 1.1f }
+                { Season.Winter, 1.1f },
             };
 
             // アクセサリー (Accessory) - 春と秋に需要増（社交シーズン）
@@ -128,7 +134,7 @@ namespace MerchantTails.Market
                 { Season.Spring, 1.3f },
                 { Season.Summer, 0.8f },
                 { Season.Autumn, 1.2f },
-                { Season.Winter, 1.0f }
+                { Season.Winter, 1.0f },
             };
 
             // 魔法書 (MagicBook) - 冬に需要増（研究シーズン）
@@ -137,7 +143,7 @@ namespace MerchantTails.Market
                 { Season.Spring, 1.0f },
                 { Season.Summer, 0.8f },
                 { Season.Autumn, 1.1f },
-                { Season.Winter, 1.4f }
+                { Season.Winter, 1.4f },
             };
 
             // 宝石 (Gem) - 一年中安定だが春に若干増
@@ -146,7 +152,7 @@ namespace MerchantTails.Market
                 { Season.Spring, 1.1f },
                 { Season.Summer, 1.0f },
                 { Season.Autumn, 1.0f },
-                { Season.Winter, 1.0f }
+                { Season.Winter, 1.0f },
             };
         }
 
@@ -216,13 +222,13 @@ namespace MerchantTails.Market
         {
             return itemType switch
             {
-                ItemType.Fruit => 10f,      // 短期取引、低価格
-                ItemType.Potion => 50f,     // 中価格、成長株
-                ItemType.Weapon => 200f,    // 高価格、安定株
-                ItemType.Accessory => 75f,  // 中価格、投機株
+                ItemType.Fruit => 10f, // 短期取引、低価格
+                ItemType.Potion => 50f, // 中価格、成長株
+                ItemType.Weapon => 200f, // 高価格、安定株
+                ItemType.Accessory => 75f, // 中価格、投機株
                 ItemType.MagicBook => 300f, // 最高価格、債券
-                ItemType.Gem => 150f,       // 高価格、ハイリスク
-                _ => 100f
+                ItemType.Gem => 150f, // 高価格、ハイリスク
+                _ => 100f,
             };
         }
 
@@ -230,21 +236,21 @@ namespace MerchantTails.Market
         {
             return itemType switch
             {
-                ItemType.Fruit => 0.3f,      // 高い変動性（腐敗リスク）
-                ItemType.Potion => 0.2f,     // 中程度の変動性
-                ItemType.Weapon => 0.1f,     // 低い変動性（安定）
+                ItemType.Fruit => 0.3f, // 高い変動性（腐敗リスク）
+                ItemType.Potion => 0.2f, // 中程度の変動性
+                ItemType.Weapon => 0.1f, // 低い変動性（安定）
                 ItemType.Accessory => 0.25f, // 高めの変動性（トレンド）
                 ItemType.MagicBook => 0.05f, // 非常に低い変動性（安定）
-                ItemType.Gem => 0.4f,        // 最高の変動性（投機）
-                _ => 0.2f
+                ItemType.Gem => 0.4f, // 最高の変動性（投機）
+                _ => 0.2f,
             };
         }
 
         public List<PriceHistory> GetPriceHistory(ItemType itemType)
         {
-            return priceHistories.ContainsKey(itemType) ?
-                new List<PriceHistory>(priceHistories[itemType]) :
-                new List<PriceHistory>();
+            return priceHistories.ContainsKey(itemType)
+                ? new List<PriceHistory>(priceHistories[itemType])
+                : new List<PriceHistory>();
         }
 
         public MarketData GetMarketData(ItemType itemType)
@@ -303,8 +309,7 @@ namespace MerchantTails.Market
         {
             foreach (var itemType in marketPrices.Keys.ToList())
             {
-                if (seasonalModifiers.ContainsKey(itemType) &&
-                    seasonalModifiers[itemType].ContainsKey(season))
+                if (seasonalModifiers.ContainsKey(itemType) && seasonalModifiers[itemType].ContainsKey(season))
                 {
                     var marketData = marketPrices[itemType];
                     float oldPrice = marketData.currentPrice;
@@ -361,13 +366,15 @@ namespace MerchantTails.Market
             }
 
             // Store active event
-            activeMarketEvents.Add(new MarketEvent
-            {
-                eventName = evt.EventName,
-                affectedItems = evt.AffectedItems,
-                modifiers = evt.PriceModifiers,
-                remainingDuration = evt.Duration
-            });
+            activeMarketEvents.Add(
+                new MarketEvent
+                {
+                    eventName = evt.EventName,
+                    affectedItems = evt.AffectedItems,
+                    modifiers = evt.PriceModifiers,
+                    remainingDuration = evt.Duration,
+                }
+            );
         }
 
         private void AdjustMarketFromTransaction(TransactionCompletedEvent evt)
@@ -396,7 +403,7 @@ namespace MerchantTails.Market
             {
                 day = TimeManager.Instance?.CurrentDay ?? 1,
                 price = price,
-                timestamp = DateTime.Now
+                timestamp = DateTime.Now,
             };
 
             priceHistories[itemType].Add(history);
@@ -426,8 +433,10 @@ namespace MerchantTails.Market
             foreach (var kvp in marketPrices)
             {
                 var data = kvp.Value;
-                Debug.Log($"  {kvp.Key}: {data.currentPrice:F2}G (Base: {data.basePrice:F2}G, " +
-                         $"Demand: {data.demand:F2}, Supply: {data.supply:F2})");
+                Debug.Log(
+                    $"  {kvp.Key}: {data.currentPrice:F2}G (Base: {data.basePrice:F2}G, "
+                        + $"Demand: {data.demand:F2}, Supply: {data.supply:F2})"
+                );
             }
         }
     }

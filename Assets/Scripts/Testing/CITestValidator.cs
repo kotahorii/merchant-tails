@@ -1,6 +1,6 @@
-using UnityEngine;
 using System.Collections;
 using MerchantTails.Core;
+using UnityEngine;
 
 namespace MerchantTails.Testing
 {
@@ -11,8 +11,11 @@ namespace MerchantTails.Testing
     public class CITestValidator : MonoBehaviour
     {
         [Header("CI Test Settings")]
-        [SerializeField] private bool autoValidateOnStart = true;
-        [SerializeField] private float validationTimeout = 10f;
+        [SerializeField]
+        private bool autoValidateOnStart = true;
+
+        [SerializeField]
+        private float validationTimeout = 10f;
 
         private bool validationComplete = false;
         private bool validationSuccess = false;
@@ -294,8 +297,11 @@ namespace MerchantTails.Testing
                 var marketSystemType = System.Type.GetType("MerchantTails.Market.MarketSystem");
                 var inventorySystemType = System.Type.GetType("MerchantTails.Inventory.InventorySystem");
 
-                bool typesExist = gameManagerType != null && timeManagerType != null &&
-                                 marketSystemType != null && inventorySystemType != null;
+                bool typesExist =
+                    gameManagerType != null
+                    && timeManagerType != null
+                    && marketSystemType != null
+                    && inventorySystemType != null;
 
                 if (typesExist)
                 {

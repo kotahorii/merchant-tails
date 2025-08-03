@@ -1,8 +1,8 @@
 using System.Collections.Generic;
+using MerchantTails.Core;
+using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
-using TMPro;
-using MerchantTails.Core;
 
 namespace MerchantTails.UI
 {
@@ -12,21 +12,40 @@ namespace MerchantTails.UI
     public class AchievementPanel : MonoBehaviour
     {
         [Header("UI References")]
-        [SerializeField] private Transform achievementListContainer;
-        [SerializeField] private GameObject achievementItemPrefab;
-        [SerializeField] private TextMeshProUGUI totalPointsText;
-        [SerializeField] private TextMeshProUGUI completionText;
-        [SerializeField] private Slider completionSlider;
+        [SerializeField]
+        private Transform achievementListContainer;
+
+        [SerializeField]
+        private GameObject achievementItemPrefab;
+
+        [SerializeField]
+        private TextMeshProUGUI totalPointsText;
+
+        [SerializeField]
+        private TextMeshProUGUI completionText;
+
+        [SerializeField]
+        private Slider completionSlider;
 
         [Header("Category Tabs")]
-        [SerializeField] private Toggle[] categoryTabs;
-        [SerializeField] private TextMeshProUGUI[] categoryPointsTexts;
+        [SerializeField]
+        private Toggle[] categoryTabs;
+
+        [SerializeField]
+        private TextMeshProUGUI[] categoryPointsTexts;
 
         [Header("Display Settings")]
-        [SerializeField] private Color unlockedColor = Color.white;
-        [SerializeField] private Color lockedColor = new Color(0.5f, 0.5f, 0.5f, 0.5f);
-        [SerializeField] private Color progressBarColor = new Color(1f, 0.8f, 0.2f);
-        [SerializeField] private Color completedBarColor = new Color(0.2f, 1f, 0.3f);
+        [SerializeField]
+        private Color unlockedColor = Color.white;
+
+        [SerializeField]
+        private Color lockedColor = new Color(0.5f, 0.5f, 0.5f, 0.5f);
+
+        [SerializeField]
+        private Color progressBarColor = new Color(1f, 0.8f, 0.2f);
+
+        [SerializeField]
+        private Color completedBarColor = new Color(0.2f, 1f, 0.3f);
 
         private AchievementSystem achievementSystem;
         private List<AchievementItemUI> achievementItems = new List<AchievementItemUI>();
@@ -64,14 +83,17 @@ namespace MerchantTails.UI
             for (int i = 0; i < categoryTabs.Length; i++)
             {
                 int index = i; // クロージャのためにローカル変数にコピー
-                categoryTabs[i].onValueChanged.AddListener((isOn) =>
-                {
-                    if (isOn)
-                    {
-                        currentCategory = (AchievementCategory)index;
-                        RefreshAchievementList();
-                    }
-                });
+                categoryTabs[i]
+                    .onValueChanged.AddListener(
+                        (isOn) =>
+                        {
+                            if (isOn)
+                            {
+                                currentCategory = (AchievementCategory)index;
+                                RefreshAchievementList();
+                            }
+                        }
+                    );
             }
         }
 
@@ -94,7 +116,11 @@ namespace MerchantTails.UI
 
         private void UpdateCategoryStats()
         {
-            for (int i = 0; i < categoryPointsTexts.Length && i < System.Enum.GetValues(typeof(AchievementCategory)).Length; i++)
+            for (
+                int i = 0;
+                i < categoryPointsTexts.Length && i < System.Enum.GetValues(typeof(AchievementCategory)).Length;
+                i++
+            )
             {
                 var category = (AchievementCategory)i;
                 var achievements = achievementSystem.GetAchievementsByCategory(category);
@@ -187,15 +213,32 @@ namespace MerchantTails.UI
     public class AchievementItemUI : MonoBehaviour
     {
         [Header("UI References")]
-        [SerializeField] private Image icon;
-        [SerializeField] private TextMeshProUGUI nameText;
-        [SerializeField] private TextMeshProUGUI descriptionText;
-        [SerializeField] private TextMeshProUGUI pointsText;
-        [SerializeField] private GameObject progressBarContainer;
-        [SerializeField] private Slider progressBar;
-        [SerializeField] private TextMeshProUGUI progressText;
-        [SerializeField] private GameObject unlockedIndicator;
-        [SerializeField] private TextMeshProUGUI unlockedDateText;
+        [SerializeField]
+        private Image icon;
+
+        [SerializeField]
+        private TextMeshProUGUI nameText;
+
+        [SerializeField]
+        private TextMeshProUGUI descriptionText;
+
+        [SerializeField]
+        private TextMeshProUGUI pointsText;
+
+        [SerializeField]
+        private GameObject progressBarContainer;
+
+        [SerializeField]
+        private Slider progressBar;
+
+        [SerializeField]
+        private TextMeshProUGUI progressText;
+
+        [SerializeField]
+        private GameObject unlockedIndicator;
+
+        [SerializeField]
+        private TextMeshProUGUI unlockedDateText;
 
         private Achievement achievement;
         private AchievementProgress progress;
@@ -204,8 +247,14 @@ namespace MerchantTails.UI
 
         public string AchievementId => achievement?.id;
 
-        public void Setup(Achievement achievement, AchievementProgress progress,
-            Color unlockedColor, Color lockedColor, Color progressBarColor, Color completedBarColor)
+        public void Setup(
+            Achievement achievement,
+            AchievementProgress progress,
+            Color unlockedColor,
+            Color lockedColor,
+            Color progressBarColor,
+            Color completedBarColor
+        )
         {
             this.achievement = achievement;
             this.progress = progress;
@@ -228,9 +277,12 @@ namespace MerchantTails.UI
 
             // 色を設定
             Color targetColor = isUnlocked ? unlockedColor : lockedColor;
-            if (nameText != null) nameText.color = targetColor;
-            if (descriptionText != null) descriptionText.color = targetColor;
-            if (icon != null) icon.color = targetColor;
+            if (nameText != null)
+                nameText.color = targetColor;
+            if (descriptionText != null)
+                descriptionText.color = targetColor;
+            if (icon != null)
+                icon.color = targetColor;
 
             // 解除インジケータ
             if (unlockedIndicator != null)
@@ -260,7 +312,8 @@ namespace MerchantTails.UI
 
                 if (showProgress && progressBar != null)
                 {
-                    float progressPercentage = progress != null ? progress.currentProgress / achievement.maxProgress : 0f;
+                    float progressPercentage =
+                        progress != null ? progress.currentProgress / achievement.maxProgress : 0f;
                     UpdateProgress(progressPercentage);
                 }
             }

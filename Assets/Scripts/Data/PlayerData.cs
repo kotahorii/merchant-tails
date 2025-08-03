@@ -11,18 +11,31 @@ namespace MerchantTails.Data
     public class PlayerData : ScriptableObject
     {
         [Header("Basic Information")]
-        [SerializeField] private string playerName = "新米商人";
-        [SerializeField] private int currentMoney = 1000;
-        [SerializeField] private MerchantRank currentRank = MerchantRank.Apprentice;
+        [SerializeField]
+        private string playerName = "新米商人";
+
+        [SerializeField]
+        private int currentMoney = 1000;
+
+        [SerializeField]
+        private MerchantRank currentRank = MerchantRank.Apprentice;
 
         [Header("Game Progress")]
-        [SerializeField] private int totalProfit = 0;
-        [SerializeField] private int successfulTransactions = 0;
-        [SerializeField] private bool tutorialCompleted = false;
+        [SerializeField]
+        private int totalProfit = 0;
+
+        [SerializeField]
+        private int successfulTransactions = 0;
+
+        [SerializeField]
+        private bool tutorialCompleted = false;
 
         [Header("Gameplay Stats")]
-        [SerializeField] private int daysSinceStart = 1;
-        [SerializeField] private Season currentSeason = Season.Spring;
+        [SerializeField]
+        private int daysSinceStart = 1;
+
+        [SerializeField]
+        private Season currentSeason = Season.Spring;
 
         // Properties for external access
         public string PlayerName
@@ -156,9 +169,12 @@ namespace MerchantTails.Data
             // TODO: 在庫価値も含めた総資産計算が必要
             int totalAssets = currentMoney;
 
-            if (totalAssets >= 10000) return MerchantRank.Master;
-            if (totalAssets >= 5000) return MerchantRank.Veteran;
-            if (totalAssets >= 1000) return MerchantRank.Skilled;
+            if (totalAssets >= 10000)
+                return MerchantRank.Master;
+            if (totalAssets >= 5000)
+                return MerchantRank.Veteran;
+            if (totalAssets >= 1000)
+                return MerchantRank.Skilled;
             return MerchantRank.Apprentice;
         }
 
@@ -184,8 +200,10 @@ namespace MerchantTails.Data
         /// </summary>
         public void LogCurrentState()
         {
-            Debug.Log($"[PlayerData] Player: {playerName}, Money: {currentMoney}, Rank: {currentRank}, " +
-                     $"Profit: {totalProfit}, Transactions: {successfulTransactions}, Day: {daysSinceStart}");
+            Debug.Log(
+                $"[PlayerData] Player: {playerName}, Money: {currentMoney}, Rank: {currentRank}, "
+                    + $"Profit: {totalProfit}, Transactions: {successfulTransactions}, Day: {daysSinceStart}"
+            );
         }
     }
 }
