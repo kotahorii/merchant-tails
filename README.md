@@ -1,7 +1,7 @@
-# マーチャントテイル ～商人物語～
+# Merchant Tales
 
 <div align="center">
-  <h3>ファンタジー世界の商人となり、投資の基本概念を自然に学べる経営シミュレーションゲーム</h3>
+  <h3>A business simulation game where players become fantasy merchants and naturally learn fundamental investment concepts</h3>
   
   [![Unity](https://img.shields.io/badge/Unity-2022.3%20LTS-black?logo=unity)](https://unity.com/)
   [![Language](https://img.shields.io/badge/Language-C%23-blue?logo=csharp)](https://docs.microsoft.com/en-us/dotnet/csharp/)
@@ -9,112 +9,117 @@
   [![License](https://img.shields.io/badge/License-Private-red)](LICENSE)
 </div>
 
-## 📋 プロジェクト概要
+## 📋 Project Overview
 
-「マーチャントテイル ～商人物語～」は、王道ファンタジー世界を舞台とした経営シミュレーションゲームです。プレイヤーは引退した祖父から受け継いだ小さな道具屋の店主となり、商品の仕入れと販売を通じて投資の基本概念を自然に学ぶことができます。
+"Merchant Tales" is a business simulation game set in a classic fantasy world. Players inherit a small tool shop from their retired grandfather and learn fundamental investment concepts naturally through buying and selling goods.
 
-### 🎯 コンセプト
+### 🎯 Concept
 
-- **「株式投資」という言葉を使わず、商売を通じて投資の本質を体験**
-- **15～25歳の投資未経験者をメインターゲット**
-- **カジュアルで親しみやすいゲーム体験**
+- **Experience the essence of investing through commerce without using the term "stock trading"**
+- **Main target: 15-25 year olds with no investment experience**
+- **Casual and approachable gaming experience**
 
-## 🎮 主な機能
+## 🎮 Key Features
 
-### 商品システム
-6種類の商品それぞれが異なる投資概念を表現：
+### Item System
 
-| 商品 | 特性 | 投資概念 |
-|------|------|----------|
-| 🍎 くだもの | 短期間で腐敗 | 短期投資 |
-| 🧪 ポーション | イベント連動で価格変動 | 成長株 |
-| ⚔️ 武器 | 価格安定・回転率低 | 優良株 |
-| 💍 アクセサリー | 流行で価格激変 | 投機株 |
-| 📚 魔法書 | 高額・安定 | 債券 |
-| 💎 宝石 | 予測困難・高リターン | ハイリスク投資 |
+Six different item types each representing different investment concepts:
 
-### ゲームシステム
-- **2つの販売方法**: 店頭販売（低リスク・低リターン）と相場取引（高リスク・高リターン）
-- **季節システム**: 春夏秋冬それぞれで需要と価格が変動
-- **イベントシステム**: ドラゴン討伐、収穫祭などで市場が大きく変動
-- **段階的成長**: 見習い→一人前→ベテラン→マスターの4段階
+| Item | Characteristics | Investment Concept |
+|------|----------------|-------------------|
+| 🍎 Fruit | Spoils quickly | Short-term trading |
+| 🧪 Potion | Event-driven price changes | Growth stocks |
+| ⚔️ Weapon | Stable prices, low turnover | Blue-chip stocks |
+| 💍 Accessory | Trend-driven price volatility | Speculative stocks |
+| 📚 Magic Book | High-value, stable | Bonds |
+| 💎 Gem | Unpredictable, high returns | High-risk investment |
 
-## 🛠️ 技術仕様
+### Game Systems
 
-- **エンジン**: Unity 2022.3 LTS
-- **言語**: C#
-- **アーキテクチャ**: MVC + Observer Pattern
-- **対応言語**: 日本語、英語
-- **プラットフォーム**: Steam（PC）、Nintendo Switch
+- **Two selling methods**: Store sales (low risk, low return) and market trading (high risk, high return)
+- **Seasonal system**: Demand and prices fluctuate across spring, summer, autumn, and winter
+- **Event system**: Major market changes from dragon slaying, harvest festivals, etc.
+- **Progressive growth**: 4 stages from Apprentice → Skilled → Veteran → Master
 
-## 📁 プロジェクト構成
+## 🛠️ Technical Specifications
+
+- **Engine**: Unity 2022.3 LTS
+- **Language**: C#
+- **Architecture**: MVC + Observer Pattern
+- **Supported Languages**: Japanese, English
+- **Platforms**: Steam (PC), Nintendo Switch
+
+## 📁 Project Structure
 
 ```
 merchant-tails/
-├── docs/                      # プロジェクト文書
-│   ├── prd.md                 # プロダクト要求仕様書
-│   ├── design-doc.md          # 設計書
-│   └── development-todo.md    # 開発TODOリスト
-├── Assets/                    # Unity アセット（今後追加）
-├── ProjectSettings/           # Unity プロジェクト設定（今後追加）
-└── README.md                  # このファイル
+├── docs/                      # Project documentation
+│   ├── prd.md                 # Product Requirements Document
+│   ├── design-doc.md          # Design Document
+│   └── development-todo.md    # Development TODO List
+├── Assets/                    # Unity assets (to be added)
+├── ProjectSettings/           # Unity project settings (to be added)
+└── README.md                  # This file
 ```
 
-## 🏗️ 開発計画
+## 🏗️ Development Plan
 
-### 📅 開発スケジュール（18ヶ月）
+### 📅 Development Schedule (18 months)
 
-| フェーズ | 期間 | 内容 |
-|----------|------|------|
-| **プロトタイプ** | 3ヶ月 | 基本システム実装 |
-| **α版開発** | 6ヶ月 | 全システム実装 |
-| **β版・調整** | 6ヶ月 | バランス調整・最適化 |
-| **リリース準備** | 3ヶ月 | マーケティング・配信準備 |
+| Phase | Duration | Content |
+|-------|----------|---------|
+| **Prototype** | 3 months | Basic system implementation |
+| **Alpha Development** | 6 months | Full system implementation |
+| **Beta & Adjustment** | 6 months | Balance tuning and optimization |
+| **Release Preparation** | 3 months | Marketing and distribution preparation |
 
-### 🎯 マイルストーン
+### 🎯 Milestones
 
-- **Week 6**: α版完成（基本ゲームループ動作）
-- **Week 12**: β版完成（全システム実装）
-- **Week 18**: 正式リリース
+- **Week 6**: Alpha version complete (basic game loop operational)
+- **Week 12**: Beta version complete (all systems implemented)
+- **Week 18**: Official release
 
-## 👥 開発チーム
+## 👥 Development Team
 
-- **プログラマー**: システム実装、Unity開発
-- **デザイナー・アーティスト**: UI/UX、キャラクター、背景、音楽
+- **Programmer**: System implementation, Unity development
+- **Designer/Artist**: UI/UX, character art, backgrounds, music
 
-## 📊 成功指標
+## 📊 Success Metrics
 
-### 必達目標
-- **3ヶ月**: 1,000本販売（損益分岐点）
-- **Steam レビュー**: 70%以上が好評
-- **平均プレイ時間**: 5時間
+### Essential Goals
 
-### 成功目標
-- **初年度**: 5,000本販売
-- **Steam レビュー**: 80%以上が好評
-- **平均プレイ時間**: 10時間
+- **3 months**: 1,000 copies sold (break-even point)
+- **Steam Reviews**: 70%+ positive
+- **Average playtime**: 5 hours
 
-### 理想目標
-- **初年度**: 10,000本販売
-- **Steam レビュー**: 90%以上が「非常に好評」
-- **続編開発が可能な収益確保**
+### Success Goals
 
-## 🎓 教育効果
+- **First year**: 5,000 copies sold
+- **Steam Reviews**: 80%+ positive
+- **Average playtime**: 10 hours
 
-このゲームを通じて、プレイヤーは以下を学ぶことができます：
+### Ideal Goals
 
-- **リスクとリターンの関係**
-- **市場の需給バランス**
-- **タイミングの重要性**
-- **分散投資の概念**
-- **複利効果の理解**
+- **First year**: 10,000 copies sold
+- **Steam Reviews**: 90%+ "Very Positive"
+- **Revenue sufficient for sequel development**
 
-## 🚀 今後の展開
+## 🎓 Educational Impact
 
-- **追加コンテンツ（DLC）**
-- **教育機関向けライセンス**
-- **モバイル版の可能性**
-- **続編開発**
+Through this game, players will learn:
+
+- **Risk and return relationships**
+- **Market supply and demand balance**
+- **Importance of timing**
+- **Diversification concepts**
+- **Understanding compound interest effects**
+
+## 🚀 Future Development
+
+- **Additional Content (DLC)**
+- **Educational institution licensing**
+- **Mobile version possibilities**
+- **Sequel development**
 
 ---
 
