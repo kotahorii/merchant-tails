@@ -147,7 +147,7 @@ jobs:
       # Run code style check with csharpier
       - name: Check code style
         run: |
-          csharpier --check Assets/Scripts/
+          csharpier check Assets/Scripts/
 
   performance-test:
     name: Performance Tests
