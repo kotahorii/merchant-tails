@@ -57,12 +57,24 @@ The project includes a GitHub Actions workflow for continuous integration. Curre
 
 To enable Unity tests and builds in CI:
 
-1. Obtain a Unity license file from [Unity Dashboard](https://unity.com/)
-2. Set the following GitHub Secrets in your repository:
-   - `UNITY_LICENSE`: Your Unity license file content
-   - `UNITY_EMAIL`: Your Unity account email
-   - `UNITY_PASSWORD`: Your Unity account password
-3. Remove the `if: false` conditions from the workflow file (`.github/workflows/unity-ci.yml`)
+1. **Get Unity Personal License (Free)**:
+   - Go to Actions tab and run "Acquire activation file" workflow
+   - Download the generated `Unity_v2022.X.XXXX.alf` file
+   - Visit [Unity License Activation](https://license.unity3d.com/manual)
+   - Upload the `.alf` file and download the `.ulf` license file
+
+2. **Set GitHub Secrets**:
+   - Go to Settings → Secrets → Actions
+   - Add these secrets:
+     - `UNITY_LICENSE`: Contents of the `.ulf` file
+     - `UNITY_EMAIL`: Your Unity ID email
+     - `UNITY_PASSWORD`: Your Unity ID password
+
+3. **Enable CI Jobs**:
+   - Edit `.github/workflows/unity-ci.yml`
+   - Remove the `if: false` conditions from test and build jobs
+
+**Note**: Unity Personal is free for revenue under $100k/year
 
 ### Current CI Features
 

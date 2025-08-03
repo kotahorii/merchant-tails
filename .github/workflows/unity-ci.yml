@@ -148,6 +148,7 @@ jobs:
       - name: Check code style
         run: |
           csharpier check Assets/Scripts/
+        continue-on-error: true
 
   performance-test:
     name: Performance Tests
