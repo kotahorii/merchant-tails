@@ -1,4 +1,7 @@
 using System;
+using System.Collections.Generic;
+using System.IO;
+using System.Text;
 using MerchantTails.Events;
 using UnityEngine;
 
@@ -11,11 +14,24 @@ namespace MerchantTails.Core
     public static class ErrorHandler
     {
         public static event Action<string, LogLevel> OnErrorLogged;
+        public static event Action<Exception> OnCriticalError;
+        public static event Action<string> OnRecoveryAttempted;
 
         private static bool debugMode = true;
         private static int maxLogHistory = 100;
-        private static System.Collections.Generic.Queue<LogEntry> logHistory =
-            new System.Collections.Generic.Queue<LogEntry>();
+        private static Queue<LogEntry> logHistory = new Queue<LogEntry>();
+
+        // エラー統計
+        private static Dictionary<string, int> errorCounts = new Dictionary<string, int>();
+        private static Dictionary<string, DateTime> lastErrorTimes = new Dictionary<string, DateTime>();
+        private static int totalErrors = 0;
+        private static int criticalErrors = 0;
+
+        // ログファイル設定
+        private static bool enableFileLogging = true;
+        private static string logFilePath;
+        private static StreamWriter logWriter;
+        private static readonly object logLock = new object();
 
         public enum LogLevel
         {
@@ -40,6 +56,30 @@ namespace MerchantTails.Core
         public static void Initialize()
         {
             Application.logMessageReceived += HandleUnityLog;
+
+            // ログファイルパスの設定
+            string logDirectory = Path.Combine(Application.persistentDataPath, "Logs");
+            if (!Directory.Exists(logDirectory))
+            {
+                Directory.CreateDirectory(logDirectory);
+            }
+
+            logFilePath = Path.Combine(logDirectory, $"game_log_{DateTime.Now:yyyy-MM-dd_HH-mm-ss}.txt");
+
+            if (enableFileLogging)
+            {
+                try
+                {
+                    logWriter = new StreamWriter(logFilePath, true);
+                    logWriter.AutoFlush = true;
+                }
+                catch (Exception e)
+                {
+                    Debug.LogError($"Failed to initialize log file: {e.Message}");
+                    enableFileLogging = false;
+                }
+            }
+
             Debug.Log("[ErrorHandler] Error handling system initialized");
         }
 
@@ -49,6 +89,16 @@ namespace MerchantTails.Core
         public static void Cleanup()
         {
             Application.logMessageReceived -= HandleUnityLog;
+
+            lock (logLock)
+            {
+                if (logWriter != null)
+                {
+                    logWriter.Close();
+                    logWriter.Dispose();
+                    logWriter = null;
+                }
+            }
         }
 
         /// <summary>
@@ -132,13 +182,16 @@ namespace MerchantTails.Core
             Log(fullMessage, LogLevel.Error, exception?.StackTrace);
             Debug.LogError(fullMessage);
 
+            // エラー統計を更新
+            totalErrors++;
+            UpdateErrorStatistics(context);
+
             // Publish error event for other systems to handle
             if (EventBus != null)
             {
                 try
                 {
-                    // Create error event (would need to define ErrorOccurredEvent)
-                    // EventBus.Publish(new ErrorOccurredEvent(message, exception));
+                    EventBus.Publish(new ErrorOccurredEvent(message, exception, context));
                 }
                 catch
                 {
@@ -162,6 +215,17 @@ namespace MerchantTails.Core
 
             Log(fullMessage, LogLevel.Critical, exception?.StackTrace);
             Debug.LogError(fullMessage);
+
+            // エラー統計を更新
+            totalErrors++;
+            criticalErrors++;
+            UpdateErrorStatistics(context);
+
+            // 致命的エラーイベントを発行
+            OnCriticalError?.Invoke(exception);
+
+            // 自動セーブを試みる
+            TryEmergencySave();
 
             // In a production game, this might trigger automatic save or crash reporting
         }
@@ -227,23 +291,46 @@ namespace MerchantTails.Core
         public static bool AttemptRecovery(string systemName)
         {
             LogInfo($"Attempting recovery for {systemName}", "Recovery");
+            OnRecoveryAttempted?.Invoke(systemName);
 
             try
             {
+                bool result = false;
                 switch (systemName.ToLower())
                 {
                     case "gamemanager":
-                        return RecoverGameManager();
+                        result = RecoverGameManager();
+                        break;
                     case "timemanager":
-                        return RecoverTimeManager();
+                        result = RecoverTimeManager();
+                        break;
                     case "marketsystem":
-                        return RecoverMarketSystem();
+                        result = RecoverMarketSystem();
+                        break;
                     case "inventorysystem":
-                        return RecoverInventorySystem();
+                        result = RecoverInventorySystem();
+                        break;
+                    case "savedata":
+                        result = RecoverSaveData();
+                        break;
+                    case "all":
+                        result = RecoverAllSystems();
+                        break;
                     default:
                         LogWarning($"No recovery procedure defined for {systemName}", "Recovery");
                         return false;
                 }
+
+                if (result)
+                {
+                    LogInfo($"Recovery successful for {systemName}", "Recovery");
+                }
+                else
+                {
+                    LogError($"Recovery failed for {systemName}", null, "Recovery");
+                }
+
+                return result;
             }
             catch (Exception e)
             {
@@ -315,6 +402,26 @@ namespace MerchantTails.Core
                 logHistory.Dequeue();
             }
 
+            // ファイルに書き込み
+            if (enableFileLogging && logWriter != null)
+            {
+                lock (logLock)
+                {
+                    try
+                    {
+                        logWriter.WriteLine($"[{entry.timestamp:yyyy-MM-dd HH:mm:ss}] [{level}] {message}");
+                        if (!string.IsNullOrEmpty(stackTrace))
+                        {
+                            logWriter.WriteLine($"Stack Trace: {stackTrace}");
+                        }
+                    }
+                    catch
+                    {
+                        // ログ書き込みエラーは無視
+                    }
+                }
+            }
+
             OnErrorLogged?.Invoke(message, level);
         }
 
@@ -351,6 +458,146 @@ namespace MerchantTails.Core
         {
             debugMode = enabled;
             LogInfo($"Debug mode {(enabled ? "enabled" : "disabled")}", "ErrorHandler");
+        }
+
+        // 新しく追加されたメソッド
+        private static void UpdateErrorStatistics(string context)
+        {
+            string key = string.IsNullOrEmpty(context) ? "Unknown" : context;
+
+            if (!errorCounts.ContainsKey(key))
+            {
+                errorCounts[key] = 0;
+            }
+            errorCounts[key]++;
+
+            lastErrorTimes[key] = DateTime.Now;
+        }
+
+        private static void TryEmergencySave()
+        {
+            try
+            {
+                if (SaveSystem.Instance != null)
+                {
+                    SaveSystem.Instance.EmergencySave();
+                    LogInfo("Emergency save completed", "Recovery");
+                }
+            }
+            catch (Exception e)
+            {
+                LogError("Emergency save failed", e, "Recovery");
+            }
+        }
+
+        private static bool RecoverSaveData()
+        {
+            try
+            {
+                if (SaveSystem.Instance != null)
+                {
+                    return SaveSystem.Instance.LoadBackup();
+                }
+                return false;
+            }
+            catch
+            {
+                return false;
+            }
+        }
+
+        private static bool RecoverAllSystems()
+        {
+            bool allRecovered = true;
+
+            allRecovered &= RecoverGameManager();
+            allRecovered &= RecoverTimeManager();
+            allRecovered &= RecoverMarketSystem();
+            allRecovered &= RecoverInventorySystem();
+
+            return allRecovered;
+        }
+
+        /// <summary>
+        /// エラー統計を取得
+        /// </summary>
+        public static ErrorStatistics GetErrorStatistics()
+        {
+            return new ErrorStatistics
+            {
+                totalErrors = totalErrors,
+                criticalErrors = criticalErrors,
+                errorCounts = new Dictionary<string, int>(errorCounts),
+                lastErrorTimes = new Dictionary<string, DateTime>(lastErrorTimes),
+            };
+        }
+
+        /// <summary>
+        /// エラー統計をリセット
+        /// </summary>
+        public static void ResetErrorStatistics()
+        {
+            totalErrors = 0;
+            criticalErrors = 0;
+            errorCounts.Clear();
+            lastErrorTimes.Clear();
+            LogInfo("Error statistics reset", "ErrorHandler");
+        }
+
+        /// <summary>
+        /// ログファイルパスを取得
+        /// </summary>
+        public static string GetLogFilePath()
+        {
+            return logFilePath;
+        }
+
+        /// <summary>
+        /// エラー発生率を計算
+        /// </summary>
+        public static float GetErrorRate(string context = null)
+        {
+            if (string.IsNullOrEmpty(context))
+            {
+                // 全体のエラー率
+                float timeSinceStart = Time.realtimeSinceStartup;
+                return timeSinceStart > 0 ? totalErrors / timeSinceStart : 0;
+            }
+            else
+            {
+                // 特定コンテキストのエラー率
+                if (errorCounts.TryGetValue(context, out int count) &&
+                    lastErrorTimes.TryGetValue(context, out DateTime lastTime))
+                {
+                    float timeSinceFirst = (float)(DateTime.Now - lastTime).TotalSeconds;
+                    return timeSinceFirst > 0 ? count / timeSinceFirst : 0;
+                }
+                return 0;
+            }
+        }
+    }
+
+    // 追加の構造体とクラス
+    public struct ErrorStatistics
+    {
+        public int totalErrors;
+        public int criticalErrors;
+        public Dictionary<string, int> errorCounts;
+        public Dictionary<string, DateTime> lastErrorTimes;
+    }
+
+    // エラーイベント
+    public class ErrorOccurredEvent : BaseGameEvent
+    {
+        public string Message { get; }
+        public Exception Exception { get; }
+        public string Context { get; }
+
+        public ErrorOccurredEvent(string message, Exception exception, string context)
+        {
+            Message = message;
+            Exception = exception;
+            Context = context;
         }
     }
 }

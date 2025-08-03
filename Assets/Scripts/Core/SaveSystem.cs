@@ -667,6 +667,111 @@ namespace MerchantTails.Core
             }
             return default(T);
         }
+
+        /// <summary>
+        /// 緊急セーブ
+        /// </summary>
+        public bool EmergencySave()
+        {
+            try
+            {
+                var saveData = CollectSaveData();
+                saveData.saveSlot = -1; // 緊急セーブ用特別スロット
+                saveData.saveTime = DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss");
+                saveData.playTime = Time.time;
+                saveData.version = Application.version;
+
+                string json = JsonUtility.ToJson(saveData, true);
+                string emergencyPath = Path.Combine(savePath, "emergency_save.json");
+                File.WriteAllText(emergencyPath, json);
+
+                ErrorHandler.LogInfo("Emergency save completed", "SaveSystem");
+                return true;
+            }
+            catch (Exception e)
+            {
+                ErrorHandler.LogError("Emergency save failed", e, "SaveSystem");
+                return false;
+            }
+        }
+
+        /// <summary>
+        /// バックアップからロード
+        /// </summary>
+        public bool LoadBackup()
+        {
+            try
+            {
+                // 最新のバックアップファイルを探す
+                var backupFiles = Directory.GetFiles(backupPath, $"save_slot{currentSlot}_*.bak")
+                    .OrderByDescending(f => new FileInfo(f).CreationTime)
+                    .FirstOrDefault();
+
+                if (string.IsNullOrEmpty(backupFiles))
+                {
+                    ErrorHandler.LogWarning("No backup files found", "SaveSystem");
+                    return false;
+                }
+
+                // バックアップを現在のセーブファイルにコピー
+                string targetPath = GetSaveFilePath(currentSlot);
+                File.Copy(backupFiles, targetPath, true);
+
+                // ロード実行
+                return Load(currentSlot);
+            }
+            catch (Exception e)
+            {
+                ErrorHandler.LogError("Load backup failed", e, "SaveSystem");
+                return false;
+            }
+        }
+
+        /// <summary>
+        /// クイックセーブ
+        /// </summary>
+        public void QuickSave()
+        {
+            Save(currentSlot);
+        }
+
+        /// <summary>
+        /// クイックロード
+        /// </summary>
+        public void QuickLoad()
+        {
+            Load(currentSlot);
+        }
+
+        /// <summary>
+        /// すべてのセーブデータを削除
+        /// </summary>
+        public void DeleteAllSaves()
+        {
+            for (int i = 0; i < maxSaveSlots; i++)
+            {
+                DeleteSave(i);
+            }
+
+            // 緊急セーブも削除
+            string emergencyPath = Path.Combine(savePath, "emergency_save.json");
+            if (File.Exists(emergencyPath))
+            {
+                File.Delete(emergencyPath);
+            }
+
+            // バックアップも削除
+            if (Directory.Exists(backupPath))
+            {
+                var backupFiles = Directory.GetFiles(backupPath, "*.bak");
+                foreach (var file in backupFiles)
+                {
+                    File.Delete(file);
+                }
+            }
+
+            ErrorHandler.LogInfo("All save data deleted", "SaveSystem");
+        }
     }
 
     /// <summary>

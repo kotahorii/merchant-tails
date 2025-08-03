@@ -1,204 +1,215 @@
-# Testing Guide - Merchant Tales
+# Merchant Tails - Testing Guide
 
 ## Overview
 
-Merchant Tales プロジェクトでは、安定性重視のアプローチに基づいた包括的なテストシステムを構築しています。このガイドでは、テストの実行方法と CI/CD 設定について説明します。
+This guide covers the testing framework and procedures for Merchant Tails. The game includes comprehensive unit tests, integration tests, performance tests, and save/load integrity tests.
 
-## Test Architecture
+## Test Structure
 
-### Core Test Components
+```
+Assets/Tests/
+├── Runtime/
+│   ├── TestBase.cs              # Base class for all tests
+│   ├── MarketSystemTests.cs     # Market system unit tests
+│   ├── InventorySystemTests.cs  # Inventory system unit tests
+│   ├── TimeManagerTests.cs      # Time manager unit tests
+│   ├── IntegrationTests.cs      # System integration tests
+│   ├── PerformanceTests.cs      # Performance benchmarks
+│   ├── SaveLoadTests.cs         # Save/load integrity tests
+│   └── MerchantTails.Tests.Runtime.asmdef
+└── Editor/
+    └── (Editor-only tests)
+```
 
-1. **SystemTestController** - 基本機能と UI 統合テスト
-2. **IntegrationTest** - システム間連携テスト（6 つのシナリオ）
-3. **StabilityTest** - 長時間実行・ストレステスト
-4. **ErrorRecoveryTest** - 例外処理・システム回復テスト
-5. **AutomatedTestRunner** - CI 環境での自動テスト実行
-6. **CITestValidator** - テスト前の環境検証
+## Running Tests
 
-### Test Categories
+### In Unity Editor
 
--   **Integration**: システム間連携テスト
--   **Performance**: パフォーマンス・安定性テスト
--   **ErrorHandling**: エラー処理・回復テスト
--   **Functional**: 基本機能テスト
--   **Configuration**: 設定・構成テスト
--   **Smoke**: 最小限の動作確認テスト
+1. Open Unity Test Runner: `Window > General > Test Runner`
+2. Switch to "PlayMode" tab for runtime tests
+3. Click "Run All" or select specific tests
 
-## Local Testing
-
-### Unity Editor での実行
-
-1. **Test Runner Window**を開く (Window > General > Test Runner)
-2. **EditMode**タブで設定テストを実行
-3. **PlayMode**タブで統合テストを実行
-
-### 手動テスト実行
-
-1. MainGame シーンを開く
-2. Play ボタンを押す
-3. OnGUI のテストボタンで個別テスト実行
-4. Console Window で結果を確認
-
-### テストコマンド
+### From Command Line
 
 ```bash
-# Unity Test Runner (エディターモード)
-Unity -projectPath . -runTests -testPlatform editmode -testResults test-results-edit.xml
+# Run all tests
+Unity -runTests -projectPath . -testResults results.xml -testPlatform PlayMode
 
-# Unity Test Runner (プレイモード)
-Unity -projectPath . -runTests -testPlatform playmode -testResults test-results-play.xml
-
-# 特定カテゴリのテスト
-Unity -projectPath . -runTests -testPlatform playmode -testCategory "Integration"
+# Run specific test category
+Unity -runTests -projectPath . -testResults results.xml -testPlatform PlayMode -testFilter "MarketSystemTests"
 ```
 
-## CI/CD Pipeline
+## Test Categories
 
-### GitHub Actions Workflow
+### 1. Unit Tests
 
-`.github/workflows/unity-ci.yml`に CI/CD パイプラインを設定済みです。
+Test individual components in isolation:
 
-#### Workflow Stages
+- **MarketSystemTests**: Price calculations, trends, seasonal modifiers
+- **InventorySystemTests**: Item management, transfers, quality degradation
+- **TimeManagerTests**: Time progression, day/season cycles, phase transitions
 
-1. **Test Stage**
+### 2. Integration Tests
 
-    - EditMode テスト実行
-    - PlayMode テスト実行
-    - 複数 Unity バージョンでのテスト
+Test interactions between multiple systems:
 
-2. **Build Stage**
+- **BuyAndSellFlow**: Complete trading cycle
+- **DayProgressionFlow**: Time advancement affecting all systems
+- **RankProgression**: Feature unlocking with rank advancement
+- **EventTriggering**: Event system affecting market prices
+- **CompleteGameLoop**: 24-hour gameplay simulation
 
-    - Windows、Linux、macOS 向けビルド
-    - 並列ビルド実行
+### 3. Performance Tests
 
-3. **Code Quality Stage**
+Measure system performance and resource usage:
 
-    - コードフォーマットチェック
-    - セキュリティ解析
+- **MarketPriceUpdate**: Price calculation speed
+- **InventoryOperations**: Add/remove item performance
+- **MemoryAllocation**: Memory usage during gameplay
+- **FrameRate**: FPS stability under load
+- **SaveSystem**: Save/load operation speed
 
-4. **Performance Test Stage**
+### 4. Save/Load Tests
 
-    - パフォーマンステスト実行
-    - メモリ使用量チェック
+Ensure data persistence integrity:
 
-5. **Deploy Stage**
-    - Steam 配信準備（本番環境のみ）
+- **PlayerData**: Money, rank, statistics
+- **TimeData**: Day, season, phase, progress
+- **ComplexInventory**: Multiple items with various states
+- **MarketHistory**: Price history preservation
+- **Investments**: Bank deposits and shop investments
 
-### Required Secrets
+## Debug Features
 
-GitHub Repository に以下の Secrets を設定してください：
+### Debug Manager (F1)
+
+Access debug menu for testing:
+
+- **Money Manipulation**: Add/subtract money instantly
+- **Time Control**: Advance hours, days, or seasons
+- **Item Spawning**: Add items to inventory
+- **Rank Setting**: Change merchant rank
+- **Event Triggering**: Force specific events
+
+### Console Commands (~)
+
+Use console for advanced debugging:
 
 ```
-UNITY_LICENSE: Unity Personalライセンス文字列
-UNITY_EMAIL: Unityアカウントのメールアドレス
-UNITY_PASSWORD: Unityアカウントのパスワード
+money <amount>        # Add/subtract money
+day <count>          # Advance days
+season [name]        # Change/advance season
+rank <rank>          # Set merchant rank
+item <type> <qty>    # Add items
+event [id]           # Trigger event
+save                 # Quick save
+load                 # Quick load
 ```
 
-### Unity License 取得
+### Keyboard Shortcuts
 
-```bash
-# Unity License取得スクリプト
-Unity -quit -batchmode -serial YOUR_SERIAL_KEY -username YOUR_EMAIL -password YOUR_PASSWORD
+- **Shift+T**: Advance 1 hour
+- **Shift+D**: Advance 1 day
+- **Shift+S**: Advance to next season
+- **Ctrl+M**: Add 1000G
+- **Ctrl+N**: Remove 1000G
+- **Alt+S**: Quick save
+- **Alt+L**: Quick load
+
+## Writing New Tests
+
+### Test Base Class
+
+All tests should inherit from `TestBase`:
+
+```csharp
+public class MySystemTests : TestBase
+{
+    [Test]
+    public void MyTest()
+    {
+        // Arrange
+        var item = CreateTestItem(ItemType.Fruit, 10);
+        
+        // Act
+        inventorySystem.AddItem(item);
+        
+        // Assert
+        Assert.AreEqual(10, inventorySystem.GetItemCount(ItemType.Fruit));
+    }
+}
 ```
 
-## Test Execution Results
+### Common Helpers
 
-### Expected Test Results
+- `CreateTestItem()`: Create test items with specific properties
+- `AdvanceTime()`: Progress time by hours
+- `AdvanceDays()`: Progress time by days
+- `AssertFloatEquals()`: Compare floats with tolerance
+- `WaitForCondition()`: Wait for async conditions
 
--   **EditMode Tests**: 8 tests passing
+## Best Practices
 
-    -   Project structure validation
-    -   Script compilation validation
-    -   Player settings validation
-    -   Build settings validation
-    -   ScriptableObject validation
-    -   Event system validation
-    -   Enum definitions validation
-    -   Testing infrastructure validation
+1. **Isolation**: Each test should be independent
+2. **Cleanup**: Use `Teardown()` to reset state
+3. **Naming**: Use descriptive test names: `MethodName_Scenario_ExpectedResult`
+4. **Assertions**: Include meaningful assertion messages
+5. **Performance**: Keep tests fast (< 1 second each)
 
--   **PlayMode Tests**: 8 tests passing
-    -   System health check
-    -   Integration test suite (6 scenarios)
-    -   Stability test suite
-    -   Error recovery test suite
-    -   System functionality verification
-    -   Memory usage verification
-    -   Configuration verification
-    -   Smoke test
+## Continuous Integration
 
-### Success Criteria
+Tests are automatically run on:
+- Pull request creation
+- Commits to main branch
+- Commits to develop branch
 
--   **Integration Tests**: 100% pass rate (0 failures)
--   **Stability Tests**: ≥95% success rate, 0 critical errors
--   **Error Recovery Tests**: ≥80% success rate
--   **Memory Usage**: <200MB in CI environment
--   **Performance**: All tests complete within timeout
+CI Pipeline includes:
+- Unity PlayMode tests execution
+- Code coverage reporting (target: 75%+)
+- Test results published to GitHub
+- Automatic PR comments with coverage data
+
+Failed tests will block merges and deployments.
+
+### Setting up CI
+
+See `.github/workflows/README.md` for detailed setup instructions including Unity license configuration.
 
 ## Troubleshooting
 
 ### Common Issues
 
-1. **Tests Time Out**
+1. **Static Instance Conflicts**: TestBase clears static instances between tests
+2. **File System Access**: Use Unity's Application paths for file operations
+3. **Timing Issues**: Use coroutines and WaitForCondition for async operations
+4. **Memory Leaks**: Check GameObject destruction in Teardown
 
-    - CI 環境では短縮設定を使用
-    - ネットワーク接続を確認
+### Debug Output
 
-2. **Memory Issues**
+Enable verbose logging:
 
-    - GC を強制実行
-    - オブジェクトの適切な破棄
-
-3. **Platform Issues**
-    - Unity version compatibility 確認
-    - Assembly definitions の設定確認
-
-### Debug Commands
-
-```bash
-# テスト詳細ログ
-Unity -projectPath . -runTests -testPlatform playmode -logFile test.log
-
-# メモリプロファイリング
-Unity -projectPath . -runTests -testPlatform playmode -enableCodeCoverage
-
-# エラー詳細出力
-Unity -projectPath . -runTests -testPlatform playmode -stackTraceLogType Full
+```csharp
+ErrorHandler.SetDebugMode(true);
 ```
+
+View test logs in:
+- Unity Console
+- Test Runner output
+- `Logs/test_results.log`
 
 ## Performance Benchmarks
 
-### Target Performance
+Target performance metrics:
 
--   **Initialization**: <2 seconds
--   **Integration Tests**: <30 seconds
--   **Stability Tests**: <60 seconds (CI), <120 seconds (full)
--   **Memory Usage**: <100MB baseline, <200MB peak
--   **Frame Rate**: >30 FPS during testing
+- Market price update: < 16.67ms (60 FPS)
+- Inventory operations: < 1ms per item
+- Save/Load: < 100ms for full game state
+- Memory growth: < 10MB per minute
+- Minimum FPS under load: 30
 
-### Monitoring
+## Coverage Goals
 
--   Memory usage tracking
--   Frame rate monitoring
--   Test execution time measurement
--   Error frequency analysis
-
-## Continuous Integration Best Practices
-
-1. **Fast Feedback Loop**: Critical tests run first
-2. **Parallel Execution**: Independent tests run concurrently
-3. **Environment Isolation**: Each test run in clean environment
-4. **Comprehensive Coverage**: All major systems tested
-5. **Clear Reporting**: Detailed test results and artifacts
-
-## Future Improvements
-
--   [ ] Add visual regression testing
--   [ ] Implement automated performance benchmarking
--   [ ] Add cross-platform compatibility tests
--   [ ] Integrate with Steam backend testing
--   [ ] Add localization testing
--   [ ] Implement stress testing for longer durations
-
-## Contact
-
-For testing-related questions or issues, please check the test logs and error reports in the CI artifacts.
+- Unit test coverage: > 80%
+- Integration test coverage: > 60%
+- Critical path coverage: 100%
+- Edge case coverage: > 70%

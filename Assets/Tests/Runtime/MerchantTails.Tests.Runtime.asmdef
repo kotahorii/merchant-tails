@@ -1,15 +1,10 @@
 {
     "name": "MerchantTails.Tests.Runtime",
-    "rootNamespace": "MerchantTails.Tests",
+    "rootNamespace": "MerchantTails.Testing",
     "references": [
-        "UnityEngine.TestRunner",
-        "UnityEditor.TestRunner",
         "MerchantTails.Core",
-        "MerchantTails.Data",
-        "MerchantTails.Events",
-        "MerchantTails.Market",
-        "MerchantTails.Inventory",
-        "MerchantTails.Testing"
+        "UnityEngine.TestRunner",
+        "UnityEditor.TestRunner"
     ],
     "includePlatforms": [],
     "excludePlatforms": [],
