@@ -12,7 +12,7 @@ namespace MerchantTails.Core
     {
         private static readonly Dictionary<Type, List<object>> eventHandlers = new Dictionary<Type, List<object>>();
         private static readonly object lockObject = new object();
-        
+
         /// <summary>
         /// イベントハンドラーを登録する
         /// </summary>
@@ -23,18 +23,18 @@ namespace MerchantTails.Core
             lock (lockObject)
             {
                 Type eventType = typeof(T);
-                
+
                 if (!eventHandlers.ContainsKey(eventType))
                 {
                     eventHandlers[eventType] = new List<object>();
                 }
-                
+
                 eventHandlers[eventType].Add(handler);
-                
+
                 Debug.Log($"[EventBus] Subscribed to {eventType.Name}. Total subscribers: {eventHandlers[eventType].Count}");
             }
         }
-        
+
         /// <summary>
         /// イベントハンドラーの登録を解除する
         /// </summary>
@@ -45,21 +45,21 @@ namespace MerchantTails.Core
             lock (lockObject)
             {
                 Type eventType = typeof(T);
-                
+
                 if (eventHandlers.ContainsKey(eventType))
                 {
                     eventHandlers[eventType].Remove(handler);
-                    
+
                     if (eventHandlers[eventType].Count == 0)
                     {
                         eventHandlers.Remove(eventType);
                     }
-                    
+
                     Debug.Log($"[EventBus] Unsubscribed from {eventType.Name}");
                 }
             }
         }
-        
+
         /// <summary>
         /// イベントを発行する
         /// </summary>
@@ -70,15 +70,15 @@ namespace MerchantTails.Core
             lock (lockObject)
             {
                 Type eventType = typeof(T);
-                
+
                 if (eventHandlers.ContainsKey(eventType))
                 {
                     var handlers = eventHandlers[eventType];
                     Debug.Log($"[EventBus] Publishing {eventType.Name} to {handlers.Count} subscribers");
-                    
+
                     // イベント配信中にハンドラーリストが変更される可能性があるため、コピーを作成
                     var handlersCopy = new List<object>(handlers);
-                    
+
                     foreach (var handler in handlersCopy)
                     {
                         try
@@ -97,7 +97,7 @@ namespace MerchantTails.Core
                 }
             }
         }
-        
+
         /// <summary>
         /// 指定した型のすべてのイベントハンドラーを削除する
         /// </summary>
@@ -107,7 +107,7 @@ namespace MerchantTails.Core
             lock (lockObject)
             {
                 Type eventType = typeof(T);
-                
+
                 if (eventHandlers.ContainsKey(eventType))
                 {
                     eventHandlers.Remove(eventType);
@@ -115,7 +115,7 @@ namespace MerchantTails.Core
                 }
             }
         }
-        
+
         /// <summary>
         /// すべてのイベントハンドラーを削除する（主にシーン切り替え時やゲーム終了時に使用）
         /// </summary>
@@ -128,12 +128,12 @@ namespace MerchantTails.Core
                 {
                     totalHandlers += kvp.Value.Count;
                 }
-                
+
                 eventHandlers.Clear();
                 Debug.Log($"[EventBus] Cleared all event handlers. Total removed: {totalHandlers}");
             }
         }
-        
+
         /// <summary>
         /// 現在登録されているイベントハンドラーの統計情報を取得する
         /// </summary>
@@ -143,16 +143,16 @@ namespace MerchantTails.Core
             lock (lockObject)
             {
                 var stats = new Dictionary<string, int>();
-                
+
                 foreach (var kvp in eventHandlers)
                 {
                     stats[kvp.Key.Name] = kvp.Value.Count;
                 }
-                
+
                 return stats;
             }
         }
-        
+
         /// <summary>
         /// デバッグ用：現在の登録状況をログ出力
         /// </summary>
@@ -161,7 +161,7 @@ namespace MerchantTails.Core
             lock (lockObject)
             {
                 Debug.Log($"[EventBus] Current event handlers: {eventHandlers.Count} event types");
-                
+
                 foreach (var kvp in eventHandlers)
                 {
                     Debug.Log($"  - {kvp.Key.Name}: {kvp.Value.Count} handlers");
@@ -169,7 +169,7 @@ namespace MerchantTails.Core
             }
         }
     }
-    
+
     /// <summary>
     /// すべてのゲームイベントが実装すべきインターフェース
     /// イベントの型安全性を保証する
@@ -179,7 +179,7 @@ namespace MerchantTails.Core
         /// <summary>イベントが発生した時刻</summary>
         DateTime Timestamp { get; }
     }
-    
+
     /// <summary>
     /// ゲームイベントの基底クラス
     /// 共通機能を提供する
@@ -187,7 +187,7 @@ namespace MerchantTails.Core
     public abstract class BaseGameEvent : IGameEvent
     {
         public DateTime Timestamp { get; private set; }
-        
+
         protected BaseGameEvent()
         {
             Timestamp = DateTime.Now;
