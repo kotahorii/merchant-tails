@@ -1,0 +1,17 @@
+{
+    "name": "MerchantTails.Core",
+    "rootNamespace": "MerchantTails.Core",
+    "references": [
+        "MerchantTails.Data",
+        "MerchantTails.Events"
+    ],
+    "includePlatforms": [],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "overrideReferences": false,
+    "precompiledReferences": [],
+    "autoReferenced": true,
+    "defineConstraints": [],
+    "versionDefines": [],
+    "noEngineReferences": false
+}

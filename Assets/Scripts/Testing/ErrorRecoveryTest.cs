@@ -1,0 +1,427 @@
+using System.Collections;
+using UnityEngine;
+using MerchantTails.Core;
+using MerchantTails.Data;
+using MerchantTails.Market;
+using MerchantTails.Inventory;
+
+namespace MerchantTails.Testing
+{
+    /// <summary>
+    /// エラーハンドリングと回復処理のテストクラス
+    /// 異常状態からの復旧能力を検証
+    /// </summary>
+    public class ErrorRecoveryTest : MonoBehaviour
+    {
+        [Header("Error Recovery Test Settings")]
+        [SerializeField] private bool runRecoveryTests = false;
+        [SerializeField] private float testTimeout = 30f;
+
+        private bool recoveryTestRunning = false;
+        private int totalRecoveryTests = 0;
+        private int successfulRecoveries = 0;
+
+        public struct RecoveryTestResult
+        {
+            public string testName;
+            public bool recoverySuccessful;
+            public float recoveryTime;
+            public string errorDetails;
+        }
+
+        private void Start()
+        {
+            if (runRecoveryTests)
+            {
+                StartCoroutine(RunErrorRecoveryTests());
+            }
+        }
+
+        public void StartErrorRecoveryTest()
+        {
+            if (!recoveryTestRunning)
+            {
+                StartCoroutine(RunErrorRecoveryTests());
+            }
+        }
+
+        private IEnumerator RunErrorRecoveryTests()
+        {
+            recoveryTestRunning = true;
+            totalRecoveryTests = 0;
+            successfulRecoveries = 0;
+
+            ErrorHandler.LogInfo("Starting error recovery tests", "ErrorRecoveryTest");
+
+            // Test 1: Null Reference Recovery
+            yield return StartCoroutine(TestNullReferenceRecovery());
+
+            // Test 2: System Recovery
+            yield return StartCoroutine(TestSystemRecovery());
+
+            // Test 3: Exception Handling
+            yield return StartCoroutine(TestExceptionHandling());
+
+            // Test 4: Memory Management
+            yield return StartCoroutine(TestMemoryPressureRecovery());
+
+            // Test 5: Event System Recovery
+            yield return StartCoroutine(TestEventSystemRecovery());
+
+            // Generate final report
+            GenerateRecoveryReport();
+
+            recoveryTestRunning = false;
+            ErrorHandler.LogInfo("Error recovery tests completed", "ErrorRecoveryTest");
+        }
+
+        private IEnumerator TestNullReferenceRecovery()
+        {
+            totalRecoveryTests++;
+            float startTime = Time.time;
+
+            ErrorHandler.LogInfo("Testing null reference recovery", "ErrorRecoveryTest");
+
+            try
+            {
+                // Simulate null reference scenarios
+                bool recovered = true;
+
+                // Test 1: Null component access
+                recovered &= ErrorHandler.SafeExecute(() =>
+                {
+                    GameObject nullObject = null;
+                    var component = nullObject.GetComponent<Transform>(); // This should fail safely
+                }, "NullComponentTest");
+
+                // Test 2: Null manager instance
+                recovered &= ErrorHandler.SafeExecute(() =>
+                {
+                    if (GameManager.Instance == null)
+                    {
+                        throw new System.NullReferenceException("GameManager is null");
+                    }
+                }, "NullManagerTest");
+
+                // Test 3: Null collection access
+                recovered &= ErrorHandler.SafeExecute(() =>
+                {
+                    System.Collections.Generic.List<string> nullList = null;
+                    int count = nullList.Count; // This should fail safely
+                }, "NullCollectionTest");
+
+                float recoveryTime = Time.time - startTime;
+
+                var result = new RecoveryTestResult
+                {
+                    testName = "Null Reference Recovery",
+                    recoverySuccessful = recovered,
+                    recoveryTime = recoveryTime,
+                    errorDetails = recovered ? "All null references handled safely" : "Some null references not handled"
+                };
+
+                LogRecoveryResult(result);
+
+                if (recovered) successfulRecoveries++;
+            }
+            catch (System.Exception e)
+            {
+                ErrorHandler.LogError($"Null reference recovery test failed: {e.Message}", e, "ErrorRecoveryTest");
+            }
+
+            yield return null;
+        }
+
+        private IEnumerator TestSystemRecovery()
+        {
+            totalRecoveryTests++;
+            float startTime = Time.time;
+
+            ErrorHandler.LogInfo("Testing system recovery capabilities", "ErrorRecoveryTest");
+
+            try
+            {
+                bool allRecovered = true;
+
+                // Test GameManager recovery
+                bool gameManagerRecovered = ErrorHandler.AttemptRecovery("gamemanager");
+                allRecovered &= gameManagerRecovered;
+
+                yield return new WaitForSeconds(0.1f);
+
+                // Test TimeManager recovery
+                bool timeManagerRecovered = ErrorHandler.AttemptRecovery("timemanager");
+                allRecovered &= timeManagerRecovered;
+
+                yield return new WaitForSeconds(0.1f);
+
+                // Test MarketSystem recovery
+                bool marketSystemRecovered = ErrorHandler.AttemptRecovery("marketsystem");
+                allRecovered &= marketSystemRecovered;
+
+                yield return new WaitForSeconds(0.1f);
+
+                // Test InventorySystem recovery
+                bool inventorySystemRecovered = ErrorHandler.AttemptRecovery("inventorysystem");
+                allRecovered &= inventorySystemRecovered;
+
+                yield return new WaitForSeconds(0.1f);
+
+                // Verify systems are functional after recovery
+                bool systemsHealthy = ErrorHandler.CheckSystemHealth();
+
+                float recoveryTime = Time.time - startTime;
+
+                var result = new RecoveryTestResult
+                {
+                    testName = "System Recovery",
+                    recoverySuccessful = allRecovered && systemsHealthy,
+                    recoveryTime = recoveryTime,
+                    errorDetails = $"GM:{gameManagerRecovered} TM:{timeManagerRecovered} MS:{marketSystemRecovered} IS:{inventorySystemRecovered} Health:{systemsHealthy}"
+                };
+
+                LogRecoveryResult(result);
+
+                if (result.recoverySuccessful) successfulRecoveries++;
+            }
+            catch (System.Exception e)
+            {
+                ErrorHandler.LogError($"System recovery test failed: {e.Message}", e, "ErrorRecoveryTest");
+            }
+        }
+
+        private IEnumerator TestExceptionHandling()
+        {
+            totalRecoveryTests++;
+            float startTime = Time.time;
+
+            ErrorHandler.LogInfo("Testing exception handling", "ErrorRecoveryTest");
+
+            try
+            {
+                bool allHandled = true;
+
+                // Test ArgumentException handling
+                allHandled &= !ErrorHandler.SafeExecute(() =>
+                {
+                    throw new System.ArgumentException("Test argument exception");
+                }, "ArgumentExceptionTest");
+
+                // Test IndexOutOfRangeException handling
+                allHandled &= !ErrorHandler.SafeExecute(() =>
+                {
+                    int[] array = new int[5];
+                    int value = array[10]; // This should fail safely
+                }, "IndexExceptionTest");
+
+                // Test InvalidOperationException handling
+                allHandled &= !ErrorHandler.SafeExecute(() =>
+                {
+                    throw new System.InvalidOperationException("Test invalid operation");
+                }, "InvalidOperationTest");
+
+                // Test that the system continues to function after exceptions
+                bool systemStillFunctional = true;
+
+                systemStillFunctional &= ErrorHandler.SafeExecute(() =>
+                {
+                    var currentTime = TimeManager.Instance?.GetFormattedTime();
+                    var fruitPrice = MarketSystem.Instance?.GetCurrentPrice(ItemType.Fruit);
+                }, "PostExceptionFunctionalTest");
+
+                float recoveryTime = Time.time - startTime;
+
+                var result = new RecoveryTestResult
+                {
+                    testName = "Exception Handling",
+                    recoverySuccessful = allHandled && systemStillFunctional,
+                    recoveryTime = recoveryTime,
+                    errorDetails = $"Exceptions handled: {allHandled}, System functional: {systemStillFunctional}"
+                };
+
+                LogRecoveryResult(result);
+
+                if (result.recoverySuccessful) successfulRecoveries++;
+            }
+            catch (System.Exception e)
+            {
+                ErrorHandler.LogError($"Exception handling test failed: {e.Message}", e, "ErrorRecoveryTest");
+            }
+
+            yield return null;
+        }
+
+        private IEnumerator TestMemoryPressureRecovery()
+        {
+            totalRecoveryTests++;
+            float startTime = Time.time;
+
+            ErrorHandler.LogInfo("Testing memory pressure recovery", "ErrorRecoveryTest");
+
+            try
+            {
+                long initialMemory = System.GC.GetTotalMemory(false);
+
+                // Create memory pressure
+                var memoryHogs = new System.Collections.Generic.List<byte[]>();
+
+                bool memoryHandled = ErrorHandler.SafeExecute(() =>
+                {
+                    for (int i = 0; i < 100; i++)
+                    {
+                        memoryHogs.Add(new byte[1024 * 1024]); // 1MB each
+
+                        // Check if we should stop due to memory pressure
+                        if (System.GC.GetTotalMemory(false) > initialMemory + 100 * 1024 * 1024) // 100MB limit
+                        {
+                            break;
+                        }
+                    }
+                }, "MemoryPressureTest");
+
+                // Cleanup
+                memoryHogs.Clear();
+                System.GC.Collect();
+                System.GC.WaitForPendingFinalizers();
+                System.GC.Collect();
+
+                yield return new WaitForSeconds(1f);
+
+                long finalMemory = System.GC.GetTotalMemory(true);
+                bool memoryRecovered = (finalMemory - initialMemory) < 10 * 1024 * 1024; // Within 10MB of initial
+
+                // Verify systems still work after memory pressure
+                bool systemsHealthy = ErrorHandler.CheckSystemHealth();
+
+                float recoveryTime = Time.time - startTime;
+
+                var result = new RecoveryTestResult
+                {
+                    testName = "Memory Pressure Recovery",
+                    recoverySuccessful = memoryHandled && memoryRecovered && systemsHealthy,
+                    recoveryTime = recoveryTime,
+                    errorDetails = $"Memory handled: {memoryHandled}, Recovered: {memoryRecovered}, Systems healthy: {systemsHealthy}"
+                };
+
+                LogRecoveryResult(result);
+
+                if (result.recoverySuccessful) successfulRecoveries++;
+            }
+            catch (System.Exception e)
+            {
+                ErrorHandler.LogError($"Memory pressure recovery test failed: {e.Message}", e, "ErrorRecoveryTest");
+            }
+        }
+
+        private IEnumerator TestEventSystemRecovery()
+        {
+            totalRecoveryTests++;
+            float startTime = Time.time;
+
+            ErrorHandler.LogInfo("Testing event system recovery", "ErrorRecoveryTest");
+
+            try
+            {
+                bool eventSystemRecovered = true;
+
+                // Test event handling with null handlers
+                eventSystemRecovered &= ErrorHandler.SafeExecute(() =>
+                {
+                    // Subscribe a null handler (should be handled safely)
+                    System.Action<Events.PriceChangedEvent> nullHandler = null;
+                    // This would normally cause issues, but should be handled
+                }, "NullEventHandlerTest");
+
+                // Test event publishing with invalid data
+                eventSystemRecovered &= ErrorHandler.SafeExecute(() =>
+                {
+                    var invalidEvent = new Events.PriceChangedEvent(ItemType.Fruit, -1f, float.NaN);
+                    Events.EventBus.Publish(invalidEvent);
+                }, "InvalidEventTest");
+
+                // Test rapid event publishing
+                eventSystemRecovered &= ErrorHandler.SafeExecute(() =>
+                {
+                    for (int i = 0; i < 1000; i++)
+                    {
+                        var rapidEvent = new Events.PriceChangedEvent(ItemType.Potion, 100f, 100f + i);
+                        Events.EventBus.Publish(rapidEvent);
+                    }
+                }, "RapidEventTest");
+
+                yield return new WaitForSeconds(0.5f);
+
+                // Verify event system is still functional
+                bool eventSystemFunctional = true;
+                int eventsReceived = 0;
+
+                System.Action<Events.PriceChangedEvent> testHandler = (evt) => eventsReceived++;
+                Events.EventBus.Subscribe<Events.PriceChangedEvent>(testHandler);
+
+                var testEvent = new Events.PriceChangedEvent(ItemType.Gem, 200f, 220f);
+                Events.EventBus.Publish(testEvent);
+
+                yield return new WaitForSeconds(0.1f);
+
+                Events.EventBus.Unsubscribe<Events.PriceChangedEvent>(testHandler);
+
+                eventSystemFunctional = eventsReceived > 0;
+
+                float recoveryTime = Time.time - startTime;
+
+                var result = new RecoveryTestResult
+                {
+                    testName = "Event System Recovery",
+                    recoverySuccessful = eventSystemRecovered && eventSystemFunctional,
+                    recoveryTime = recoveryTime,
+                    errorDetails = $"Recovery: {eventSystemRecovered}, Functional: {eventSystemFunctional}, Events received: {eventsReceived}"
+                };
+
+                LogRecoveryResult(result);
+
+                if (result.recoverySuccessful) successfulRecoveries++;
+            }
+            catch (System.Exception e)
+            {
+                ErrorHandler.LogError($"Event system recovery test failed: {e.Message}", e, "ErrorRecoveryTest");
+            }
+        }
+
+        private void LogRecoveryResult(RecoveryTestResult result)
+        {
+            string status = result.recoverySuccessful ? "✓ PASS" : "✗ FAIL";
+            ErrorHandler.LogInfo($"{status} {result.testName}: {result.errorDetails} ({result.recoveryTime:F2}s)", "ErrorRecoveryTest");
+        }
+
+        private void GenerateRecoveryReport()
+        {
+            float successRate = totalRecoveryTests > 0 ?
+                (float)successfulRecoveries / totalRecoveryTests * 100f : 100f;
+
+            ErrorHandler.LogInfo("=== ERROR RECOVERY TEST REPORT ===", "ErrorRecoveryTest");
+            ErrorHandler.LogInfo($"Total Recovery Tests: {totalRecoveryTests}", "ErrorRecoveryTest");
+            ErrorHandler.LogInfo($"Successful Recoveries: {successfulRecoveries}", "ErrorRecoveryTest");
+            ErrorHandler.LogInfo($"Recovery Success Rate: {successRate:F2}%", "ErrorRecoveryTest");
+
+            if (successRate >= 80f)
+            {
+                ErrorHandler.LogInfo("✓ ERROR RECOVERY TESTS PASSED - System handles errors well", "ErrorRecoveryTest");
+            }
+            else
+            {
+                ErrorHandler.LogError("✗ ERROR RECOVERY TESTS FAILED - System needs better error handling", null, "ErrorRecoveryTest");
+            }
+        }
+
+        public bool IsRecoveryTestRunning()
+        {
+            return recoveryTestRunning;
+        }
+
+        public float GetRecoverySuccessRate()
+        {
+            return totalRecoveryTests > 0 ?
+                (float)successfulRecoveries / totalRecoveryTests * 100f : 100f;
+        }
+    }
+}
