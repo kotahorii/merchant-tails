@@ -40,7 +40,7 @@ The game follows a **3-layer MVC + Observer Pattern** architecture:
 ### Unity Project Setup (Phase 1 - Week 1-2)
 
 ```bash
-# Unity 2022.3 LTS project creation required
+# Unity 6.1 LTS (6000.1.14f1) project creation required
 # Folder structure: Scripts/, Assets/, Prefabs/, Scenes/
 ```
 
