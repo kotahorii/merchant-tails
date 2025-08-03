@@ -62,64 +62,18 @@ merchant-tails/
 └── README.md                  # This file
 ```
 
-## 🏗️ Development Plan
+## 🎓 Educational Goals
 
-### 📅 Development Schedule (18 months)
+Players learn fundamental investment concepts through gameplay:
+- Risk and return relationships
+- Market dynamics and timing
+- Diversification strategies
 
-| Phase | Duration | Content |
-|-------|----------|---------|
-| **Prototype** | 3 months | Basic system implementation |
-| **Alpha Development** | 6 months | Full system implementation |
-| **Beta & Adjustment** | 6 months | Balance tuning and optimization |
-| **Release Preparation** | 3 months | Marketing and distribution preparation |
+## 📋 Documentation
 
-### 🎯 Milestones
-
-- **Week 6**: Alpha version complete (basic game loop operational)
-- **Week 12**: Beta version complete (all systems implemented)
-- **Week 18**: Official release
-
-## 👥 Development Team
-
-- **Programmer**: System implementation, Unity development
-- **Designer/Artist**: UI/UX, character art, backgrounds, music
-
-## 📊 Success Metrics
-
-### Essential Goals
-
-- **3 months**: 1,000 copies sold (break-even point)
-- **Steam Reviews**: 70%+ positive
-- **Average playtime**: 5 hours
-
-### Success Goals
-
-- **First year**: 5,000 copies sold
-- **Steam Reviews**: 80%+ positive
-- **Average playtime**: 10 hours
-
-### Ideal Goals
-
-- **First year**: 10,000 copies sold
-- **Steam Reviews**: 90%+ "Very Positive"
-- **Revenue sufficient for sequel development**
-
-## 🎓 Educational Impact
-
-Through this game, players will learn:
-
-- **Risk and return relationships**
-- **Market supply and demand balance**
-- **Importance of timing**
-- **Diversification concepts**
-- **Understanding compound interest effects**
-
-## 🚀 Future Development
-
-- **Additional Content (DLC)**
-- **Educational institution licensing**
-- **Mobile version possibilities**
-- **Sequel development**
+- **[PRD](docs/prd.md)**: Complete product requirements
+- **[Design Document](docs/design-doc.md)**: Technical architecture  
+- **[Development Plan](docs/development-todo.md)**: Detailed roadmap and tasks
 
 ---
 
