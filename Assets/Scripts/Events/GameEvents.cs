@@ -1,5 +1,6 @@
 using MerchantTails.Core;
 using MerchantTails.Data;
+using System.Collections.Generic;
 
 namespace MerchantTails.Events
 {
@@ -218,27 +219,27 @@ namespace MerchantTails.Events
             NewYear = newYear;
         }
     }
-    
+
     /// <summary>購入完了を通知</summary>
     public class PurchaseCompletedEvent : BaseGameEvent
     {
         public List<(ItemType ItemType, int Quantity)> PurchasedItems { get; }
         public float TotalCost { get; }
-        
+
         public PurchaseCompletedEvent(List<(ItemType, int)> purchasedItems, float totalCost)
         {
             PurchasedItems = new List<(ItemType, int)>(purchasedItems);
             TotalCost = totalCost;
         }
     }
-    
+
     /// <summary>アイテムの腐敗を通知</summary>
     public class ItemDecayedEvent : BaseGameEvent
     {
         public ItemType ItemType { get; }
         public int Quantity { get; }
         public InventoryLocation Location { get; }
-        
+
         public ItemDecayedEvent(ItemType itemType, int quantity, InventoryLocation location)
         {
             ItemType = itemType;
@@ -246,19 +247,34 @@ namespace MerchantTails.Events
             Location = location;
         }
     }
-    
+
     /// <summary>市場イベントの発生を通知</summary>
     public class MarketEventTriggeredEvent : BaseGameEvent
     {
         public string EventName { get; }
         public string Description { get; }
         public Dictionary<ItemType, float> PriceModifiers { get; }
-        
+
         public MarketEventTriggeredEvent(string eventName, string description, Dictionary<ItemType, float> priceModifiers)
         {
             EventName = eventName;
             Description = description;
             PriceModifiers = new Dictionary<ItemType, float>(priceModifiers);
+        }
+    }
+
+    /// <summary>
+    /// 機能が解放されたときのイベント
+    /// </summary>
+    public class FeatureUnlockedEvent : BaseGameEvent
+    {
+        public GameFeature Feature { get; }
+        public string FeatureName { get; }
+
+        public FeatureUnlockedEvent(GameFeature feature, string featureName)
+        {
+            Feature = feature;
+            FeatureName = featureName;
         }
     }
 }

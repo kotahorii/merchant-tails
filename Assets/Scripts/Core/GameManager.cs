@@ -12,7 +12,9 @@ namespace MerchantTails.Core
         [Header("Core Systems")]
         [SerializeField] private TimeManager timeManager;
         [SerializeField] private PlayerData playerData;
-        
+        [SerializeField] private AssetCalculator assetCalculator;
+        [SerializeField] private FeatureUnlockSystem featureUnlockSystem;
+
         [Header("Tutorial")]
         [SerializeField] private bool tutorialCompleted = false;
 
@@ -26,6 +28,8 @@ namespace MerchantTails.Core
 
         public TimeManager TimeManager => timeManager;
         public PlayerData PlayerData => playerData;
+        public AssetCalculator AssetCalculator => assetCalculator;
+        public FeatureUnlockSystem FeatureUnlockSystem => featureUnlockSystem;
         public bool IsTutorialCompleted => tutorialCompleted;
 
         public event Action<GameState> OnGameStateChanged;
@@ -59,6 +63,12 @@ namespace MerchantTails.Core
 
             if (playerData == null)
                 playerData = CreateDefaultPlayerData();
+
+            if (assetCalculator == null)
+                assetCalculator = FindObjectOfType<AssetCalculator>();
+
+            if (featureUnlockSystem == null)
+                featureUnlockSystem = FindObjectOfType<FeatureUnlockSystem>();
         }
 
         public void ChangeState(GameState newState)
@@ -137,14 +147,14 @@ namespace MerchantTails.Core
             // TODO: Implement load system
             tutorialCompleted = PlayerPrefs.GetInt("TutorialCompleted", 0) == 1;
         }
-        
+
         public void SetTutorialCompleted(bool completed)
         {
             tutorialCompleted = completed;
             PlayerPrefs.SetInt("TutorialCompleted", completed ? 1 : 0);
             PlayerPrefs.Save();
         }
-        
+
         public bool HasSaveData()
         {
             // Check if save data exists
