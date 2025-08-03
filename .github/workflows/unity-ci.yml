@@ -142,19 +142,12 @@ jobs:
       # Install code analysis tools
       - name: Install dotnet tools
         run: |
-          dotnet tool install --global dotnet-format
           dotnet tool install --global csharpier
-
-      # Run code formatting check
-      - name: Check code formatting
-        run: |
-          dotnet format --verify-no-changes --verbosity diagnostic Assets/Scripts/
 
       # Run code style check with csharpier
       - name: Check code style
         run: |
           csharpier --check Assets/Scripts/
-        continue-on-error: true
 
   performance-test:
     name: Performance Tests
