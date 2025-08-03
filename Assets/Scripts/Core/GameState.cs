@@ -22,6 +22,9 @@ namespace MerchantTails.Core
         MarketView,
 
         /// <summary>一時停止状態</summary>
-        Paused
+        Paused,
+
+        /// <summary>ゲーム終了確認画面</summary>
+        GameOver,
     }
 }
