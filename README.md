@@ -48,7 +48,35 @@ Six different item types each representing different investment concepts:
 -   **Language**: C#
 -   **Architecture**: MVC + Observer Pattern
 -   **Supported Languages**: Japanese, English
--   **Platforms**: Steam (PC), Nintendo Switch
+
+## 🔧 CI/CD Setup
+
+The project includes a GitHub Actions workflow for continuous integration. Currently, only code quality checks are enabled.
+
+### Enabling Unity CI/CD
+
+To enable Unity tests and builds in CI:
+
+1. Obtain a Unity license file from [Unity Dashboard](https://unity.com/)
+2. Set the following GitHub Secrets in your repository:
+   - `UNITY_LICENSE`: Your Unity license file content
+   - `UNITY_EMAIL`: Your Unity account email
+   - `UNITY_PASSWORD`: Your Unity account password
+3. Remove the `if: false` conditions from the workflow file (`.github/workflows/unity-ci.yml`)
+
+### Current CI Features
+
+- ✅ Code formatting check with dotnet-format
+- ✅ Code style check with CSharpier
+- ⏸️ Unity EditMode tests (disabled - requires license)
+- ⏸️ Unity PlayMode tests (disabled - requires license)
+- ⏸️ Unity builds for Windows, Linux, macOS (disabled - requires license)
+- ⏸️ Performance tests (disabled - requires license)
+
+## 🎯 Target Platforms
+
+-   **PC**: Steam (Windows, Linux, macOS)
+-   **Console**: Nintendo Switch
 
 ## 📁 Project Structure
 
