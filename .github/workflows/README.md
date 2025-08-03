@@ -39,6 +39,18 @@
 
 ### Unity ライセンスの設定
 
+#### Unity Personal版を使用する場合
+
+1. GitHubのActionsタブから「Acquire Unity License Activation File」ワークフローを実行
+2. ワークフロー完了後、Artifactsから`.alf`ファイルをダウンロード
+3. https://license.unity3d.com/manual にアクセス
+4. `.alf`ファイルをアップロードし、アクティベーションを完了
+5. 生成された`.ulf`ライセンスファイルをダウンロード
+6. GitHubリポジトリの Settings > Secrets and variables > Actions で設定:
+   - `UNITY_LICENSE`: .ulfファイルの内容全体をコピー&ペースト
+
+#### Unity Pro/Plus版を使用する場合
+
 1. ローカルでUnityプロジェクトを開く
 2. Unity Hubでライセンスをアクティベート
 3. 以下のコマンドでライセンスファイルを取得:
@@ -49,10 +61,8 @@
    # Windows
    type %PROGRAMDATA%\Unity\Unity_lic.ulf
    ```
-4. GitHubリポジトリの Settings > Secrets and variables > Actions で以下を設定:
+4. GitHubリポジトリの Settings > Secrets and variables > Actions で設定:
    - `UNITY_LICENSE`: ライセンスファイルの内容
-   - `UNITY_EMAIL`: Unityアカウントのメール
-   - `UNITY_PASSWORD`: Unityアカウントのパスワード
 
 ### ローカルでのテスト実行
 

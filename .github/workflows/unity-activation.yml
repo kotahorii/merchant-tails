@@ -1,0 +1,39 @@
+name: Acquire Unity License Activation File
+
+on:
+  workflow_dispatch:
+    inputs:
+      unity_version:
+        description: "Unity version"
+        required: true
+        default: "2022.3.10f1"
+        type: string
+
+jobs:
+  activation:
+    name: Request manual activation file 🔑
+    runs-on: ubuntu-latest
+    steps:
+      - name: Request manual activation file
+        id: getManualLicenseFile
+        uses: game-ci/unity-request-activation-file@v3
+        with:
+          unityVersion: ${{ inputs.unity_version }}
+
+      - name: Upload activation file
+        uses: actions/upload-artifact@v4
+        with:
+          name: Unity_v${{ inputs.unity_version }}.alf
+          path: ${{ steps.getManualLicenseFile.outputs.filePath }}
+
+      - name: Display next steps
+        run: |
+          echo "### Next Steps for Unity Personal License Setup"
+          echo ""
+          echo "1. Download the .alf file from the artifacts of this workflow run"
+          echo "2. Visit https://license.unity3d.com/manual"
+          echo "3. Upload the .alf file and complete the activation"
+          echo "4. Download the resulting .ulf license file"
+          echo "5. Add the contents of the .ulf file as a GitHub Secret named UNITY_LICENSE"
+          echo ""
+          echo "For detailed instructions, see: https://game-ci.com/docs/github/activation"
