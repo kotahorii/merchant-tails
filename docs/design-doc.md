@@ -20,11 +20,11 @@
 
 ### 1.2 技術スタック
 
-- **エンジン**: Unity 2022.3 LTS
-- **言語**: C#
-- **アーキテクチャパターン**: MVC + Observer Pattern
-- **データ永続化**: JSON + PlayerPrefs
-- **状態管理**: Finite State Machine
+-   **エンジン**: Unity 2022.3 LTS
+-   **言語**: C#
+-   **アーキテクチャパターン**: MVC + Observer Pattern
+-   **データ永続化**: JSON + PlayerPrefs
+-   **状態管理**: Finite State Machine
 
 ## 2. コアシステム設計
 

@@ -23,5 +23,5 @@ namespace MerchantTails.Core
 
         /// <summary>一時停止状態</summary>
         Paused
-}
+    }
 }

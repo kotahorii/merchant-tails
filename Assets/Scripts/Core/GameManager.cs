@@ -12,6 +12,9 @@ namespace MerchantTails.Core
         [Header("Core Systems")]
         [SerializeField] private TimeManager timeManager;
         [SerializeField] private PlayerData playerData;
+        
+        [Header("Tutorial")]
+        [SerializeField] private bool tutorialCompleted = false;
 
         public static GameManager Instance { get; private set; }
 
@@ -23,6 +26,7 @@ namespace MerchantTails.Core
 
         public TimeManager TimeManager => timeManager;
         public PlayerData PlayerData => playerData;
+        public bool IsTutorialCompleted => tutorialCompleted;
 
         public event Action<GameState> OnGameStateChanged;
 
@@ -123,12 +127,28 @@ namespace MerchantTails.Core
         {
             Debug.Log("[GameManager] Saving game...");
             // TODO: Implement save system
+            PlayerPrefs.SetInt("TutorialCompleted", tutorialCompleted ? 1 : 0);
+            PlayerPrefs.Save();
         }
 
         public void LoadGame()
         {
             Debug.Log("[GameManager] Loading game...");
             // TODO: Implement load system
+            tutorialCompleted = PlayerPrefs.GetInt("TutorialCompleted", 0) == 1;
+        }
+        
+        public void SetTutorialCompleted(bool completed)
+        {
+            tutorialCompleted = completed;
+            PlayerPrefs.SetInt("TutorialCompleted", completed ? 1 : 0);
+            PlayerPrefs.Save();
+        }
+        
+        public bool HasSaveData()
+        {
+            // Check if save data exists
+            return PlayerPrefs.HasKey("SaveData_Exists") && PlayerPrefs.GetInt("SaveData_Exists", 0) == 1;
         }
 
         public void PauseGame()

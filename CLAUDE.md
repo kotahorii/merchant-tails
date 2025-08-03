@@ -17,12 +17,12 @@ The game follows a **3-layer MVC + Observer Pattern** architecture:
 
 ### Core Systems
 
-- **GameManager**: Central state management (MainMenu, Tutorial, Shopping, StoreManagement, MarketView, Paused)
-- **TimeManager**: Handles seasons (Spring/Summer/Autumn/Winter) and daily phases (Morning/Afternoon/Evening/Night)
-- **MarketSystem**: Price calculations with seasonal and event-based modifiers for 6 item types
-- **InventorySystem**: Dual inventory (shop front-of-house vs market speculation)
-- **EventSystem**: Scheduled and random events that affect market prices
-- **SaveSystem**: JSON-based persistence with auto-save functionality
+-   **GameManager**: Central state management (MainMenu, Tutorial, Shopping, StoreManagement, MarketView, Paused)
+-   **TimeManager**: Handles seasons (Spring/Summer/Autumn/Winter) and daily phases (Morning/Afternoon/Evening/Night)
+-   **MarketSystem**: Price calculations with seasonal and event-based modifiers for 6 item types
+-   **InventorySystem**: Dual inventory (shop front-of-house vs market speculation)
+-   **EventSystem**: Scheduled and random events that affect market prices
+-   **SaveSystem**: JSON-based persistence with auto-save functionality
 
 ### Item Types & Investment Concepts
 
@@ -48,36 +48,36 @@ The game follows a **3-layer MVC + Observer Pattern** architecture:
 
 Based on the design document, implement:
 
-- Unit tests for MarketSystem price calculations
-- Integration tests for complete day flow cycles
-- Save/load integrity testing
-- Performance testing for update frequency optimization
+-   Unit tests for MarketSystem price calculations
+-   Integration tests for complete day flow cycles
+-   Save/load integrity testing
+-   Performance testing for update frequency optimization
 
 ## Key Technical Decisions
 
 ### Data Management
 
-- **Persistence**: JSON + PlayerPrefs for save data
-- **State Management**: Finite State Machine pattern
-- **Updates**: Separated into frame-rate, fixed-rate, and slow update cycles for performance
+-   **Persistence**: JSON + PlayerPrefs for save data
+-   **State Management**: Finite State Machine pattern
+-   **Updates**: Separated into frame-rate, fixed-rate, and slow update cycles for performance
 
 ### Progression System
 
 4-tier merchant ranking system that unlocks features:
 
-- 見習い (Apprentice): ~1,000G - Basic features only
-- 一人前 (Skilled): ~5,000G - Price forecasting unlocked
-- ベテラン (Veteran): ~10,000G - Advanced analytics
-- マスター (Master): 10,000G+ - All features
+-   見習い (Apprentice): ~1,000G - Basic features only
+-   一人前 (Skilled): ~5,000G - Price forecasting unlocked
+-   ベテラン (Veteran): ~10,000G - Advanced analytics
+-   マスター (Master): 10,000G+ - All features
 
 ### Event-Driven Architecture
 
 Uses EventBus pattern for system communication:
 
-- PriceChangedEvent
-- SeasonChangedEvent
-- PhaseChangedEvent
-- Custom game events
+-   PriceChangedEvent
+-   SeasonChangedEvent
+-   PhaseChangedEvent
+-   Custom game events
 
 ## Development Workflow
 
@@ -92,8 +92,8 @@ Uses EventBus pattern for system communication:
 
 ### Team Structure
 
-- **Programmer**: Unity C# implementation, system architecture
-- **Designer/Artist**: UI/UX, character art, backgrounds, audio
+-   **Programmer**: Unity C# implementation, system architecture
+-   **Designer/Artist**: UI/UX, character art, backgrounds, audio
 
 ## Localization
 
@@ -107,18 +107,18 @@ The game must teach investment concepts without explicitly using financial terms
 
 ### Performance Targets
 
-- Target platforms: Steam (PC) and Nintendo Switch
-- Must handle complex market calculations while maintaining smooth gameplay
-- Memory optimization required for extended play sessions
+-   Target platforms: Steam (PC) and Nintendo Switch
+-   Must handle complex market calculations while maintaining smooth gameplay
+-   Memory optimization required for extended play sessions
 
 ## Success Metrics
 
-- Break-even: 1,000 copies sold
-- Success target: 5,000 copies in first year
-- Educational effectiveness measured through player progression and understanding
+-   Break-even: 1,000 copies sold
+-   Success target: 5,000 copies in first year
+-   Educational effectiveness measured through player progression and understanding
 
 ## Documentation References
 
-- **PRD**: `docs/prd.md` - Complete product requirements
-- **Design Document**: `docs/design-doc.md` - Technical architecture details
-- **Development TODO**: `docs/development-todo.md` - Phase-by-phase implementation plan
+-   **PRD**: `docs/prd.md` - Complete product requirements
+-   **Design Document**: `docs/design-doc.md` - Technical architecture details
+-   **Development TODO**: `docs/development-todo.md` - Phase-by-phase implementation plan
