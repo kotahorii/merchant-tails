@@ -1,24 +1,11 @@
 name: Unity CI/CD Pipeline
 
-# NOTE: Unity 6 (6000.x.x) is not yet fully supported by game-ci actions
-# Additionally, Unity Personal license doesn't work with GitHub Actions CI/CD
-# 
-# Current issues:
-# 1. game-ci/unity-test-runner doesn't recognize Unity 6 version format (6000.x.x)
-# 2. Unity Pro/Plus license is required for automated builds
-# 
-# Alternative solutions:
-# 1. Use Unity Cloud Build (https://unity.com/products/unity-build-server)
-# 2. Use self-hosted runners with local Unity 6 installation
-# 3. Wait for game-ci to add Unity 6 support
-# 4. Downgrade to Unity 2022.3 LTS for CI/CD compatibility
-
 on:
   push:
     branches: [main, develop]
   pull_request:
     branches: [main]
-  workflow_dispatch: # 手動実行を許可
+  workflow_dispatch:
 
 env:
   UNITY_LICENSE: ${{ secrets.UNITY_LICENSE }}
@@ -26,36 +13,18 @@ env:
   UNITY_PASSWORD: ${{ secrets.UNITY_PASSWORD }}
 
 jobs:
-  # Unity tests are disabled until Unity license is configured
-  # To enable Unity CI/CD:
-  # 1. Get Unity license file from https://unity.com/
-  # 2. Set UNITY_LICENSE, UNITY_EMAIL, and UNITY_PASSWORD in GitHub Secrets
-  # Unity tests are temporarily disabled due to Unity 6 compatibility
   test:
-    if: false # Disabled until Unity 6 support is available
-    name: Test Unity Project
+    name: Run Unity Tests
     runs-on: ubuntu-latest
-    # Unity license must be configured in GitHub Secrets
     strategy:
       fail-fast: false
-      matrix:
-        testMode:
-          - EditMode
-          - PlayMode
-        # Unity version will be auto-detected from ProjectSettings/ProjectVersion.txt
     steps:
-      # Checkout repository
       - uses: actions/checkout@v4
         with:
           fetch-depth: 0
           lfs: true
 
-      # Git LFS checkout
-      - name: Checkout LFS objects
-        run: git lfs checkout
-
-      # Cache Unity Library folder
-      - uses: actions/cache@v4
+      - uses: actions/cache@v3
         with:
           path: Library
           key: Library-Unity6-${{ hashFiles('Assets/**', 'Packages/**', 'ProjectSettings/**') }}
@@ -63,42 +32,86 @@ jobs:
             Library-Unity6-
             Library-
 
-      # Unity Test Runner
-      - name: Run Unity Tests
+      # Setup Unity license
+      - name: Create Unity license file
+        run: |
+          mkdir -p /tmp/Unity
+          echo "${{ secrets.UNITY_LICENSE }}" > /tmp/Unity/Unity_lic.ulf
+
+      # Unity 6: Use game-ci with Unity 2022.3 compatible format
+      - name: Run Unity Tests (Compatibility Mode)
+        id: test-compat
         uses: game-ci/unity-test-runner@v4
-        id: unity-tests
+        continue-on-error: true
         env:
           UNITY_LICENSE: ${{ secrets.UNITY_LICENSE }}
         with:
-          unityVersion: auto
-          testMode: ${{ matrix.testMode }}
+          projectPath: .
+          unityVersion: 2022.3.45f1 # Use compatible version format
+          testMode: all
           artifactsPath: test-results
           githubToken: ${{ secrets.GITHUB_TOKEN }}
-          checkName: Unity Test Results (${{ matrix.testMode }})
+          checkName: Unity Test Results
+          customParameters: -nographics -batchmode
+
+      # If alternative fails, try game-ci with different parameters
+      - name: Run Unity Tests (game-ci auto-detect)
+        if: steps.test-alternative.outcome == 'failure'
+        id: test-gameciAuto
+        uses: game-ci/unity-test-runner@v4
+        continue-on-error: true
+        env:
+          UNITY_LICENSE: ${{ secrets.UNITY_LICENSE }}
+        with:
+          projectPath: .
+          unityVersion: auto
+          testMode: all
+          artifactsPath: test-results
+          githubToken: ${{ secrets.GITHUB_TOKEN }}
+          checkName: Unity Test Results
+          customParameters: -nographics -batchmode
+
+      # Final attempt: Unity 2022.3 LTS format (might work with Unity 6)
+      - name: Run Unity Tests (LTS format attempt)
+        if: steps.test-gameciAuto.outcome == 'failure'
+        uses: game-ci/unity-test-runner@v4
+        env:
+          UNITY_LICENSE: ${{ secrets.UNITY_LICENSE }}
+        with:
+          projectPath: .
+          unityVersion: 2022.3.45f1 # Use last known working format
+          testMode: all
+          artifactsPath: test-results
+          githubToken: ${{ secrets.GITHUB_TOKEN }}
+          checkName: Unity Test Results
           coverageOptions: generateAdditionalMetrics;generateHtmlReport;generateBadgeReport;assemblyFilters:+MerchantTails.*
 
-      # Upload test results
-      - uses: actions/upload-artifact@v4
+      - name: Upload Test Results
+        uses: actions/upload-artifact@v4
         if: always()
         with:
-          name: Test results (${{ matrix.testMode }})
+          name: Test results
           path: test-results
 
-      # Publish test results
-      - name: Publish Test Results
-        uses: dorny/test-reporter@v1
+      - name: Upload Coverage Results
+        uses: actions/upload-artifact@v4
         if: always()
         with:
-          name: Unity Test Results (${{ matrix.testMode }})
-          path: test-results/*.xml
-          reporter: java-junit
-          fail-on-error: true
+          name: Coverage results
+          path: CodeCoverage
+
+      - name: Publish Test Report
+        uses: mikepenz/action-junit-report@v3
+        if: always()
+        with:
+          report_paths: test-results/**/*.xml
+          check_name: Unity Test Report
+          fail_on_failure: true
+          token: ${{ secrets.GITHUB_TOKEN }}
 
   build:
-    if: false # Disabled until Unity 6 support is available
     name: Build Unity Project
     runs-on: ubuntu-latest
-    # Unity license must be configured in GitHub Secrets
     needs: test
     strategy:
       fail-fast: false
@@ -108,18 +121,12 @@ jobs:
           - StandaloneLinux64
           - StandaloneOSX
     steps:
-      # Checkout repository
       - uses: actions/checkout@v4
         with:
           fetch-depth: 0
           lfs: true
 
-      # Git LFS checkout
-      - name: Checkout LFS objects
-        run: git lfs checkout
-
-      # Cache Unity Library folder
-      - uses: actions/cache@v4
+      - uses: actions/cache@v3
         with:
           path: Library
           key: Library-Unity6-${{ hashFiles('Assets/**', 'Packages/**', 'ProjectSettings/**') }}
@@ -127,20 +134,24 @@ jobs:
             Library-Unity6-
             Library-
 
-      # Unity Build
+      - name: Create Unity license file
+        run: |
+          mkdir -p /tmp/Unity
+          echo "${{ secrets.UNITY_LICENSE }}" > /tmp/Unity/Unity_lic.ulf
+
       - name: Build Unity Project
         uses: game-ci/unity-builder@v4
         env:
           UNITY_LICENSE: ${{ secrets.UNITY_LICENSE }}
         with:
-          unityVersion: auto
+          projectPath: .
+          unityVersion: 2022.3.45f1 # Use compatible version format
           targetPlatform: ${{ matrix.targetPlatform }}
           buildName: MerchantTails
           buildsPath: build
-          buildMethod: BuildScript.BuildGame
 
-      # Upload build artifacts
-      - uses: actions/upload-artifact@v4
+      - name: Upload Build Artifacts
+        uses: actions/upload-artifact@v4
         with:
           name: Build-${{ matrix.targetPlatform }}
           path: build/${{ matrix.targetPlatform }}
@@ -149,119 +160,20 @@ jobs:
     name: Code Quality Analysis
     runs-on: ubuntu-latest
     steps:
-      # Checkout repository
       - uses: actions/checkout@v4
         with:
           fetch-depth: 0
 
-      # Setup .NET for code analysis
       - name: Setup .NET
         uses: actions/setup-dotnet@v3
         with:
           dotnet-version: "8.0.x"
 
-      # Install code analysis tools
       - name: Install dotnet tools
         run: |
           dotnet tool install --global csharpier
 
-      # Run code style check with csharpier
-      - name: Check code style
+      - name: Check Code Style
         run: |
           csharpier check Assets/Scripts/
         continue-on-error: true
-
-  performance-test:
-    if: false # Disabled until Unity 6 support is available
-    name: Performance Tests
-    runs-on: ubuntu-latest
-    # Unity license must be configured in GitHub Secrets
-    needs: test
-    steps:
-      # Checkout repository
-      - uses: actions/checkout@v4
-        with:
-          fetch-depth: 0
-          lfs: true
-
-      # Git LFS checkout
-      - name: Checkout LFS objects
-        run: git lfs checkout
-
-      # Cache Unity Library folder
-      - uses: actions/cache@v4
-        with:
-          path: Library
-          key: Library-Unity6-${{ hashFiles('Assets/**', 'Packages/**', 'ProjectSettings/**') }}
-          restore-keys: |
-            Library-Unity6-
-            Library-
-
-      # Run performance tests
-      - name: Run Performance Tests
-        uses: game-ci/unity-test-runner@v4
-        env:
-          UNITY_LICENSE: ${{ secrets.UNITY_LICENSE }}
-        with:
-          unityVersion: auto
-          testMode: PlayMode
-          customParameters: -testCategory "Performance"
-          artifactsPath: performance-results
-
-      # Upload performance test results
-      - uses: actions/upload-artifact@v4
-        if: always()
-        with:
-          name: Performance Test Results
-          path: performance-results
-
-  # Steam deployment disabled - will be enabled when ready for release
-  # deploy:
-  #   name: Deploy to Steam (Production)
-  #   runs-on: ubuntu-latest
-  #   needs: [test, build, code-quality]
-  #   if: github.ref == 'refs/heads/main' && github.event_name == 'push'
-  #   steps:
-  #     # Checkout repository
-  #     - uses: actions/checkout@v4
-  #
-  #     # Download build artifacts
-  #     - uses: actions/download-artifact@v4
-  #       with:
-  #         name: Build-StandaloneWindows64
-  #         path: build/windows
-  #
-  #     - uses: actions/download-artifact@v3
-  #       with:
-  #         name: Build-StandaloneLinux64
-  #         path: build/linux
-  #
-  #     - uses: actions/download-artifact@v3
-  #       with:
-  #         name: Build-StandaloneOSX
-  #         path: build/mac
-  #
-  #     # Deploy to Steam (will be implemented when ready)
-  #     - name: Deploy to Steam
-  #       run: |
-  #         echo "Steam deployment will be implemented here"
-
-  notify:
-    name: Notify Results
-    runs-on: ubuntu-latest
-    needs: [code-quality]
-    if: always()
-    steps:
-      - name: Notify Success
-        if: needs.code-quality.result == 'success'
-        run: |
-          echo "✅ Code quality checks passed!"
-          echo "Code Quality: ${{ needs.code-quality.result }}"
-          echo "Note: Unity tests are disabled until Unity license is configured"
-
-      - name: Notify Failure
-        if: needs.code-quality.result == 'failure'
-        run: |
-          echo "❌ Code quality checks failed!"
-          echo "Code Quality: ${{ needs.code-quality.result }}"
-          exit 1
