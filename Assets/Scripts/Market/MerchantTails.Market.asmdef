@@ -1,21 +1,13 @@
 {
-    "name": "MerchantTails.Core",
-    "rootNamespace": "MerchantTails.Core",
+    "name": "MerchantTails.Market",
+    "rootNamespace": "MerchantTails.Market",
     "references": [
         "MerchantTails.Data",
         "MerchantTails.Events",
-        "MerchantTails.Market",
-        "MerchantTails.Inventory",
-        "MerchantTails.UI",
-        "MerchantTails.Tutorial",
-        "Unity.TextMeshPro",
-        "Unity.Addressables",
         "Unity.Mathematics",
         "Unity.Burst",
         "Unity.Collections",
-        "Unity.Jobs",
-        "Unity.UIElements",
-        "UnityEngine.UI"
+        "Unity.Jobs"
     ],
     "includePlatforms": [],
     "excludePlatforms": [],

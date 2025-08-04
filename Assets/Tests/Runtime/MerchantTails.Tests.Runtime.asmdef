@@ -3,8 +3,19 @@
     "rootNamespace": "MerchantTails.Testing",
     "references": [
         "MerchantTails.Core",
+        "MerchantTails.Data",
+        "MerchantTails.Events",
+        "MerchantTails.Market",
+        "MerchantTails.UI",
         "UnityEngine.TestRunner",
-        "UnityEditor.TestRunner"
+        "UnityEditor.TestRunner",
+        "Unity.TextMeshPro",
+        "Unity.Addressables",
+        "Unity.Mathematics",
+        "Unity.Burst",
+        "Unity.Collections",
+        "Unity.Jobs",
+        "Unity.PerformanceTesting"
     ],
     "includePlatforms": [],
     "excludePlatforms": [],
