@@ -7,11 +7,11 @@ using System.Text;
 using System.Threading.Tasks;
 using MerchantTails.Data;
 using MerchantTails.Events;
+using Newtonsoft.Json; // Unity 6の新しいJSON統合
 using Unity.Burst;
 using Unity.Collections;
 using Unity.Jobs;
 using UnityEngine;
-using Newtonsoft.Json; // Unity 6の新しいJSON統合
 
 namespace MerchantTails.Core
 {

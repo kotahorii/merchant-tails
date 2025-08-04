@@ -87,7 +87,7 @@ namespace MerchantTails.Market
             // Initialize market data for all item types
             var itemTypes = Enum.GetValues(typeof(ItemType));
             int itemCount = itemTypes.Length;
-            
+
             // Initialize NativeArrays for Job System
             nativeBasePrices = new NativeArray<float>(itemCount, Allocator.Persistent);
             nativeCurrentPrices = new NativeArray<float>(itemCount, Allocator.Persistent);

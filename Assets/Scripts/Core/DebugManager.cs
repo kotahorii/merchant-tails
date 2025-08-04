@@ -448,8 +448,10 @@ namespace MerchantTails.Core
             float inputY = y + consoleHeight - 30;
             consoleCommand = GUI.TextField(new Rect(x + 5, inputY, width - 70, 25), consoleCommand);
 
-            if (GUI.Button(new Rect(x + width - 60, inputY, 55, 25), "Execute") ||
-                (Event.current.type == EventType.KeyDown && Event.current.keyCode == KeyCode.Return))
+            if (
+                GUI.Button(new Rect(x + width - 60, inputY, 55, 25), "Execute") ||
+                (Event.current.type == EventType.KeyDown && Event.current.keyCode == KeyCode.Return)
+            )
             {
                 ExecuteConsoleCommand(consoleCommand);
                 consoleCommand = "";
