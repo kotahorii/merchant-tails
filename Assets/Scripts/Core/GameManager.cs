@@ -1,6 +1,5 @@
 using System;
 using MerchantTails.Data;
-using MerchantTails.Systems;
 using UnityEngine;
 
 namespace MerchantTails.Core
@@ -18,8 +17,9 @@ namespace MerchantTails.Core
         [SerializeField]
         private PlayerData playerData;
 
-        [SerializeField]
-        private AssetCalculator assetCalculator;
+        // TODO: AssetCalculator integration - currently in Systems assembly
+        // [SerializeField]
+        // private AssetCalculator assetCalculator;
 
         [SerializeField]
         private FeatureUnlockSystem featureUnlockSystem;
@@ -38,7 +38,8 @@ namespace MerchantTails.Core
 
         public TimeManager TimeManager => timeManager;
         public PlayerData PlayerData => playerData;
-        public AssetCalculator AssetCalculator => assetCalculator;
+        // TODO: AssetCalculator integration
+        // public AssetCalculator AssetCalculator => assetCalculator;
         public FeatureUnlockSystem FeatureUnlockSystem => featureUnlockSystem;
         public bool IsTutorialCompleted => tutorialCompleted;
 
@@ -74,8 +75,9 @@ namespace MerchantTails.Core
             if (playerData == null)
                 playerData = CreateDefaultPlayerData();
 
-            if (assetCalculator == null)
-                assetCalculator = FindObjectOfType<AssetCalculator>();
+            // TODO: AssetCalculator integration
+            // if (assetCalculator == null)
+            //     assetCalculator = FindObjectOfType<AssetCalculator>();
 
             if (featureUnlockSystem == null)
                 featureUnlockSystem = FindObjectOfType<FeatureUnlockSystem>();
