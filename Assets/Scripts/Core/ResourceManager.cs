@@ -148,10 +148,10 @@ namespace MerchantTails.Core
             // {
             //     LoadWithAddressables<T>(path);
             // }
-            else
-            {
+            // else
+            // {
                 StartCoroutine(LoadWithResourcesAsync<T>(path));
-            }
+            // }
         }
 
         /// <summary>
@@ -405,15 +405,17 @@ namespace MerchantTails.Core
         {
             foreach (string path in resourceCache.Keys)
             {
-                if (useAddressables && activeHandles.ContainsKey(path))
-                {
-                    Addressables.Release(activeHandles[path]);
-                }
+                // TODO: Addressables support
+                // if (useAddressables && activeHandles.ContainsKey(path))
+                // {
+                //     Addressables.Release(activeHandles[path]);
+                // }
             }
 
             resourceCache.Clear();
             cacheQueue.Clear();
-            activeHandles.Clear();
+            // TODO: Addressables support
+            // activeHandles.Clear();
             pendingCallbacks.Clear();
         }
 
@@ -436,14 +438,15 @@ namespace MerchantTails.Core
         /// </summary>
         private void ReleaseAllHandles()
         {
-            if (useAddressables)
-            {
-                foreach (var handle in activeHandles.Values)
-                {
-                    Addressables.Release(handle);
-                }
-                activeHandles.Clear();
-            }
+            // TODO: Addressables support
+            // if (useAddressables)
+            // {
+            //     foreach (var handle in activeHandles.Values)
+            //     {
+            //         Addressables.Release(handle);
+            //     }
+            //     activeHandles.Clear();
+            // }
         }
 
         /// <summary>

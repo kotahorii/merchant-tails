@@ -5,7 +5,7 @@ using MerchantTails.Inventory;
 using MerchantTails.Market;
 using UnityEngine;
 
-namespace MerchantTails.Core
+namespace MerchantTails.Systems
 {
     /// <summary>
     /// プレイヤーの総資産を計算するシステム
@@ -175,7 +175,9 @@ namespace MerchantTails.Core
         /// </summary>
         private float CalculateBankDeposits()
         {
-            return BankSystem.Instance?.GetTotalDeposits() ?? 0f;
+            // TODO: BankSystem implementation
+            // return BankSystem.Instance?.GetTotalDeposits() ?? 0f;
+            return 0f;
         }
 
         /// <summary>
@@ -185,11 +187,13 @@ namespace MerchantTails.Core
         {
             float investmentValue = 0f;
 
+            // TODO: ShopInvestmentSystem implementation
             // 店舗投資（設備投資は資産価値として計上）
-            investmentValue += ShopInvestmentSystem.Instance?.GetTotalInvestment() ?? 0f;
+            // investmentValue += ShopInvestmentSystem.Instance?.GetTotalInvestment() ?? 0f;
 
+            // TODO: MerchantInvestmentSystem implementation
             // 他商人への出資
-            investmentValue += MerchantInvestmentSystem.Instance?.GetTotalInvestmentValue() ?? 0f;
+            // investmentValue += MerchantInvestmentSystem.Instance?.GetTotalInvestmentValue() ?? 0f;
 
             return investmentValue;
         }
