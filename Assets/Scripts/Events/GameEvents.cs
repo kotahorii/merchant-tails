@@ -1,9 +1,22 @@
 using System.Collections.Generic;
 using MerchantTails.Core;
 using MerchantTails.Data;
+using MerchantTails.Inventory;
 
 namespace MerchantTails.Events
 {
+    /// <summary>
+    /// 全てのゲームイベントの基底クラス
+    /// </summary>
+    public abstract class BaseGameEvent
+    {
+        public float Timestamp { get; }
+
+        protected BaseGameEvent()
+        {
+            Timestamp = UnityEngine.Time.time;
+        }
+    }
     /// <summary>
     /// ゲーム状態が変更されたときのイベント
     /// </summary>
