@@ -1,3 +1,4 @@
+using MerchantTails.Core;
 using MerchantTails.Data;
 
 namespace MerchantTails.Events

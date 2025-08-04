@@ -1,4 +1,6 @@
+using System;
 using System.Collections.Generic;
+using MerchantTails.Core;
 using MerchantTails.Data;
 
 namespace MerchantTails.Events
@@ -6,13 +8,13 @@ namespace MerchantTails.Events
     /// <summary>
     /// 全てのゲームイベントの基底クラス
     /// </summary>
-    public abstract class BaseGameEvent
+    public abstract class BaseGameEvent : IGameEvent
     {
-        public float Timestamp { get; }
+        public DateTime Timestamp { get; }
 
         protected BaseGameEvent()
         {
-            Timestamp = UnityEngine.Time.time;
+            Timestamp = DateTime.Now;
         }
     }
     /// <summary>

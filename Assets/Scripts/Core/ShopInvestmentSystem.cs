@@ -252,7 +252,7 @@ namespace MerchantTails.Core
             var upgrade = GetUpgrade(upgradeId);
             if (upgrade == null)
             {
-                ErrorHandler.LogError($"Upgrade not found: {upgradeId}", "ShopInvestment");
+                ErrorHandler.LogError($"Upgrade not found: {upgradeId}", null, "ShopInvestment");
                 return false;
             }
 

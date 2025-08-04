@@ -214,7 +214,7 @@ namespace MerchantTails.Core
         /// </summary>
         private void EmergencyMemoryCleanup()
         {
-            ErrorHandler.LogError("Emergency memory cleanup triggered", "MemoryOptimization");
+            ErrorHandler.LogError("Emergency memory cleanup triggered", null, "MemoryOptimization");
 
             // すべてのキャッシュをクリア
             ResourceManager.Instance?.ClearAllCache();

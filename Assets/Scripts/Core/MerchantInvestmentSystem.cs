@@ -192,7 +192,7 @@ namespace MerchantTails.Core
             var merchant = GetMerchant(merchantId);
             if (merchant == null)
             {
-                ErrorHandler.LogError($"Merchant not found: {merchantId}", "MerchantInvestment");
+                ErrorHandler.LogError($"Merchant not found: {merchantId}", null, "MerchantInvestment");
                 return false;
             }
 
