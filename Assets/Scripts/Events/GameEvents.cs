@@ -1,7 +1,5 @@
 using System.Collections.Generic;
-using MerchantTails.Core;
 using MerchantTails.Data;
-using MerchantTails.Inventory;
 
 namespace MerchantTails.Events
 {

@@ -1,4 +1,4 @@
-namespace MerchantTails.Core
+namespace MerchantTails.Data
 {
     /// <summary>
     /// ゲームの状態を表すenum

@@ -2,9 +2,7 @@
     "name": "MerchantTails.Events",
     "rootNamespace": "MerchantTails.Events",
     "references": [
-        "MerchantTails.Data",
-        "MerchantTails.Core",
-        "MerchantTails.Inventory"
+        "MerchantTails.Data"
     ],
     "includePlatforms": [],
     "excludePlatforms": [],
