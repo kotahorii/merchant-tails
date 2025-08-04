@@ -27,7 +27,6 @@ jobs:
   test:
     name: Test Unity Project
     runs-on: ubuntu-latest
-    if: false # Unity Personal license doesn't work with GitHub Actions
     # Unity license must be configured in GitHub Secrets
     strategy:
       fail-fast: false
@@ -88,7 +87,6 @@ jobs:
   build:
     name: Build Unity Project
     runs-on: ubuntu-latest
-    if: false # Unity Personal license doesn't work with GitHub Actions
     # Unity license must be configured in GitHub Secrets
     needs: test
     strategy:
@@ -163,7 +161,6 @@ jobs:
   performance-test:
     name: Performance Tests
     runs-on: ubuntu-latest
-    if: false # Unity Personal license doesn't work with GitHub Actions
     # Unity license must be configured in GitHub Secrets
     needs: test
     steps:

@@ -1,0 +1,54 @@
+name: Unity CI/CD (Local Runner)
+
+# This workflow runs on self-hosted runners
+# Perfect for Unity Personal license users
+
+on:
+  push:
+    branches: [main, develop]
+  pull_request:
+    branches: [main]
+  workflow_dispatch:
+
+jobs:
+  test-and-build:
+    name: Test and Build Unity Project
+    runs-on: self-hosted
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          lfs: true
+
+      - name: Run Unity Tests
+        run: |
+          echo "Running Unity tests..."
+          ./scripts/local-build.sh test
+
+      - name: Build for current platform
+        run: |
+          echo "Building Unity project..."
+          ./scripts/local-build.sh build
+
+      - name: Upload build artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: Unity-Build-${{ runner.os }}
+          path: build/
+
+  notify:
+    name: Notify Results
+    runs-on: ubuntu-latest
+    needs: [test-and-build]
+    if: always()
+    steps:
+      - name: Notify Success
+        if: needs.test-and-build.result == 'success'
+        run: |
+          echo "✅ Build succeeded on self-hosted runner!"
+          
+      - name: Notify Failure
+        if: needs.test-and-build.result == 'failure'
+        run: |
+          echo "❌ Build failed on self-hosted runner!"
+          exit 1
