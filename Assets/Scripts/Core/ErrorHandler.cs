@@ -566,8 +566,10 @@ namespace MerchantTails.Core
             else
             {
                 // 特定コンテキストのエラー率
-                if (errorCounts.TryGetValue(context, out int count) &&
-                    lastErrorTimes.TryGetValue(context, out DateTime lastTime))
+                if (
+                    errorCounts.TryGetValue(context, out int count) &&
+                    lastErrorTimes.TryGetValue(context, out DateTime lastTime)
+                )
                 {
                     float timeSinceFirst = (float)(DateTime.Now - lastTime).TotalSeconds;
                     return timeSinceFirst > 0 ? count / timeSinceFirst : 0;

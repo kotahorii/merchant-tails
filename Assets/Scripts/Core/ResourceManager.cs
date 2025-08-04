@@ -42,7 +42,8 @@ namespace MerchantTails.Core
 
         // 非同期ロード管理
         private Dictionary<string, AsyncOperationHandle> activeHandles = new Dictionary<string, AsyncOperationHandle>();
-        private Dictionary<string, List<Action<UnityEngine.Object>>> pendingCallbacks = new Dictionary<string, List<Action<UnityEngine.Object>>>();
+        private Dictionary<string, List<Action<UnityEngine.Object>>> pendingCallbacks =
+            new Dictionary<string, List<Action<UnityEngine.Object>>>();
 
         // リソースパス定義
         public static class ResourcePaths

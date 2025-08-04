@@ -218,7 +218,8 @@ namespace MerchantTails.UI
         private void SetupUI()
         {
             titleText.text = "リスクとリターンの関係";
-            descriptionText.text = "投資にはリスクとリターンのバランスが重要です。\n一般的に、高いリターンを得るには高いリスクを取る必要があります。";
+            descriptionText.text =
+                "投資にはリスクとリターンのバランスが重要です。\n一般的に、高いリターンを得るには高いリスクを取る必要があります。";
 
             xAxisLabel.text = "リスク";
             yAxisLabel.text = "期待リターン";
