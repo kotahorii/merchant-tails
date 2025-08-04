@@ -2,6 +2,7 @@
     "name": "MerchantTails.Inventory",
     "rootNamespace": "MerchantTails.Inventory",
     "references": [
+        "MerchantTails.Core",
         "MerchantTails.Data",
         "MerchantTails.Events"
     ],

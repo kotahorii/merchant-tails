@@ -2,6 +2,7 @@
     "name": "MerchantTails.Market",
     "rootNamespace": "MerchantTails.Market",
     "references": [
+        "MerchantTails.Core",
         "MerchantTails.Data",
         "MerchantTails.Events",
         "Unity.Mathematics",

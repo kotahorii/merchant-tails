@@ -4,8 +4,7 @@
     "references": [
         "MerchantTails.Core",
         "MerchantTails.Data",
-        "MerchantTails.Events",
-        "MerchantTails.UI"
+        "MerchantTails.Events"
     ],
     "includePlatforms": [],
     "excludePlatforms": [],
