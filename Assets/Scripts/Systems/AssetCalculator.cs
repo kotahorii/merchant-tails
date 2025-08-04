@@ -201,9 +201,9 @@ namespace MerchantTails.Systems
         /// <summary>
         /// 資産の内訳を取得
         /// </summary>
-        public AssetBreakdown GetAssetBreakdown()
+        public Data.AssetBreakdown GetAssetBreakdown()
         {
-            var breakdown = new AssetBreakdown
+            var breakdown = new Data.AssetBreakdown
             {
                 cash = playerData?.CurrentMoney ?? 0f,
                 inventoryValue = CalculateInventoryValue(),
@@ -301,7 +301,7 @@ namespace MerchantTails.Systems
         /// </summary>
         private void PublishDailyAssetReport()
         {
-            var report = new DailyAssetReport
+            var report = new Data.DailyAssetReport
             {
                 day = TimeManager.Instance?.CurrentDay ?? 1,
                 totalAssets = lastCalculatedAssets,
@@ -314,31 +314,6 @@ namespace MerchantTails.Systems
         }
     }
 
-    /// <summary>
-    /// 資産の内訳
-    /// </summary>
-    [System.Serializable]
-    public struct AssetBreakdown
-    {
-        public float cash;
-        public float inventoryValue;
-        public float bankDeposits;
-        public float investments;
-        public float totalAssets;
-    }
-
-    /// <summary>
-    /// 日次資産レポート
-    /// </summary>
-    [System.Serializable]
-    public struct DailyAssetReport
-    {
-        public int day;
-        public float totalAssets;
-        public float dailyProfit;
-        public float profitPercentage;
-        public AssetBreakdown breakdown;
-    }
 
 
 }
