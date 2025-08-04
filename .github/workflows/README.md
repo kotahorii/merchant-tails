@@ -1,39 +1,42 @@
 # GitHub Actions Workflows
 
-このディレクトリには、Merchant Tailsプロジェクトの継続的インテグレーション（CI）ワークフローが含まれています。
+このディレクトリには、Merchant Tailsプロジェクトの継続的インテグレーション/継続的デプロイメント（CI/CD）ワークフローが含まれています。
 
-## Workflows
+## ワークフロー
 
-### 1. Code Format Check (`format-check.yml`)
+### Unity CI/CD Pipeline (`unity-ci.yml`)
 
-**目的**: C#コードのフォーマットをチェック
-
-**トリガー**:
-- `main`ブランチへのプッシュ
-- プルリクエスト
-
-**動作**:
-- CSharpierを使用してコードフォーマットをチェック
-- フォーマットエラーがある場合はビルドを失敗させる
-
-### 2. Unity Tests (`unity-tests.yml`)
-
-**目的**: Unity Test Frameworkで作成されたテストを実行
+**目的**: Unityプロジェクトの自動テストとビルド
 
 **トリガー**:
 - `main`, `develop`ブランチへのプッシュ
 - `main`ブランチへのプルリクエスト
+- 手動実行（workflow_dispatch）
 
-**動作**:
-- PlayModeテストを実行
+**ジョブ**:
+
+#### 1. Test (Unity Tests)
+- **EditMode Tests**: エディター環境でのユニットテスト
+- **PlayMode Tests**: ゲーム実行環境での統合テスト
+- テスト結果をJUnit形式でレポート
 - テスト結果をアーティファクトとして保存
-- コードカバレッジレポートを生成
-- PRにテスト結果とカバレッジをコメント
+
+#### 2. Build
+- 対象プラットフォーム: Windows, Linux, macOS
+- ビルド成果物をアーティファクトとして保存
+
+#### 3. Code Quality
+- CSharpierによるコードフォーマットチェック
+- コード品質の維持
+
+#### 4. Performance Test
+- パフォーマンステストの実行
+- パフォーマンス結果をアーティファクトとして保存
 
 **必要なSecrets**:
-- `UNITY_LICENSE`: Unity ProまたはPlusライセンス
-- `UNITY_EMAIL`: Unityアカウントのメールアドレス
-- `UNITY_PASSWORD`: Unityアカウントのパスワード
+- `UNITY_LICENSE`: Unityライセンスファイル（.ulf）の内容
+- `UNITY_EMAIL`: Unity IDのメールアドレス（オプション）
+- `UNITY_PASSWORD`: Unity IDのパスワード（オプション）
 
 ## セットアップ手順
 
@@ -41,40 +44,57 @@
 
 #### Unity Personal版を使用する場合
 
-1. GitHubのActionsタブから「Acquire Unity License Activation File」ワークフローを実行
-2. ワークフロー完了後、Artifactsから`.alf`ファイルをダウンロード
-3. https://license.unity3d.com/manual にアクセス
-4. `.alf`ファイルをアップロードし、アクティベーションを完了
-5. 生成された`.ulf`ライセンスファイルをダウンロード
-6. GitHubリポジトリの Settings > Secrets and variables > Actions で設定:
-   - `UNITY_LICENSE`: .ulfファイルの内容全体をコピー&ペースト
+**注意**: 2023年12月以降、Unity PersonalライセンスはManual Activationでの.ulfファイル取得ができません。
 
-#### Unity Pro/Plus版を使用する場合
-
-1. ローカルでUnityプロジェクトを開く
-2. Unity Hubでライセンスをアクティベート
-3. 以下のコマンドでライセンスファイルを取得:
+**推奨方法**:
+1. Unity Hubでローカルにライセンスをアクティベート
+2. 既存のライセンスファイルの場所を確認:
    ```bash
-   # macOS/Linux
-   cat ~/Library/Unity/Unity_lic.ulf
+   # macOS
+   cat ~/Library/Unity/licenses/UnityEntitlementLicense.xml
    
    # Windows
    type %PROGRAMDATA%\Unity\Unity_lic.ulf
+   
+   # Linux
+   cat ~/.local/share/unity3d/Unity/Unity_lic.ulf
    ```
-4. GitHubリポジトリの Settings > Secrets and variables > Actions で設定:
-   - `UNITY_LICENSE`: ライセンスファイルの内容
+3. GitHubリポジトリの Settings > Secrets and variables > Actions で設定:
+   - `UNITY_LICENSE`: ライセンスファイルの内容全体をコピー&ペースト
+
+**代替方法**: Self-hosted Runnerを使用（ローカルマシンでCIを実行）
+
+#### Unity Pro/Plus版を使用する場合
+
+標準的な方法でライセンスファイルを取得可能です。
 
 ### ローカルでのテスト実行
 
 CIで実行される前にローカルでテストを確認:
 
 ```bash
-# Unityコマンドラインでテスト実行
-Unity -runTests -projectPath . -testResults results.xml -testPlatform PlayMode
+# Unity 6.1 LTS (6000.1.14f1) を使用
+
+# EditMode テスト実行
+/Applications/Unity/Hub/Editor/6000.1.14f1/Unity.app/Contents/MacOS/Unity \
+  -runTests -projectPath . -testPlatform EditMode \
+  -testResults test-results/EditMode-results.xml -logFile -
+
+# PlayMode テスト実行
+/Applications/Unity/Hub/Editor/6000.1.14f1/Unity.app/Contents/MacOS/Unity \
+  -runTests -projectPath . -testPlatform PlayMode \
+  -testResults test-results/PlayMode-results.xml -logFile -
 
 # CSharpierフォーマットチェック
 dotnet tool restore
-dotnet csharpier . --check
+dotnet csharpier Assets/Scripts --check
+```
+
+### ローカルビルドスクリプト
+
+プロジェクトに含まれる`scripts/local-build.sh`を使用:
+```bash
+./scripts/local-build.sh
 ```
 
 ## トラブルシューティング
@@ -84,8 +104,9 @@ dotnet csharpier . --check
 エラー: `License activation failed`
 
 解決方法:
-1. Unity Personal版を使用している場合は、game-ci/unity-request-activation-file アクションを使用
-2. ライセンスが期限切れの場合は、新しいライセンスを取得して更新
+1. Unity Personal版の場合、ローカルでアクティベートしたライセンスを使用
+2. GitHub Secretsの`UNITY_LICENSE`が正しく設定されているか確認
+3. ライセンスが期限切れの場合は、Unity Hubで再アクティベート
 
 ### テスト失敗
 
@@ -113,6 +134,8 @@ dotnet csharpier .
 3. **テストカバレッジ75%以上を維持**
 4. **新機能には必ずテストを追加**
 5. **CIが失敗したらすぐに修正**
+6. **Unity 6.1 LTS (6000.1.14f1) を使用**
+7. **テストは EditMode と PlayMode の両方を作成**
 
 ## 参考リンク
 
