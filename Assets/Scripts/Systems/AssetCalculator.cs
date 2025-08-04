@@ -130,7 +130,7 @@ namespace MerchantTails.Systems
             lastCalculatedAssets = totalAssets;
 
             // 資産変動イベントを発行
-            EventBus.Publish(new AssetChangedEvent(totalAssets, GetAssetBreakdown()));
+            EventBus.Publish(new Events.AssetChangedEvent(totalAssets, GetAssetBreakdown()));
 
             return totalAssets;
         }
@@ -310,7 +310,7 @@ namespace MerchantTails.Systems
                 breakdown = GetAssetBreakdown(),
             };
 
-            EventBus.Publish(new DailyAssetReportEvent(report));
+            EventBus.Publish(new Events.DailyAssetReportEvent(report));
         }
     }
 
@@ -340,31 +340,5 @@ namespace MerchantTails.Systems
         public AssetBreakdown breakdown;
     }
 
-    /// <summary>
-    /// 資産変動イベント
-    /// </summary>
-    public class AssetChangedEvent : BaseGameEvent
-    {
-        public float TotalAssets { get; }
-        public AssetBreakdown Breakdown { get; }
 
-        public AssetChangedEvent(float totalAssets, AssetBreakdown breakdown)
-        {
-            TotalAssets = totalAssets;
-            Breakdown = breakdown;
-        }
-    }
-
-    /// <summary>
-    /// 日次資産レポートイベント
-    /// </summary>
-    public class DailyAssetReportEvent : BaseGameEvent
-    {
-        public DailyAssetReport Report { get; }
-
-        public DailyAssetReportEvent(DailyAssetReport report)
-        {
-            Report = report;
-        }
-    }
 }
