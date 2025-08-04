@@ -271,7 +271,10 @@ namespace MerchantTails.Core
         private void DrawFPS()
         {
             Color originalColor = GUI.color;
-            GUI.color = currentFPS < 30 ? Color.red : currentFPS < 50 ? Color.yellow : Color.green;
+            GUI.color =
+                currentFPS < 30 ? Color.red
+                : currentFPS < 50 ? Color.yellow
+                : Color.green;
             GUI.Label(new Rect(10, 10, 200, 25), $"FPS: {currentFPS:F1}", debugStyle);
             GUI.color = originalColor;
         }

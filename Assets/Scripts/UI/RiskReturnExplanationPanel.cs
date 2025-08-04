@@ -567,7 +567,8 @@ namespace MerchantTails.UI
         public void AnimateIn(float delay)
         {
             transform.localScale = Vector3.zero;
-            LeanTween.scale(gameObject, Vector3.one, 0.5f)
+            LeanTween
+                .scale(gameObject, Vector3.one, 0.5f)
                 .setDelay(delay)
                 .setEaseOutBack();
         }

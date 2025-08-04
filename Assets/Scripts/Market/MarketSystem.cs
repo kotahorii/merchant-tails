@@ -36,7 +36,7 @@ namespace MerchantTails.Market
         private Dictionary<ItemType, MarketData> marketPrices;
         private Dictionary<ItemType, List<PriceHistory>> priceHistories;
         private List<MarketEvent> activeMarketEvents;
-        
+
         // Job System用のNativeArrays
         private NativeArray<float> nativeBasePrices;
         private NativeArray<float> nativeCurrentPrices;

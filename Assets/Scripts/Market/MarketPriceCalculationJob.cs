@@ -15,6 +15,7 @@ namespace MerchantTails.Market
         // 入力データ
         [ReadOnly]
         public NativeArray<float> basePrices;
+
         [ReadOnly]
         public NativeArray<float> volatilities;
         [ReadOnly]
