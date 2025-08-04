@@ -34,8 +34,7 @@ jobs:
         testMode:
           - EditMode
           - PlayMode
-        unityVersion:
-          - 6000.1.14f1
+        # Unity version will be auto-detected from ProjectSettings/ProjectVersion.txt
     steps:
       # Checkout repository
       - uses: actions/checkout@v4
@@ -51,21 +50,24 @@ jobs:
       - uses: actions/cache@v4
         with:
           path: Library
-          key: Library-${{ matrix.unityVersion }}-${{ hashFiles('Assets/**', 'Packages/**', 'ProjectSettings/**') }}
+          key: Library-Unity6-${{ hashFiles('Assets/**', 'Packages/**', 'ProjectSettings/**') }}
           restore-keys: |
-            Library-${{ matrix.unityVersion }}-
+            Library-Unity6-
             Library-
 
       # Unity Test Runner
       - name: Run Unity Tests
         uses: game-ci/unity-test-runner@v4
         id: unity-tests
+        env:
+          UNITY_LICENSE: ${{ secrets.UNITY_LICENSE }}
         with:
-          unityVersion: ${{ matrix.unityVersion }}
+          unityVersion: auto
           testMode: ${{ matrix.testMode }}
           artifactsPath: test-results
           githubToken: ${{ secrets.GITHUB_TOKEN }}
           checkName: Unity Test Results (${{ matrix.testMode }})
+          coverageOptions: generateAdditionalMetrics;generateHtmlReport;generateBadgeReport;assemblyFilters:+MerchantTails.*
 
       # Upload test results
       - uses: actions/upload-artifact@v4
@@ -111,16 +113,18 @@ jobs:
       - uses: actions/cache@v4
         with:
           path: Library
-          key: Library-6000.1.14f1-${{ hashFiles('Assets/**', 'Packages/**', 'ProjectSettings/**') }}
+          key: Library-Unity6-${{ hashFiles('Assets/**', 'Packages/**', 'ProjectSettings/**') }}
           restore-keys: |
-            Library-6000.1.14f1-
+            Library-Unity6-
             Library-
 
       # Unity Build
       - name: Build Unity Project
         uses: game-ci/unity-builder@v4
+        env:
+          UNITY_LICENSE: ${{ secrets.UNITY_LICENSE }}
         with:
-          unityVersion: 6000.1.14f1
+          unityVersion: auto
           targetPlatform: ${{ matrix.targetPlatform }}
           buildName: MerchantTails
           buildsPath: build
@@ -178,16 +182,18 @@ jobs:
       - uses: actions/cache@v4
         with:
           path: Library
-          key: Library-6000.1.14f1-${{ hashFiles('Assets/**', 'Packages/**', 'ProjectSettings/**') }}
+          key: Library-Unity6-${{ hashFiles('Assets/**', 'Packages/**', 'ProjectSettings/**') }}
           restore-keys: |
-            Library-6000.1.14f1-
+            Library-Unity6-
             Library-
 
       # Run performance tests
       - name: Run Performance Tests
         uses: game-ci/unity-test-runner@v4
+        env:
+          UNITY_LICENSE: ${{ secrets.UNITY_LICENSE }}
         with:
-          unityVersion: 6000.1.14f1
+          unityVersion: auto
           testMode: PlayMode
           customParameters: -testCategory "Performance"
           artifactsPath: performance-results
