@@ -1,8 +1,9 @@
 using System;
 using System.Collections.Generic;
 using UnityEngine;
-using UnityEngine.AddressableAssets;
-using UnityEngine.ResourceManagement.AsyncOperations;
+// TODO: Addressables support - currently disabled
+// using UnityEngine.AddressableAssets;
+// using UnityEngine.ResourceManagement.AsyncOperations;
 
 namespace MerchantTails.Core
 {
@@ -41,7 +42,8 @@ namespace MerchantTails.Core
         private float lastMemoryCheckTime;
 
         // 非同期ロード管理
-        private Dictionary<string, AsyncOperationHandle> activeHandles = new Dictionary<string, AsyncOperationHandle>();
+        // TODO: Addressables support
+        // private Dictionary<string, AsyncOperationHandle> activeHandles = new Dictionary<string, AsyncOperationHandle>();
         private Dictionary<string, List<Action<UnityEngine.Object>>> pendingCallbacks =
             new Dictionary<string, List<Action<UnityEngine.Object>>>();
 
@@ -141,10 +143,11 @@ namespace MerchantTails.Core
             // 新規非同期ロード
             pendingCallbacks[path] = new List<Action<UnityEngine.Object>> { obj => onComplete?.Invoke(obj as T) };
 
-            if (useAddressables)
-            {
-                LoadWithAddressables<T>(path);
-            }
+            // TODO: Addressables support
+            // if (useAddressables)
+            // {
+            //     LoadWithAddressables<T>(path);
+            // }
             else
             {
                 StartCoroutine(LoadWithResourcesAsync<T>(path));
@@ -173,31 +176,32 @@ namespace MerchantTails.Core
             pendingCallbacks.Remove(path);
         }
 
-        /// <summary>
-        /// Addressablesを使用した非同期読み込み
-        /// </summary>
-        private void LoadWithAddressables<T>(string path) where T : UnityEngine.Object
-        {
-            var handle = Addressables.LoadAssetAsync<T>(path);
-            activeHandles[path] = handle;
-
-            handle.Completed += (AsyncOperationHandle<T> completedHandle) =>
-            {
-                if (completedHandle.Status == AsyncOperationStatus.Succeeded)
-                {
-                    AddToCache(path, completedHandle.Result);
-                    InvokeCallbacks(path, completedHandle.Result);
-                }
-                else
-                {
-                    ErrorHandler.LogError($"Addressable load failed: {path}", "ResourceManager");
-                    InvokeCallbacks(path, null);
-                }
-
-                activeHandles.Remove(path);
-                pendingCallbacks.Remove(path);
-            };
-        }
+        // TODO: Addressables support
+        // /// <summary>
+        // /// Addressablesを使用した非同期読み込み
+        // /// </summary>
+        // private void LoadWithAddressables<T>(string path) where T : UnityEngine.Object
+        // {
+        //     var handle = Addressables.LoadAssetAsync<T>(path);
+        //     activeHandles[path] = handle;
+        //
+        //     handle.Completed += (AsyncOperationHandle<T> completedHandle) =>
+        //     {
+        //         if (completedHandle.Status == AsyncOperationStatus.Succeeded)
+        //         {
+        //             AddToCache(path, completedHandle.Result);
+        //             InvokeCallbacks(path, completedHandle.Result);
+        //         }
+        //         else
+        //         {
+        //             ErrorHandler.LogError($"Addressable load failed: {path}", "ResourceManager");
+        //             InvokeCallbacks(path, null);
+        //         }
+        //
+        //         activeHandles.Remove(path);
+        //         pendingCallbacks.Remove(path);
+        //     };
+        // }
 
         /// <summary>
         /// プリロード（事前読み込み）
@@ -294,11 +298,12 @@ namespace MerchantTails.Core
             if (resourceCache.TryGetValue(path, out CachedResource cached))
             {
                 // Addressablesの場合はリリース
-                if (useAddressables && activeHandles.ContainsKey(path))
-                {
-                    Addressables.Release(activeHandles[path]);
-                    activeHandles.Remove(path);
-                }
+                // TODO: Addressables support
+                // if (useAddressables && activeHandles.ContainsKey(path))
+                // {
+                //     Addressables.Release(activeHandles[path]);
+                //     activeHandles.Remove(path);
+                // }
 
                 resourceCache.Remove(path);
                 ErrorHandler.LogInfo($"Removed from cache: {path}", "ResourceManager");

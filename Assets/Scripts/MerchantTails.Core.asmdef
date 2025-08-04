@@ -4,6 +4,8 @@
     "references": [
         "MerchantTails.Data",
         "MerchantTails.Events",
+        "MerchantTails.Market",
+        "MerchantTails.Inventory",
         "Unity.TextMeshPro",
         "Unity.Addressables",
         "Unity.Mathematics",

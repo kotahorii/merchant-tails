@@ -1,6 +1,8 @@
 using System.Collections.Generic;
 using MerchantTails.Data;
 using MerchantTails.Events;
+using MerchantTails.Inventory;
+using MerchantTails.Market;
 using UnityEngine;
 
 namespace MerchantTails.Core

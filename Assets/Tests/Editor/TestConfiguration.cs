@@ -1,6 +1,7 @@
 using UnityEngine;
 using UnityEditor;
 using NUnit.Framework;
+using System.Linq;
 
 namespace MerchantTails.Tests.Editor
 {
@@ -109,7 +110,7 @@ namespace MerchantTails.Tests.Editor
             Assert.IsNotNull(seasonEnum, "Season enum should exist");
             Assert.IsTrue(seasonEnum.IsEnum, "Season should be an enum");
 
-            var gameStateEnum = System.Type.GetType("MerchantTails.Core.GameState");
+            var gameStateEnum = System.Type.GetType("MerchantTails.Data.GameState");
             Assert.IsNotNull(gameStateEnum, "GameState enum should exist");
             Assert.IsTrue(gameStateEnum.IsEnum, "GameState should be an enum");
 
