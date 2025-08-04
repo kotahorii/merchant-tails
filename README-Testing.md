@@ -130,10 +130,10 @@ public class MySystemTests : TestBase
     {
         // Arrange
         var item = CreateTestItem(ItemType.Fruit, 10);
-        
+
         // Act
         inventorySystem.AddItem(item);
-        
+
         // Assert
         Assert.AreEqual(10, inventorySystem.GetItemCount(ItemType.Fruit));
     }
