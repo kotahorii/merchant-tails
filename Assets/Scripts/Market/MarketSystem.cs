@@ -4,6 +4,10 @@ using System.Linq;
 using MerchantTails.Core;
 using MerchantTails.Data;
 using MerchantTails.Events;
+using Unity.Burst;
+using Unity.Collections;
+using Unity.Jobs;
+using Unity.Mathematics;
 using UnityEngine;
 
 namespace MerchantTails.Market
@@ -32,6 +36,17 @@ namespace MerchantTails.Market
         private Dictionary<ItemType, MarketData> marketPrices;
         private Dictionary<ItemType, List<PriceHistory>> priceHistories;
         private List<MarketEvent> activeMarketEvents;
+        
+        // Job System用のNativeArrays
+        private NativeArray<float> nativeBasePrices;
+        private NativeArray<float> nativeCurrentPrices;
+        private NativeArray<float> nativeVolatilities;
+        private NativeArray<float> nativeDemands;
+        private NativeArray<float> nativeSupplies;
+        private NativeArray<float> nativeSeasonalModifiers;
+        private NativeArray<float> nativeEventModifiers;
+        private NativeArray<float> nativePriceChanges;
+        private JobHandle priceCalculationHandle;
 
         // Seasonal price modifiers
         private readonly Dictionary<ItemType, Dictionary<Season, float>> seasonalModifiers =
@@ -70,18 +85,42 @@ namespace MerchantTails.Market
             activeMarketEvents = new List<MarketEvent>();
 
             // Initialize market data for all item types
-            foreach (ItemType itemType in Enum.GetValues(typeof(ItemType)))
+            var itemTypes = Enum.GetValues(typeof(ItemType));
+            int itemCount = itemTypes.Length;
+            
+            // Initialize NativeArrays for Job System
+            nativeBasePrices = new NativeArray<float>(itemCount, Allocator.Persistent);
+            nativeCurrentPrices = new NativeArray<float>(itemCount, Allocator.Persistent);
+            nativeVolatilities = new NativeArray<float>(itemCount, Allocator.Persistent);
+            nativeDemands = new NativeArray<float>(itemCount, Allocator.Persistent);
+            nativeSupplies = new NativeArray<float>(itemCount, Allocator.Persistent);
+            nativeSeasonalModifiers = new NativeArray<float>(itemCount, Allocator.Persistent);
+            nativeEventModifiers = new NativeArray<float>(itemCount, Allocator.Persistent);
+            nativePriceChanges = new NativeArray<float>(itemCount, Allocator.Persistent);
+            
+            int index = 0;
+            foreach (ItemType itemType in itemTypes)
             {
                 var marketData = CreateInitialMarketData(itemType);
                 marketPrices[itemType] = marketData;
                 priceHistories[itemType] = new List<PriceHistory>();
 
+                // Initialize native arrays
+                nativeBasePrices[index] = marketData.basePrice;
+                nativeCurrentPrices[index] = marketData.currentPrice;
+                nativeVolatilities[index] = marketData.volatility;
+                nativeDemands[index] = marketData.demand;
+                nativeSupplies[index] = marketData.supply;
+                nativeSeasonalModifiers[index] = 1.0f;
+                nativeEventModifiers[index] = 1.0f;
+                
                 // Record initial price
                 RecordPrice(itemType, marketData.currentPrice);
+                index++;
             }
 
             InitializeSeasonalModifiers();
-            Debug.Log($"[MarketSystem] Initialized {marketPrices.Count} market items");
+            Debug.Log($"[MarketSystem] Initialized {marketPrices.Count} market items with Job System support");
         }
 
         private MarketData CreateInitialMarketData(ItemType itemType)
@@ -170,12 +209,144 @@ namespace MerchantTails.Market
 
         private void OnDestroy()
         {
+            // Job完了を待つ
+            priceCalculationHandle.Complete();
+            
+            // NativeArraysの解放
+            if (nativeBasePrices.IsCreated) nativeBasePrices.Dispose();
+            if (nativeCurrentPrices.IsCreated) nativeCurrentPrices.Dispose();
+            if (nativeVolatilities.IsCreated) nativeVolatilities.Dispose();
+            if (nativeDemands.IsCreated) nativeDemands.Dispose();
+            if (nativeSupplies.IsCreated) nativeSupplies.Dispose();
+            if (nativeSeasonalModifiers.IsCreated) nativeSeasonalModifiers.Dispose();
+            if (nativeEventModifiers.IsCreated) nativeEventModifiers.Dispose();
+            if (nativePriceChanges.IsCreated) nativePriceChanges.Dispose();
+            
             // Unsubscribe from events
             EventBus.Unsubscribe<PhaseChangedEvent>(OnPhaseChanged);
             EventBus.Unsubscribe<SeasonChangedEvent>(OnSeasonChanged);
             EventBus.Unsubscribe<DayChangedEvent>(OnDayChanged);
             EventBus.Unsubscribe<GameEventTriggeredEvent>(OnGameEventTriggered);
             EventBus.Unsubscribe<TransactionCompletedEvent>(OnTransactionCompleted);
+        }
+
+        // Unity 6 Job System対応の価格更新メソッド
+        public void UpdatePrices()
+        {
+            if (!enablePriceFluctuations)
+                return;
+
+            // Job System用データの準備
+            PrepareJobData();
+
+            // Job Systemで価格計算を並列実行
+            var priceJob = new MarketPriceCalculationJob
+            {
+                basePrices = nativeBasePrices,
+                volatilities = nativeVolatilities,
+                demands = nativeDemands,
+                supplies = nativeSupplies,
+                seasonalModifiers = nativeSeasonalModifiers,
+                eventModifiers = nativeEventModifiers,
+                globalMarketTrend = CalculateGlobalMarketTrend(),
+                randomSeed = (uint)UnityEngine.Random.Range(0, int.MaxValue),
+                deltaTime = Time.deltaTime,
+                calculatedPrices = nativeCurrentPrices,
+                priceChanges = nativePriceChanges
+            };
+
+            // Jobのスケジューリング
+            priceCalculationHandle = priceJob.Schedule(marketPrices.Count, 1);
+            
+            // Jobの完了を待つ
+            priceCalculationHandle.Complete();
+            
+            // 結果をDictionaryに反映
+            ApplyJobResults();
+
+            Debug.Log("[MarketSystem] Prices updated using Job System");
+        }
+        
+        private void PrepareJobData()
+        {
+            int index = 0;
+            foreach (var kvp in marketPrices)
+            {
+                var marketData = kvp.Value;
+                nativeCurrentPrices[index] = marketData.currentPrice;
+                nativeDemands[index] = marketData.demand;
+                nativeSupplies[index] = marketData.supply;
+                nativeSeasonalModifiers[index] = GetSeasonalModifier(kvp.Key);
+                nativeEventModifiers[index] = GetEventModifier(kvp.Key);
+                index++;
+            }
+        }
+        
+        private void ApplyJobResults()
+        {
+            int index = 0;
+            foreach (var kvp in marketPrices.ToList())
+            {
+                var itemType = kvp.Key;
+                var marketData = kvp.Value;
+                
+                float oldPrice = marketData.currentPrice;
+                float newPrice = nativeCurrentPrices[index];
+                
+                marketData.currentPrice = newPrice;
+                marketData.lastUpdateDay = GameManager.Instance.TimeManager.CurrentDay;
+                
+                // Record price history
+                RecordPrice(itemType, newPrice);
+                
+                // Publish price change event
+                if (Math.Abs(oldPrice - newPrice) > 0.01f)
+                {
+                    OnPriceChanged?.Invoke(itemType, oldPrice, newPrice);
+                    EventBus.Publish(new PriceChangedEvent(itemType, oldPrice, newPrice));
+                }
+                
+                index++;
+            }
+        }
+        
+        private float CalculateGlobalMarketTrend()
+        {
+            // グローバル市場トレンドの計算（-1.0 ~ 1.0）
+            float trend = 0f;
+            foreach (var history in priceHistories.Values)
+            {
+                if (history.Count > 10)
+                {
+                    float recentAvg = history.TakeLast(5).Average(h => h.price);
+                    float olderAvg = history.Skip(history.Count - 10).Take(5).Average(h => h.price);
+                    trend += (recentAvg - olderAvg) / olderAvg;
+                }
+            }
+            return Mathf.Clamp(trend / priceHistories.Count, -1f, 1f);
+        }
+        
+        private float GetSeasonalModifier(ItemType itemType)
+        {
+            var currentSeason = GameManager.Instance.TimeManager.CurrentSeason;
+            if (seasonalModifiers.ContainsKey(itemType) && seasonalModifiers[itemType].ContainsKey(currentSeason))
+            {
+                return seasonalModifiers[itemType][currentSeason];
+            }
+            return 1.0f;
+        }
+        
+        private float GetEventModifier(ItemType itemType)
+        {
+            float modifier = 1.0f;
+            foreach (var evt in activeMarketEvents)
+            {
+                if (evt.priceModifiers.ContainsKey(itemType))
+                {
+                    modifier *= evt.priceModifiers[itemType];
+                }
+            }
+            return modifier;
         }
 
         // Event handlers

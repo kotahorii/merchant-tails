@@ -14,18 +14,18 @@ namespace MerchantTails.Core
         private static UpdateManager instance;
         public static UpdateManager Instance => instance;
 
-        [Header("Update Settings")]
+        [Header("Update Settings - 2D Novel Game Optimized")]
         [SerializeField]
-        private int targetFrameRate = 60;
+        private int targetFrameRate = 30; // 2Dゲーム向けに30FPSに最適化
 
         [SerializeField]
-        private float fixedUpdateRate = 0.02f; // 50Hz
+        private float fixedUpdateRate = 0.1f; // 10Hz - 物理演算不要のため低頻度
 
         [SerializeField]
-        private float slowUpdateRate = 1f; // 1Hz
+        private float slowUpdateRate = 1f; // 1Hz - UI更新用
 
         [SerializeField]
-        private float verySlowUpdateRate = 5f; // 0.2Hz
+        private float verySlowUpdateRate = 5f; // 0.2Hz - 市場価格更新用
 
         [Header("Performance Settings")]
         [SerializeField]
@@ -107,8 +107,12 @@ namespace MerchantTails.Core
             // デルタタイム計算
             deltaTime = Time.deltaTime;
 
-            // FPS計算
-            UpdateFPS();
+            // FPS計算（2Dゲームなので頻度を下げる）
+            if (frameCount % 60 == 0)
+            {
+                UpdateFPS();
+            }
+            frameCount++;
 
             // パフォーマンスチェック
             performanceCheckTimer += deltaTime;
@@ -118,10 +122,13 @@ namespace MerchantTails.Core
                 performanceCheckTimer = 0f;
             }
 
-            // 通常更新
-            UpdateNormal();
+            // 通常更新（UI要素のみ必要時に更新）
+            if (updatables.Count > 0 || prioritizedUpdatables.Count > 0)
+            {
+                UpdateNormal();
+            }
 
-            // スロー更新
+            // スロー更新（UI更新用）
             slowUpdateTimer += deltaTime;
             if (slowUpdateTimer >= slowUpdateRate)
             {
@@ -129,7 +136,7 @@ namespace MerchantTails.Core
                 slowUpdateTimer = 0f;
             }
 
-            // ベリースロー更新
+            // ベリースロー更新（市場価格等の定期更新）
             verySlowUpdateTimer += deltaTime;
             if (verySlowUpdateTimer >= verySlowUpdateRate)
             {
@@ -291,7 +298,7 @@ namespace MerchantTails.Core
         }
 
         /// <summary>
-        /// パフォーマンス設定を調整
+        /// パフォーマンス設定を調整（2Dゲーム向け最適化）
         /// </summary>
         private void AdjustPerformanceSettings()
         {
@@ -300,20 +307,39 @@ namespace MerchantTails.Core
                 case PerformanceLevel.Normal:
                     slowUpdateRate = 1f;
                     verySlowUpdateRate = 5f;
+                    Application.targetFrameRate = 30;
                     break;
 
                 case PerformanceLevel.Low:
                     slowUpdateRate = 2f;
                     verySlowUpdateRate = 10f;
-                    QualitySettings.SetQualityLevel(QualitySettings.GetQualityLevel() - 1, true);
+                    Application.targetFrameRate = 24;
+                    // 2Dゲームなので品質設定は変更しない
                     break;
 
                 case PerformanceLevel.Critical:
                     slowUpdateRate = 3f;
                     verySlowUpdateRate = 15f;
-                    QualitySettings.SetQualityLevel(0, true);
+                    Application.targetFrameRate = 20;
+                    // エフェクトを無効化
+                    DisableNonEssentialEffects();
                     break;
             }
+        }
+        
+        /// <summary>
+        /// 非必須エフェクトを無効化
+        /// </summary>
+        private void DisableNonEssentialEffects()
+        {
+            // パーティクルエフェクトの無効化
+            var particles = FindObjectsOfType<ParticleSystem>();
+            foreach (var particle in particles)
+            {
+                particle.enableEmission = false;
+            }
+            
+            ErrorHandler.LogWarning("Performance critical: Disabled non-essential effects", "UpdateManager");
         }
 
         // 登録・解除メソッド

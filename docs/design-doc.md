@@ -20,11 +20,14 @@
 
 ### 1.2 技術スタック
 
--   **エンジン**: Unity 2022.3 LTS
+-   **エンジン**: Unity 6.1 LTS (6000.1.14f1)
 -   **言語**: C#
 -   **アーキテクチャパターン**: MVC + Observer Pattern
--   **データ永続化**: JSON + PlayerPrefs
+-   **データ永続化**: JSON + PlayerPrefs (Unity 6の新しいNewtonsoft.Json統合)
 -   **状態管理**: Finite State Machine
+-   **UI フレームワーク**: UI Toolkit (Unity 6対応)
+-   **並列処理**: Job System + Burst Compiler
+-   **アセット管理**: Addressables 2.0
 
 ## 2. コアシステム設計
 
@@ -80,12 +83,14 @@ public class MarketSystem : MonoBehaviour
 {
     private Dictionary<ItemType, MarketData> marketPrices;
     private EventSystem eventSystem;
+    private JobHandle priceCalculationHandle; // Unity 6 Job System
 
     public float GetCurrentPrice(ItemType itemType);
     public float GetBasePrice(ItemType itemType);
     public List<PriceHistory> GetPriceHistory(ItemType itemType);
 
-    private void UpdatePrices();
+    // Job System対応の並列価格計算
+    private void UpdatePricesParallel();
     private void ApplySeasonalEffects();
     private void ApplyEventEffects();
 }
@@ -98,6 +103,13 @@ public class MarketData
     public float volatility;
     public List<PriceHistory> history;
     public SeasonalModifier seasonalModifier;
+}
+
+// Unity 6 Job System用の価格計算Job
+[BurstCompile]
+public struct MarketPriceCalculationJob : IJobParallelFor
+{
+    // 並列処理による高速価格計算
 }
 ```
 
@@ -234,20 +246,25 @@ public class EventSystem : MonoBehaviour
 }
 ```
 
-## 4. UI/UX システム設計
+## 4. UI/UX システム設計 (Unity 6 UI Toolkit対応)
 
 ### 4.1 画面遷移
 
 ```csharp
-public class SceneManager : MonoBehaviour
+// Unity 6 UI Toolkit対応の新しいUI管理システム
+public class UIToolkitManager : MonoBehaviour
 {
-    private Stack<UIScreen> screenStack;
-    private Dictionary<ScreenType, UIScreen> screens;
+    private Stack<VisualElement> screenStack;
+    private Dictionary<ScreenType, UIDocument> screens;
+    private PanelSettings panelSettings; // Unity 6 UI Toolkit
 
     public void PushScreen(ScreenType screenType);
     public void PopScreen();
     public void ReplaceScreen(ScreenType screenType);
     public void ClearStack();
+    
+    // データバインディング対応
+    public void BindData<T>(string elementName, T data);
 }
 
 public enum ScreenType
@@ -327,20 +344,24 @@ public enum TutorialType
 
 ## 6. セーブ/ロードシステム
 
-### 6.1 データ永続化
+### 6.1 データ永続化 (Unity 6 最適化)
 
 ```csharp
 public class SaveSystem : MonoBehaviour
 {
     private const string SAVE_KEY = "MerchantTales_SaveData";
+    private JobHandle saveJobHandle; // Unity 6 Job System
 
     public void SaveGame(PlayerData playerData);
     public PlayerData LoadGame();
     public bool HasSaveData();
     public void DeleteSaveData();
 
-    // オートセーブ
-    private void AutoSave();
+    // Unity 6の新しいJSON統合を使用した高速化
+    private void SaveGameAsync();
+    private void LoadGameAsync();
+    
+    // Job Systemによる並列セーブ処理
     private IEnumerator AutoSaveCoroutine();
 }
 
@@ -352,25 +373,37 @@ public class SaveData
     public DateTime saveTimestamp;
     public string gameVersion;
 }
+
+// Unity 6 Job System用のセーブデータ処理Job
+[BurstCompile]
+public struct SaveDataProcessingJob : IJob
+{
+    // 並列処理による高速セーブ/ロード
+}
 ```
 
 ## 7. パフォーマンス最適化
 
-### 7.1 メモリ管理
+### 7.1 メモリ管理 (Unity 6 Addressables 2.0)
 
 ```csharp
 public class ResourceManager : MonoBehaviour
 {
-    private Dictionary<string, Object> loadedAssets;
+    private Dictionary<string, AsyncOperationHandle> loadedAssets;
     private Queue<string> assetQueue;
 
-    public T LoadAsset<T>(string assetPath) where T : Object;
+    // Unity 6 Addressables 2.0を使用した効率的なアセット管理
+    public async Task<T> LoadAssetAsync<T>(string assetPath) where T : Object;
     public void UnloadAsset(string assetPath);
     public void PreloadAssets(List<string> assetPaths);
+    
+    // 2Dゲーム向けスプライトアトラス最適化
+    public void LoadSpriteAtlas(string atlasPath);
+    public void UnloadUnusedSprites();
 }
 ```
 
-### 7.2 更新頻度最適化
+### 7.2 更新頻度最適化 (2Dノベルゲーム向け)
 
 ```csharp
 public class UpdateManager : MonoBehaviour
@@ -379,10 +412,11 @@ public class UpdateManager : MonoBehaviour
     private List<IUpdatable> fixedUpdates;
     private List<IUpdatable> slowUpdates;
 
-    // フレーム毎、物理更新、低頻度更新を分離
-    private void Update();
-    private void FixedUpdate();
-    private IEnumerator SlowUpdateCoroutine();
+    // 2Dノベルゲーム向けに最適化された更新頻度
+    // UIの更新頻度を下げてパフォーマンス向上
+    private void Update(); // UI要素は必要時のみ更新
+    private void FixedUpdate(); // 物理演算不要のため最小限
+    private IEnumerator SlowUpdateCoroutine(); // 市場価格等の定期更新
 }
 ```
 
@@ -525,4 +559,39 @@ public enum LanguageType
 }
 ```
 
-この Design Document は、PRD で定義された要件を技術的に実装するための詳細な設計指針を提供します。各システムは独立性を保ちながら、イベントバスを通じて効率的に連携し、拡張性とメンテナンス性を確保しています。
+## 13. Unity 6/6.1 新機能活用
+
+### 13.1 2Dゲーム向け最適化
+
+```csharp
+// Unity 6の新機能を活用した2Dゲーム最適化
+public class Unity6OptimizationManager : MonoBehaviour
+{
+    // GPU Resident Drawer対応のスプライトバッチング
+    public void SetupGPUBatching();
+    
+    // UI Toolkitによる効率的なUI描画
+    public void OptimizeUIRendering();
+    
+    // Job Systemによるデータ処理の並列化
+    public void SetupParallelProcessing();
+}
+```
+
+### 13.2 プラットフォーム別最適化
+
+```csharp
+public class PlatformOptimizer : MonoBehaviour
+{
+    // Nintendo Switch向け最適化
+    public void OptimizeForSwitch();
+    
+    // Steam向け高解像度対応
+    public void OptimizeForPC();
+    
+    // Unity 6の新しいテクスチャ圧縮
+    public void OptimizeTextureCompression();
+}
+```
+
+この Design Document は、PRD で定義された要件を技術的に実装するための詳細な設計指針を提供します。Unity 6/6.1の新機能を活用し、2Dノベルゲーム風の静的なゲームに最適化されたアーキテクチャとなっています。各システムは独立性を保ちながら、イベントバスを通じて効率的に連携し、拡張性とメンテナンス性を確保しています。

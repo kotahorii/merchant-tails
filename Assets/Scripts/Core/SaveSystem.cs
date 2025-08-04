@@ -4,9 +4,14 @@ using System.IO;
 using System.Linq;
 using System.Security.Cryptography;
 using System.Text;
+using System.Threading.Tasks;
 using MerchantTails.Data;
 using MerchantTails.Events;
+using Unity.Burst;
+using Unity.Collections;
+using Unity.Jobs;
 using UnityEngine;
+using Newtonsoft.Json; // Unity 6の新しいJSON統合
 
 namespace MerchantTails.Core
 {
@@ -90,7 +95,7 @@ namespace MerchantTails.Core
             // オートセーブの処理
             if (enableAutoSave && Time.time - lastAutoSaveTime > autoSaveInterval)
             {
-                AutoSave();
+                _ = AutoSaveAsync(); // Unity 6の非同期処理
                 lastAutoSaveTime = Time.time;
             }
         }
@@ -151,9 +156,9 @@ namespace MerchantTails.Core
         }
 
         /// <summary>
-        /// 現在のゲーム状態をセーブ
+        /// 現在のゲーム状態をセーブ（Unity 6 Job System対応）
         /// </summary>
-        public void Save(int slot = -1)
+        public async Task<bool> SaveAsync(int slot = -1)
         {
             if (slot == -1)
                 slot = currentSlot;
@@ -167,13 +172,16 @@ namespace MerchantTails.Core
                 currentSaveData.playTime = Time.time;
                 currentSaveData.version = Application.version;
 
-                // JSONに変換
-                string json = JsonUtility.ToJson(currentSaveData, true);
+                // Unity 6の新しいNewtonsoft.Json統合を使用
+                string json = JsonConvert.SerializeObject(currentSaveData, Formatting.Indented);
+                byte[] jsonBytes = Encoding.UTF8.GetBytes(json);
 
-                // 暗号化
+                // Job Systemで圧縮と暗号化を並列処理
+                byte[] processedData = jsonBytes;
+
                 if (enableEncryption)
                 {
-                    json = Encrypt(json);
+                    processedData = await ProcessDataWithJobsAsync(jsonBytes, true);
                 }
 
                 // バックアップの作成
@@ -182,25 +190,28 @@ namespace MerchantTails.Core
                     CreateBackup(slot);
                 }
 
-                // ファイルに書き込み
+                // ファイルに書き込み（非同期）
                 string filePath = GetSaveFilePath(slot);
-                File.WriteAllText(filePath, json);
+                await File.WriteAllBytesAsync(filePath, processedData);
 
                 OnSaveCompleted?.Invoke(slot);
                 EventBus.Publish(new SaveCompletedEvent(slot));
                 ErrorHandler.LogInfo($"Save completed: Slot {slot}", "SaveSystem");
+                return true;
             }
             catch (Exception e)
             {
                 OnSaveError?.Invoke(e.Message);
                 ErrorHandler.LogError($"Save failed: {e.Message}", "SaveSystem");
+                return false;
             }
         }
 
+
         /// <summary>
-        /// セーブデータをロード
+        /// セーブデータをロード（Unity 6 Job System対応）
         /// </summary>
-        public bool Load(int slot = -1)
+        public async Task<bool> LoadAsync(int slot = -1)
         {
             if (slot == -1)
                 slot = currentSlot;
@@ -215,17 +226,20 @@ namespace MerchantTails.Core
 
             try
             {
-                // ファイルを読み込み
-                string json = File.ReadAllText(filePath);
+                // ファイルを読み込み（非同期）
+                byte[] encryptedData = await File.ReadAllBytesAsync(filePath);
 
-                // 復号化
+                // Job Systemで復号化と解凍を並列処理
+                byte[] jsonBytes = encryptedData;
+
                 if (enableEncryption)
                 {
-                    json = Decrypt(json);
+                    jsonBytes = await ProcessDataWithJobsAsync(encryptedData, false);
                 }
 
-                // JSONからデシリアライズ
-                currentSaveData = JsonUtility.FromJson<SaveData>(json);
+                // Unity 6の新しいNewtonsoft.Json統合を使用
+                string json = Encoding.UTF8.GetString(jsonBytes);
+                currentSaveData = JsonConvert.DeserializeObject<SaveData>(json);
                 currentSlot = slot;
 
                 // ゲーム状態に適用
@@ -244,13 +258,19 @@ namespace MerchantTails.Core
             }
         }
 
+
         /// <summary>
-        /// オートセーブ
+        /// オートセーブ（Unity 6対応）
         /// </summary>
+        private async Task AutoSaveAsync()
+        {
+            await SaveAsync(currentSlot);
+            ErrorHandler.LogInfo("Auto save completed", "SaveSystem");
+        }
+
         private void AutoSave()
         {
-            Save(currentSlot);
-            ErrorHandler.LogInfo("Auto save completed", "SaveSystem");
+            _ = AutoSaveAsync();
         }
 
         /// <summary>
@@ -609,7 +629,110 @@ namespace MerchantTails.Core
             PlayerPrefs.Save();
         }
 
-        // 暗号化・復号化
+        /// <summary>
+        /// Job Systemを使用したデータ処理
+        /// </summary>
+        private async Task<byte[]> ProcessDataWithJobsAsync(byte[] inputData, bool isEncrypting)
+        {
+            return await Task.Run(() =>
+            {
+                byte[] result = inputData;
+                
+                if (isEncrypting)
+                {
+                    // 圧縮
+                    var compressedData = new NativeArray<byte>(inputData.Length * 2, Allocator.TempJob);
+                    var uncompressedData = new NativeArray<byte>(inputData, Allocator.TempJob);
+                    var compressedSize = new NativeArray<int>(1, Allocator.TempJob);
+                    
+                    var compressionJob = new SaveDataCompressionJob
+                    {
+                        uncompressedData = uncompressedData,
+                        compressedData = compressedData,
+                        compressedSize = compressedSize
+                    };
+                    
+                    var compressionHandle = compressionJob.Schedule();
+                    compressionHandle.Complete();
+                    
+                    int actualSize = compressedSize[0];
+                    result = new byte[actualSize];
+                    compressedData.Slice(0, actualSize).CopyTo(result);
+                    
+                    compressedData.Dispose();
+                    uncompressedData.Dispose();
+                    compressedSize.Dispose();
+                    
+                    // 暗号化
+                    var plainData = new NativeArray<byte>(result, Allocator.TempJob);
+                    var encryptedData = new NativeArray<byte>(result.Length, Allocator.TempJob);
+                    
+                    var encryptionJob = new SaveDataEncryptionJob
+                    {
+                        plainData = plainData,
+                        encryptedData = encryptedData,
+                        encryptionKey = (uint)encryptionKey.GetHashCode()
+                    };
+                    
+                    var encryptionHandle = encryptionJob.Schedule(result.Length, 64);
+                    encryptionHandle.Complete();
+                    
+                    encryptedData.CopyTo(result);
+                    
+                    plainData.Dispose();
+                    encryptedData.Dispose();
+                }
+                else
+                {
+                    // 復号化
+                    var encryptedData = new NativeArray<byte>(inputData, Allocator.TempJob);
+                    var decryptedData = new NativeArray<byte>(inputData.Length, Allocator.TempJob);
+                    
+                    var decryptionJob = new SaveDataDecryptionJob
+                    {
+                        encryptedData = encryptedData,
+                        decryptedData = decryptedData,
+                        encryptionKey = (uint)encryptionKey.GetHashCode()
+                    };
+                    
+                    var decryptionHandle = decryptionJob.Schedule(inputData.Length, 64);
+                    decryptionHandle.Complete();
+                    
+                    decryptedData.CopyTo(result);
+                    
+                    encryptedData.Dispose();
+                    decryptedData.Dispose();
+                    
+                    // 解凍
+                    var compressedData = new NativeArray<byte>(result, Allocator.TempJob);
+                    var decompressedData = new NativeArray<byte>(result.Length * 10, Allocator.TempJob); // 十分な大きさを確保
+                    var decompressedSize = new NativeArray<int>(1, Allocator.TempJob);
+                    
+                    var decompressionJob = new SaveDataDecompressionJob
+                    {
+                        compressedData = compressedData,
+                        compressedSize = result.Length,
+                        decompressedData = decompressedData,
+                        decompressedSize = decompressedSize
+                    };
+                    
+                    var decompressionHandle = decompressionJob.Schedule();
+                    decompressionHandle.Complete();
+                    
+                    int actualSize = decompressedSize[0];
+                    result = new byte[actualSize];
+                    decompressedData.Slice(0, actualSize).CopyTo(result);
+                    
+                    compressedData.Dispose();
+                    decompressedData.Dispose();
+                    decompressedSize.Dispose();
+                }
+                
+                return result;
+            });
+        }
+
+        // 暗号化・復号化（旧実装、削除予定）
         private string Encrypt(string plainText)
         {
             if (string.IsNullOrEmpty(plainText))

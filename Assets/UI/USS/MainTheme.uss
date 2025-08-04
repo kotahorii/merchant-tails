@@ -1,0 +1,317 @@
+/* Unity 6 UI Toolkit - Main Theme Stylesheet */
+/* 2Dノベルゲーム向けの和風商人テーマ */
+
+:root {
+    /* Color Palette */
+    --primary-color: #8B4513; /* 茶色 - 商人のイメージ */
+    --secondary-color: #DAA520; /* ゴールド - 富のイメージ */
+    --accent-color: #DC143C; /* 深紅 - 和風アクセント */
+    --background-color: #FDF5E6; /* オールドレース - 和紙風 */
+    --text-color: #2F4F4F; /* ダークスレートグレー */
+    --text-light: #696969; /* ディムグレー */
+
+    /* Spacing */
+    --spacing-xs: 4px;
+    --spacing-sm: 8px;
+    --spacing-md: 16px;
+    --spacing-lg: 24px;
+    --spacing-xl: 32px;
+
+    /* Typography */
+    --font-size-xs: 12px;
+    --font-size-sm: 14px;
+    --font-size-md: 16px;
+    --font-size-lg: 20px;
+    --font-size-xl: 24px;
+    --font-size-xxl: 32px;
+
+    /* Animation */
+    --transition-fast: 200ms;
+    --transition-normal: 300ms;
+    --transition-slow: 500ms;
+}
+
+/* Panel Base Styles */
+.panel {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    background-color: var(--background-color);
+    padding: var(--spacing-lg);
+    transition-duration: var(--transition-normal);
+    transition-property: opacity, scale;
+}
+
+.panel__background {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    background-image: resource('UI/Textures/paper-texture');
+    opacity: 0.1;
+}
+
+/* Main Menu Styles */
+.logo-container {
+    align-self: center;
+    margin-top: 10%;
+    margin-bottom: var(--spacing-xl);
+}
+
+.game-title {
+    font-size: var(--font-size-xxl);
+    color: var(--primary-color);
+    -unity-font-style: bold;
+    -unity-text-align: middle-center;
+    text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
+}
+
+.game-subtitle {
+    font-size: var(--font-size-lg);
+    color: var(--text-light);
+    -unity-text-align: middle-center;
+    margin-top: var(--spacing-sm);
+}
+
+.menu-buttons {
+    align-self: center;
+    width: 300px;
+    margin-top: var(--spacing-xl);
+}
+
+.menu-button {
+    margin: var(--spacing-sm) 0;
+    padding: var(--spacing-md) var(--spacing-lg);
+    background-color: rgba(255, 255, 255, 0.9);
+    border-color: var(--primary-color);
+    border-width: 2px;
+    border-radius: 8px;
+    color: var(--text-color);
+    font-size: var(--font-size-md);
+    transition-duration: var(--transition-fast);
+    transition-property: background-color, scale;
+}
+
+.menu-button:hover {
+    background-color: var(--secondary-color);
+    scale: 1.05;
+}
+
+.menu-button:active {
+    scale: 0.95;
+}
+
+.menu-button--primary {
+    background-color: var(--primary-color);
+    color: white;
+}
+
+.menu-button--primary:hover {
+    background-color: #A0522D;
+}
+
+.menu-button--danger {
+    color: var(--accent-color);
+}
+
+.version-label {
+    position: absolute;
+    bottom: var(--spacing-md);
+    right: var(--spacing-md);
+    color: var(--text-light);
+    font-size: var(--font-size-xs);
+}
+
+/* HUD Styles */
+.hud {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    flex-direction: column;
+}
+
+.hud__top-bar {
+    flex-direction: row;
+    justify-content: space-between;
+    background-color: rgba(47, 79, 79, 0.95);
+    padding: var(--spacing-md);
+    border-bottom-width: 2px;
+    border-bottom-color: var(--secondary-color);
+}
+
+.time-display {
+    flex-direction: row;
+    align-items: center;
+}
+
+.season-label {
+    color: white;
+    font-size: var(--font-size-md);
+    margin-right: var(--spacing-md);
+}
+
+.day-label {
+    color: var(--secondary-color);
+    font-size: var(--font-size-lg);
+    -unity-font-style: bold;
+    margin-right: var(--spacing-md);
+}
+
+.phase-indicator {
+    background-color: rgba(255, 255, 255, 0.2);
+    border-radius: 16px;
+    padding: var(--spacing-xs) var(--spacing-md);
+}
+
+.phase-label {
+    color: white;
+    font-size: var(--font-size-sm);
+}
+
+.money-display {
+    flex-direction: row;
+    align-items: baseline;
+}
+
+.currency-symbol {
+    color: var(--secondary-color);
+    font-size: var(--font-size-xl);
+    margin-right: var(--spacing-xs);
+}
+
+.money-amount {
+    color: white;
+    font-size: var(--font-size-xl);
+    -unity-font-style: bold;
+}
+
+.quick-stats {
+    flex-direction: row;
+}
+
+.icon-button {
+    width: 40px;
+    height: 40px;
+    margin: 0 var(--spacing-xs);
+    background-color: rgba(255, 255, 255, 0.1);
+    border-width: 0;
+    border-radius: 8px;
+    transition-duration: var(--transition-fast);
+}
+
+.icon-button:hover {
+    background-color: rgba(255, 255, 255, 0.2);
+    scale: 1.1;
+}
+
+.icon {
+    font-size: 20px;
+    -unity-text-align: middle-center;
+}
+
+.notification-area {
+    position: absolute;
+    top: 80px;
+    right: var(--spacing-md);
+    width: 300px;
+}
+
+.notification {
+    background-color: rgba(255, 255, 255, 0.95);
+    border-radius: 8px;
+    padding: var(--spacing-md);
+    margin-bottom: var(--spacing-sm);
+    border-left-width: 4px;
+    border-left-color: var(--primary-color);
+    opacity: 0;
+    translate: 20px 0;
+    transition-duration: var(--transition-normal);
+    transition-property: opacity, translate;
+}
+
+.notification--info {
+    border-left-color: #4169E1;
+}
+
+.notification--success {
+    border-left-color: #32CD32;
+}
+
+.notification--warning {
+    border-left-color: #FFD700;
+}
+
+.notification--error {
+    border-left-color: var(--accent-color);
+}
+
+.notification__title {
+    font-size: var(--font-size-md);
+    -unity-font-style: bold;
+    color: var(--text-color);
+    margin-bottom: var(--spacing-xs);
+}
+
+.notification__message {
+    font-size: var(--font-size-sm);
+    color: var(--text-light);
+}
+
+.quick-action-bar {
+    position: absolute;
+    bottom: var(--spacing-md);
+    left: 50%;
+    translate: -50% 0;
+    flex-direction: row;
+    background-color: rgba(47, 79, 79, 0.95);
+    border-radius: 24px;
+    padding: var(--spacing-sm);
+}
+
+.action-button {
+    margin: 0 var(--spacing-xs);
+    padding: var(--spacing-sm) var(--spacing-lg);
+    background-color: rgba(255, 255, 255, 0.1);
+    border-width: 0;
+    border-radius: 16px;
+    color: white;
+    font-size: var(--font-size-sm);
+    transition-duration: var(--transition-fast);
+}
+
+.action-button:hover {
+    background-color: var(--secondary-color);
+    color: var(--text-color);
+}
+
+/* Animations */
+@keyframes fadeIn {
+    0% {
+        opacity: 0;
+        translate: 0 -20px;
+    }
+    100% {
+        opacity: 1;
+        translate: 0 0;
+    }
+}
+
+@keyframes slideIn {
+    0% {
+        translate: -100% 0;
+    }
+    100% {
+        translate: 0 0;
+    }
+}
+
+/* Responsive Design for 2D Games */
+@media (max-aspect-ratio: 16/9) {
+    .menu-buttons {
+        width: 80%;
+        max-width: 300px;
+    }
+
+    .notification-area {
+        width: 250px;
+    }
+}

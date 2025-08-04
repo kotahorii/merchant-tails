@@ -41,8 +41,8 @@ namespace MerchantTails.Testing
             base.Teardown();
         }
 
-        [Test]
-        public void SaveAndLoad_PlayerData()
+        [UnityTest]
+        public IEnumerator SaveAndLoad_PlayerData()
         {
             // Arrange
             string testName = "TestMerchant";
@@ -57,8 +57,10 @@ namespace MerchantTails.Testing
             gameManager.PlayerData.TotalTransactions = testTransactions;
             gameManager.PlayerData.TotalProfit = testProfit;
 
-            // Act
-            saveSystem.Save(0);
+            // Act - Use async methods
+            var saveTask = saveSystem.SaveAsync(0);
+            yield return new WaitUntil(() => saveTask.IsCompleted);
+            Assert.IsTrue(saveTask.Result, "Save should succeed");
 
             // Reset data
             gameManager.PlayerData.SetPlayerName("Default");
@@ -67,10 +69,11 @@ namespace MerchantTails.Testing
             gameManager.PlayerData.TotalTransactions = 0;
             gameManager.PlayerData.TotalProfit = 0;
 
-            bool loadSuccess = saveSystem.Load(0);
+            var loadTask = saveSystem.LoadAsync(0);
+            yield return new WaitUntil(() => loadTask.IsCompleted);
 
             // Assert
-            Assert.IsTrue(loadSuccess, "Load should succeed");
+            Assert.IsTrue(loadTask.Result, "Load should succeed");
             Assert.AreEqual(testName, gameManager.PlayerData.PlayerName);
             Assert.AreEqual(testMoney, gameManager.PlayerData.CurrentMoney);
             Assert.AreEqual(testRank, gameManager.PlayerData.CurrentRank);
