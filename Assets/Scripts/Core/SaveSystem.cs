@@ -207,7 +207,6 @@ namespace MerchantTails.Core
             }
         }
 
-
         /// <summary>
         /// セーブデータをロード（Unity 6 Job System対応）
         /// </summary>
