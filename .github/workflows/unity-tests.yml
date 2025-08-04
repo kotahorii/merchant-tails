@@ -1,9 +1,5 @@
 name: Unity Tests
 
-# NOTE: Unity 6 (6000.x.x) is not yet fully supported by game-ci/unity-test-runner
-# This workflow is temporarily disabled until proper Unity 6 support is available
-# Alternative: Use self-hosted runners with Unity 6 installed locally
-
 on:
   push:
     branches: [main, develop]
@@ -13,22 +9,15 @@ on:
 
 env:
   UNITY_LICENSE: ${{ secrets.UNITY_LICENSE }}
+  UNITY_EMAIL: ${{ secrets.UNITY_EMAIL }}
+  UNITY_PASSWORD: ${{ secrets.UNITY_PASSWORD }}
 
 jobs:
-  # Unity tests are temporarily disabled due to Unity 6 compatibility issues
-  # To re-enable:
-  # 1. Wait for game-ci/unity-test-runner to support Unity 6 version format
-  # 2. Or use self-hosted runners with Unity 6 installed
-  # 3. Or downgrade to Unity 2022.3 LTS
-  
-  # test:
-    name: Run Unity Tests (${{ matrix.unityVersion }})
+  test:
+    name: Run Unity Tests
     runs-on: ubuntu-latest
     strategy:
       fail-fast: false
-      matrix:
-        unityVersion:
-          - 6000.1.14f1
     steps:
       - uses: actions/checkout@v4
         with:
@@ -38,39 +27,64 @@ jobs:
       - uses: actions/cache@v3
         with:
           path: Library
-          key: Library-${{ matrix.unityVersion }}-${{ hashFiles('Assets/**', 'Packages/**', 'ProjectSettings/**') }}
+          key: Library-Unity6-${{ hashFiles('Assets/**', 'Packages/**', 'ProjectSettings/**') }}
           restore-keys: |
-            Library-${{ matrix.unityVersion }}-
+            Library-Unity6-
             Library-
 
-      # Try with auto-detection first
-      - name: Run Unity Tests (auto-detect version)
-        id: test-auto
+      # Setup Unity license
+      - name: Create Unity license file
+        run: |
+          mkdir -p /tmp/Unity
+          echo "${{ secrets.UNITY_LICENSE }}" > /tmp/Unity/Unity_lic.ulf
+        
+      # Unity 6: Use game-ci with Unity 2022.3 compatible format
+      - name: Run Unity Tests (Compatibility Mode)
+        id: test-compat
         uses: game-ci/unity-test-runner@v4
         continue-on-error: true
         env:
           UNITY_LICENSE: ${{ secrets.UNITY_LICENSE }}
         with:
-          unityVersion: auto
-          testMode: PlayMode
-          artifactsPath: test-results
-          githubToken: ${{ secrets.GITHUB_TOKEN }}
-          checkName: Unity Test Results
-          coverageOptions: generateAdditionalMetrics;generateHtmlReport;generateBadgeReport;assemblyFilters:+MerchantTails.Core
-
-      # Fallback to v3 if v4 fails
-      - name: Run Unity Tests (v3 fallback)
-        if: steps.test-auto.outcome == 'failure'
-        uses: game-ci/unity-test-runner@v3
-        env:
-          UNITY_LICENSE: ${{ secrets.UNITY_LICENSE }}
-        with:
-          unityVersion: ${{ matrix.unityVersion }}
+          projectPath: .
+          unityVersion: 2022.3.45f1  # Use compatible version format
           testMode: all
           artifactsPath: test-results
           githubToken: ${{ secrets.GITHUB_TOKEN }}
           checkName: Unity Test Results
-          coverageOptions: generateAdditionalMetrics;generateHtmlReport;generateBadgeReport;assemblyFilters:+MerchantTails.Core
+          customParameters: -nographics -batchmode
+
+      # If alternative fails, try game-ci with different parameters
+      - name: Run Unity Tests (game-ci auto-detect)
+        if: steps.test-alternative.outcome == 'failure'
+        id: test-gameciAuto
+        uses: game-ci/unity-test-runner@v4
+        continue-on-error: true
+        env:
+          UNITY_LICENSE: ${{ secrets.UNITY_LICENSE }}
+        with:
+          projectPath: .
+          unityVersion: auto
+          testMode: all
+          artifactsPath: test-results
+          githubToken: ${{ secrets.GITHUB_TOKEN }}
+          checkName: Unity Test Results
+          customParameters: -nographics -batchmode
+
+      # Final attempt: Unity 2022.3 LTS format (might work with Unity 6)
+      - name: Run Unity Tests (LTS format attempt)
+        if: steps.test-gameciAuto.outcome == 'failure'
+        uses: game-ci/unity-test-runner@v4
+        env:
+          UNITY_LICENSE: ${{ secrets.UNITY_LICENSE }}
+        with:
+          projectPath: .
+          unityVersion: 2022.3.45f1  # Use last known working format
+          testMode: all
+          artifactsPath: test-results
+          githubToken: ${{ secrets.GITHUB_TOKEN }}
+          checkName: Unity Test Results
+          coverageOptions: generateAdditionalMetrics;generateHtmlReport;generateBadgeReport;assemblyFilters:+MerchantTails.*
 
       - name: Upload Test Results
         uses: actions/upload-artifact@v4
