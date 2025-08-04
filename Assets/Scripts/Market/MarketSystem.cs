@@ -97,7 +97,7 @@ namespace MerchantTails.Market
             nativeSeasonalModifiers = new NativeArray<float>(itemCount, Allocator.Persistent);
             nativeEventModifiers = new NativeArray<float>(itemCount, Allocator.Persistent);
             nativePriceChanges = new NativeArray<float>(itemCount, Allocator.Persistent);
-            
+
             int index = 0;
             foreach (ItemType itemType in itemTypes)
             {

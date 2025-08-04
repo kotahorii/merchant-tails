@@ -18,6 +18,7 @@ namespace MerchantTails.Market
 
         [ReadOnly]
         public NativeArray<float> volatilities;
+
         [ReadOnly]
         public NativeArray<float> demands;
         [ReadOnly]
