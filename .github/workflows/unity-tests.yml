@@ -1,5 +1,9 @@
 name: Unity Tests
 
+# NOTE: Unity 6 (6000.x.x) is not yet fully supported by game-ci/unity-test-runner
+# This workflow is temporarily disabled until proper Unity 6 support is available
+# Alternative: Use self-hosted runners with Unity 6 installed locally
+
 on:
   push:
     branches: [main, develop]
@@ -11,7 +15,13 @@ env:
   UNITY_LICENSE: ${{ secrets.UNITY_LICENSE }}
 
 jobs:
-  test:
+  # Unity tests are temporarily disabled due to Unity 6 compatibility issues
+  # To re-enable:
+  # 1. Wait for game-ci/unity-test-runner to support Unity 6 version format
+  # 2. Or use self-hosted runners with Unity 6 installed
+  # 3. Or downgrade to Unity 2022.3 LTS
+  
+  # test:
     name: Run Unity Tests (${{ matrix.unityVersion }})
     runs-on: ubuntu-latest
     strategy:

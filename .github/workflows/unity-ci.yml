@@ -1,11 +1,17 @@
 name: Unity CI/CD Pipeline
 
-# NOTE: Unity Personal license doesn't work with GitHub Actions CI/CD
-# Unity Pro/Plus license is required for automated builds
+# NOTE: Unity 6 (6000.x.x) is not yet fully supported by game-ci actions
+# Additionally, Unity Personal license doesn't work with GitHub Actions CI/CD
+# 
+# Current issues:
+# 1. game-ci/unity-test-runner doesn't recognize Unity 6 version format (6000.x.x)
+# 2. Unity Pro/Plus license is required for automated builds
+# 
 # Alternative solutions:
 # 1. Use Unity Cloud Build (https://unity.com/products/unity-build-server)
-# 2. Use self-hosted runners with local Unity installation
-# 3. Purchase Unity Pro/Plus license for CI/CD
+# 2. Use self-hosted runners with local Unity 6 installation
+# 3. Wait for game-ci to add Unity 6 support
+# 4. Downgrade to Unity 2022.3 LTS for CI/CD compatibility
 
 on:
   push:
@@ -24,7 +30,9 @@ jobs:
   # To enable Unity CI/CD:
   # 1. Get Unity license file from https://unity.com/
   # 2. Set UNITY_LICENSE, UNITY_EMAIL, and UNITY_PASSWORD in GitHub Secrets
+  # Unity tests are temporarily disabled due to Unity 6 compatibility
   test:
+    if: false # Disabled until Unity 6 support is available
     name: Test Unity Project
     runs-on: ubuntu-latest
     # Unity license must be configured in GitHub Secrets
@@ -87,6 +95,7 @@ jobs:
           fail-on-error: true
 
   build:
+    if: false # Disabled until Unity 6 support is available
     name: Build Unity Project
     runs-on: ubuntu-latest
     # Unity license must be configured in GitHub Secrets
@@ -163,6 +172,7 @@ jobs:
         continue-on-error: true
 
   performance-test:
+    if: false # Disabled until Unity 6 support is available
     name: Performance Tests
     runs-on: ubuntu-latest
     # Unity license must be configured in GitHub Secrets
