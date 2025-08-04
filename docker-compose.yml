@@ -1,0 +1,30 @@
+version: '3.8'
+
+services:
+  unity-license-server:
+    image: unityci/unity-license-server:latest
+    environment:
+      - UNITY_USERNAME=${UNITY_EMAIL}
+      - UNITY_PASSWORD=${UNITY_PASSWORD}
+    ports:
+      - "5053:5053"
+    volumes:
+      - ./licenses:/licenses
+
+  unity-builder:
+    image: unityci/editor:6000.1.14f1-linux-il2cpp-2
+    depends_on:
+      - unity-license-server
+    environment:
+      - UNITY_LICENSE_SERVER=http://unity-license-server:5053
+    volumes:
+      - .:/project
+    working_dir: /project
+    command: |
+      /opt/unity/Editor/Unity \
+        -batchmode \
+        -quit \
+        -projectPath . \
+        -runTests \
+        -testPlatform EditMode \
+        -logFile -

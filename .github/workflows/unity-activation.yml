@@ -4,9 +4,9 @@ on:
   workflow_dispatch:
     inputs:
       unityVersion:
-        description: 'Unity version'
+        description: "Unity version"
         required: true
-        default: '6000.1.14f1'
+        default: "6000.1.14f1"
 
 jobs:
   request-activation-file:
@@ -26,13 +26,13 @@ jobs:
               -logFile - \
               -createManualActivationFile \
               -quit || true
-          
+
           # Find the generated .alf file
           ls -la *.alf || echo "No .alf file found in current directory"
-          
+
           # Try to find .alf file in common locations
           find . -name "*.alf" -type f 2>/dev/null || echo "No .alf files found"
-          
+
       - name: Create simple activation file
         run: |
           # If the above doesn't work, create a simple request file
@@ -55,7 +55,7 @@ jobs:
             </SystemInfo>
           </root>
           EOF
-          
+
       - name: Upload activation file
         uses: actions/upload-artifact@v4
         with:
