@@ -96,7 +96,8 @@ namespace MerchantTails.Core
         /// <summary>
         /// リソースを同期的に読み込み
         /// </summary>
-        public T Load<T>(string path) where T : UnityEngine.Object
+        public T Load<T>(string path)
+            where T : UnityEngine.Object
         {
             // キャッシュチェック
             if (TryGetFromCache<T>(path, out T cached))

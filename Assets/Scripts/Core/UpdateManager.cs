@@ -326,7 +326,7 @@ namespace MerchantTails.Core
                     break;
             }
         }
-        
+
         /// <summary>
         /// 非必須エフェクトを無効化
         /// </summary>
