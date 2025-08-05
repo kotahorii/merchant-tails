@@ -118,46 +118,4 @@ namespace MerchantTails.Data
         /// <summary>装飾 - 価格交渉力を向上</summary>
         Decoration,
     }
-
-    /// <summary>
-    /// ゲーム機能の種類
-    /// </summary>
-    public enum GameFeature
-    {
-        /// <summary>基本的な取引</summary>
-        BasicTrading,
-
-        /// <summary>簡易在庫管理</summary>
-        SimpleInventory,
-
-        /// <summary>価格予測</summary>
-        PricePrediction,
-
-        /// <summary>市場トレンド分析</summary>
-        MarketTrends,
-
-        /// <summary>銀行口座</summary>
-        BankAccount,
-
-        /// <summary>高度な分析</summary>
-        AdvancedAnalytics,
-
-        /// <summary>イベント予測</summary>
-        EventPrediction,
-
-        /// <summary>店舗投資</summary>
-        ShopInvestment,
-
-        /// <summary>自動価格設定</summary>
-        AutoPricing,
-
-        /// <summary>商人ネットワーク</summary>
-        MerchantNetwork,
-
-        /// <summary>市場影響力</summary>
-        MarketManipulation,
-
-        /// <summary>独占取引</summary>
-        ExclusiveDeals,
-    }
 }
