@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using MerchantTails.Core;
 using MerchantTails.Data;
-using MerchantTails.Events;
+using MerchantTails.Core;
 using TMPro;
 using UnityEngine;
 using UnityEngine.UI;

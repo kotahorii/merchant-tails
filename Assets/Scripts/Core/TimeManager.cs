@@ -1,7 +1,6 @@
 using System;
 using System.Collections;
 using MerchantTails.Data;
-using MerchantTails.Events;
 using UnityEngine;
 
 namespace MerchantTails.Core

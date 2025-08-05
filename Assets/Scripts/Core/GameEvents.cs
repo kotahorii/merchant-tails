@@ -1,22 +1,9 @@
 using System;
 using System.Collections.Generic;
-using MerchantTails.Core;
 using MerchantTails.Data;
 
-namespace MerchantTails.Events
+namespace MerchantTails.Core
 {
-    /// <summary>
-    /// 全てのゲームイベントの基底クラス
-    /// </summary>
-    public abstract class BaseGameEvent : IGameEvent
-    {
-        public DateTime Timestamp { get; }
-
-        protected BaseGameEvent()
-        {
-            Timestamp = DateTime.Now;
-        }
-    }
     /// <summary>
     /// ゲーム状態が変更されたときのイベント
     /// </summary>
@@ -304,6 +291,34 @@ namespace MerchantTails.Events
         {
             Feature = feature;
             FeatureName = featureName;
+        }
+    }
+
+    /// <summary>
+    /// 資産変動イベント
+    /// </summary>
+    public class AssetChangedEvent : BaseGameEvent
+    {
+        public float TotalAssets { get; }
+        public AssetBreakdown Breakdown { get; }
+
+        public AssetChangedEvent(float totalAssets, AssetBreakdown breakdown)
+        {
+            TotalAssets = totalAssets;
+            Breakdown = breakdown;
+        }
+    }
+
+    /// <summary>
+    /// 日次資産レポートイベント
+    /// </summary>
+    public class DailyAssetReportEvent : BaseGameEvent
+    {
+        public DailyAssetReport Report { get; }
+
+        public DailyAssetReportEvent(DailyAssetReport report)
+        {
+            Report = report;
         }
     }
 }

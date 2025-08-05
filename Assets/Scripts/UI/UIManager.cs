@@ -1,6 +1,6 @@
 using System.Collections.Generic;
 using MerchantTails.Core;
-using MerchantTails.Events;
+using MerchantTails.Core;
 using UnityEngine;
 using UnityEngine.UI;
 

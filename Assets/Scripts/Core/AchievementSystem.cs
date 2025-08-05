@@ -2,7 +2,6 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using MerchantTails.Data;
-using MerchantTails.Events;
 using UnityEngine;
 
 namespace MerchantTails.Core

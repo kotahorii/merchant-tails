@@ -1,7 +1,6 @@
 using System.Collections;
 using MerchantTails.Core;
 using MerchantTails.Data;
-using MerchantTails.Events;
 using NUnit.Framework;
 using UnityEngine;
 using UnityEngine.TestTools;
