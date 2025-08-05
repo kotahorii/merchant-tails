@@ -129,7 +129,7 @@ namespace MerchantTails.Core
         {
             if (!supportedLanguages.Contains(language))
             {
-                ErrorHandler.LogWarning($"Unsupported language: {language}", "LocalizationManager");
+                ErrorHandler.LogWarning($"Unsupported language: {language}", null, "LocalizationManager");
                 return;
             }
 
@@ -169,7 +169,7 @@ namespace MerchantTails.Core
             TextAsset localizationFile = Resources.Load<TextAsset>(filePath);
             if (localizationFile == null)
             {
-                ErrorHandler.LogError($"Localization file not found: {filePath}", "LocalizationManager");
+                ErrorHandler.LogError($"Localization file not found: {filePath}", null, "LocalizationManager");
                 CreateDefaultLocalization(language);
                 return;
             }
@@ -193,7 +193,7 @@ namespace MerchantTails.Core
             }
             catch (Exception e)
             {
-                ErrorHandler.LogError($"Failed to load localization: {e.Message}", "LocalizationManager");
+                ErrorHandler.LogError($"Failed to load localization: {e.Message}", e, "LocalizationManager");
                 CreateDefaultLocalization(language);
             }
         }
@@ -309,7 +309,7 @@ namespace MerchantTails.Core
                 return value;
             }
 
-            ErrorHandler.LogWarning($"Localization key not found: {key}", "LocalizationManager");
+            ErrorHandler.LogWarning($"Localization key not found: {key}", null, "LocalizationManager");
             return $"[{key}]";
         }
 

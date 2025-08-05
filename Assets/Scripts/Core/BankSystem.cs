@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using MerchantTails.Data;
+using MerchantTails.UI;
 using UnityEngine;
 
 namespace MerchantTails.Core
@@ -253,7 +254,7 @@ namespace MerchantTails.Core
 
             if (typeIndex < 0 || typeIndex >= termDepositTypes.Count)
             {
-                ErrorHandler.LogError("Invalid term deposit type", "BankSystem");
+                ErrorHandler.LogError("Invalid term deposit type", null, "BankSystem");
                 return false;
             }
 

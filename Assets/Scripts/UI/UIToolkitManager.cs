@@ -203,7 +203,7 @@ namespace MerchantTails.UI
             }
             else
             {
-                ErrorHandler.LogError($"UI Panel {uiType} not found", "UIToolkitManager");
+                ErrorHandler.LogError($"UI Panel {uiType} not found", null, "UIToolkitManager");
             }
         }
 

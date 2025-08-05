@@ -2,6 +2,8 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using MerchantTails.Data;
+using MerchantTails.Inventory;
+using MerchantTails.UI;
 using UnityEngine;
 
 namespace MerchantTails.Core
@@ -518,6 +520,37 @@ namespace MerchantTails.Core
             }
 
             return (float)unlockedCount / achievements.Count * 100f;
+        }
+
+        /// <summary>
+        /// 解放済みの実績IDリストを取得
+        /// </summary>
+        public List<string> GetUnlockedAchievements()
+        {
+            var unlockedList = new List<string>();
+            foreach (var achievement in achievements)
+            {
+                if (progressData.TryGetValue(achievement.id, out var progress) && progress.unlocked)
+                {
+                    unlockedList.Add(achievement.id);
+                }
+            }
+            return unlockedList;
+        }
+
+        /// <summary>
+        /// 解放済み実績をロード
+        /// </summary>
+        public void LoadUnlockedAchievements(List<string> unlockedIds)
+        {
+            foreach (var id in unlockedIds)
+            {
+                if (progressData.ContainsKey(id))
+                {
+                    progressData[id].unlocked = true;
+                    progressData[id].unlockedDate = DateTime.Now; // セーブデータに日付も含める場合はそちらを使用
+                }
+            }
         }
 
         // ヘルパーメソッド

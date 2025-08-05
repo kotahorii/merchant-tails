@@ -3,6 +3,11 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using MerchantTails.Data;
+using MerchantTails.Inventory;
+using MerchantTails.Market;
+using MerchantTails.Systems;
+using MerchantTails.Tutorial;
+using MerchantTails.UI;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -187,18 +192,22 @@ namespace MerchantTails.Core
             {
                 if (Input.GetKeyDown(KeyCode.T))
                 {
-                    TimeManager.Instance?.AdvanceTime(1f); // 1時間進める
-                    LogDebug("Advanced time by 1 hour");
+                    TimeManager.Instance?.SkipToNextPhase(); // 次のフェーズに進める
+                    LogDebug("Advanced to next phase");
                 }
                 else if (Input.GetKeyDown(KeyCode.D))
                 {
-                    TimeManager.Instance?.AdvanceDay();
+                    TimeManager.Instance?.SkipToNextDay();
                     LogDebug("Advanced to next day");
                 }
                 else if (Input.GetKeyDown(KeyCode.S))
                 {
-                    TimeManager.Instance?.AdvanceSeason();
-                    LogDebug("Advanced to next season");
+                    // シーズンを進めるには数日スキップ
+                    for (int i = 0; i < 30; i++)
+                    {
+                        TimeManager.Instance?.SkipToNextDay();
+                    }
+                    LogDebug("Advanced season (by 30 days)");
                 }
             }
 
@@ -326,7 +335,7 @@ namespace MerchantTails.Core
 
             if (GUI.Button(new Rect(x + 10, buttonY, width - 20, buttonHeight), "Advance 1 Day"))
             {
-                TimeManager.Instance?.AdvanceDay();
+                TimeManager.Instance?.SkipToNextDay();
             }
             buttonY += buttonHeight + spacing;
 
@@ -334,14 +343,17 @@ namespace MerchantTails.Core
             {
                 for (int i = 0; i < 7; i++)
                 {
-                    TimeManager.Instance?.AdvanceDay();
+                    TimeManager.Instance?.SkipToNextDay();
                 }
             }
             buttonY += buttonHeight + spacing;
 
             if (GUI.Button(new Rect(x + 10, buttonY, width - 20, buttonHeight), "Advance Season"))
             {
-                TimeManager.Instance?.AdvanceSeason();
+                for (int i = 0; i < 30; i++)
+                {
+                    TimeManager.Instance?.SkipToNextDay();
+                }
             }
             buttonY += buttonHeight + spacing;
 
@@ -505,7 +517,7 @@ namespace MerchantTails.Core
                 {
                     for (int i = 0; i < days; i++)
                     {
-                        TimeManager.Instance?.AdvanceDay();
+                        TimeManager.Instance?.SkipToNextDay();
                     }
                 }
             };
@@ -521,7 +533,10 @@ namespace MerchantTails.Core
                 }
                 else
                 {
-                    TimeManager.Instance?.AdvanceSeason();
+                    for (int i = 0; i < 30; i++)
+                    {
+                        TimeManager.Instance?.SkipToNextDay();
+                    }
                 }
             };
 
@@ -597,9 +612,10 @@ namespace MerchantTails.Core
             var gameManager = GameManager.Instance;
             if (gameManager != null && gameManager.PlayerData != null)
             {
-                gameManager.PlayerData.CurrentMoney += amount;
-                LogDebug($"Added {amount:C} to player money. New total: {gameManager.PlayerData.CurrentMoney:C}");
-                EventBus.Publish(new MoneyChangedEvent(amount));
+                int previousMoney = gameManager.PlayerData.CurrentMoney;
+                int newMoney = previousMoney + (int)amount;
+                gameManager.AddMoney((int)amount);
+                LogDebug($"Added {amount:C} to player money. New total: {newMoney:C}");
             }
         }
 
@@ -608,9 +624,9 @@ namespace MerchantTails.Core
             var gameManager = GameManager.Instance;
             if (gameManager != null && gameManager.PlayerData != null)
             {
-                gameManager.PlayerData.CurrentRank = rank;
+                MerchantRank previousRank = gameManager.PlayerData.CurrentRank;
+                gameManager.UpdatePlayerRank(rank);
                 LogDebug($"Set merchant rank to: {rank}");
-                EventBus.Publish(new RankChangedEvent(rank));
             }
         }
 
@@ -619,19 +635,15 @@ namespace MerchantTails.Core
             var inventory = InventorySystem.Instance;
             if (inventory != null)
             {
-                var item = new ItemData
+                bool success = inventory.AddItem(type, quantity, InventoryLocation.Trading);
+                if (success)
                 {
-                    id = Guid.NewGuid().ToString(),
-                    type = type,
-                    basePrice = MarketSystem.Instance?.GetCurrentPrice(type) ?? 100f,
-                    currentPrice = MarketSystem.Instance?.GetCurrentPrice(type) ?? 100f,
-                    quantity = quantity,
-                    quality = ItemQuality.Normal,
-                    isInShop = false,
-                };
-
-                inventory.AddItem(item);
-                LogDebug($"Added {quantity}x {type} to inventory");
+                    LogDebug($"Added {quantity}x {type} to inventory");
+                }
+                else
+                {
+                    LogDebug($"Failed to add {quantity}x {type} to inventory - capacity full?");
+                }
             }
         }
 
@@ -663,32 +675,46 @@ namespace MerchantTails.Core
             var timeManager = TimeManager.Instance;
             if (timeManager != null)
             {
+                Season previousSeason = timeManager.CurrentSeason;
+                int currentYear = timeManager.CurrentYear;
                 // リフレクションでプライベートフィールドを設定
                 var field = typeof(TimeManager).GetField("currentSeason", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance);
                 field?.SetValue(timeManager, season);
-                EventBus.Publish(new SeasonChangedEvent(season));
+                EventBus.Publish(new SeasonChangedEvent(previousSeason, season, currentYear));
                 LogDebug($"Set season to: {season}");
             }
         }
 
         private void TriggerRandomEvent()
         {
-            var eventSystem = EventSystem.Instance;
-            if (eventSystem != null)
-            {
-                eventSystem.TriggerRandomEvent();
-                LogDebug("Triggered random event");
-            }
+            // ランダムなマーケットイベントをトリガー
+            var items = new ItemType[] { ItemType.Fruit, ItemType.Potion };
+            var modifiers = new float[] { 1.2f, 1.5f };
+            var eventData = new GameEventTriggeredEvent(
+                "Debug Event",
+                "デバッグ用のテストイベント",
+                items,
+                modifiers,
+                3
+            );
+            EventBus.Publish(eventData);
+            LogDebug("Triggered random market event");
         }
 
         private void TriggerEvent(string eventId)
         {
-            var eventSystem = EventSystem.Instance;
-            if (eventSystem != null)
-            {
-                // イベントIDで特定のイベントをトリガー
-                LogDebug($"Triggered event: {eventId}");
-            }
+            // 特定のマーケットイベントをトリガー
+            var items = new ItemType[] { ItemType.Weapon };
+            var modifiers = new float[] { 0.8f };
+            var eventData = new GameEventTriggeredEvent(
+                eventId,
+                $"Event: {eventId}",
+                items,
+                modifiers,
+                5
+            );
+            EventBus.Publish(eventData);
+            LogDebug($"Triggered event: {eventId}");
         }
 
         private void ResetTutorial()

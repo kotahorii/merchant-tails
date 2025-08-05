@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using MerchantTails.Data;
+using MerchantTails.UI;
 using UnityEngine;
 
 namespace MerchantTails.Core
@@ -150,13 +151,7 @@ namespace MerchantTails.Core
                         featureName = "独占取引",
                         description = "特別な取引機会にアクセスできます",
                     },
-                    new FeatureUnlock
-                    {
-                        feature = GameFeature.FullAutomation,
-                        requiredRank = MerchantRank.Master,
-                        featureName = "完全自動化",
-                        description = "取引を完全に自動化できます",
-                    },
+                    // 自動価格設定はすでにベテランで解放されているため削除
                 };
             }
 
@@ -291,6 +286,24 @@ namespace MerchantTails.Core
                     return MerchantRank.Master;
                 default:
                     return MerchantRank.Master;
+            }
+        }
+
+        /// <summary>
+        /// 解放済み機能をロード
+        /// </summary>
+        public void LoadUnlockedFeatures(List<GameFeature> features)
+        {
+            // すべての機能を一旦ロック
+            foreach (GameFeature feature in Enum.GetValues(typeof(GameFeature)))
+            {
+                unlockedFeatures[feature] = false;
+            }
+
+            // ロードした機能を解放
+            foreach (var feature in features)
+            {
+                unlockedFeatures[feature] = true;
             }
         }
 

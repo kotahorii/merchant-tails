@@ -57,7 +57,7 @@ namespace MerchantTails.UI
 
             if (achievementSystem == null)
             {
-                ErrorHandler.LogError("AchievementSystem not found!", "AchievementPanel");
+                ErrorHandler.LogError("AchievementSystem not found!", null, "AchievementPanel");
                 return;
             }
 

@@ -2,6 +2,8 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Text;
+using MerchantTails.Inventory;
+using MerchantTails.Market;
 using UnityEngine;
 
 namespace MerchantTails.Core

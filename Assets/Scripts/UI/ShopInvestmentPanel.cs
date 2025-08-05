@@ -67,7 +67,7 @@ namespace MerchantTails.UI
 
             if (investmentSystem == null)
             {
-                ErrorHandler.LogError("ShopInvestmentSystem not found!", "ShopInvestmentPanel");
+                ErrorHandler.LogError("ShopInvestmentSystem not found!", null, "ShopInvestmentPanel");
                 return;
             }
 

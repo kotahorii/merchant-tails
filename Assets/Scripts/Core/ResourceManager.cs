@@ -115,7 +115,7 @@ namespace MerchantTails.Core
             }
             else
             {
-                ErrorHandler.LogWarning($"Resource not found: {path}", "ResourceManager");
+                ErrorHandler.LogWarning($"Resource not found: {path}", null, "ResourceManager");
             }
 
             return resource;
@@ -169,7 +169,7 @@ namespace MerchantTails.Core
             }
             else
             {
-                ErrorHandler.LogWarning($"Async resource not found: {path}", "ResourceManager");
+                ErrorHandler.LogWarning($"Async resource not found: {path}", null, "ResourceManager");
                 InvokeCallbacks(path, null);
             }
 
@@ -340,12 +340,12 @@ namespace MerchantTails.Core
 
             if (memoryUsage > memoryCriticalThreshold)
             {
-                ErrorHandler.LogError($"Critical memory usage: {memoryUsage:P0}", "ResourceManager");
+                ErrorHandler.LogError($"Critical memory usage: {memoryUsage:P0}", null, "ResourceManager");
                 EmergencyCacheClear();
             }
             else if (memoryUsage > memoryWarningThreshold)
             {
-                ErrorHandler.LogWarning($"High memory usage: {memoryUsage:P0}", "ResourceManager");
+                ErrorHandler.LogWarning($"High memory usage: {memoryUsage:P0}", null, "ResourceManager");
                 ClearUnusedCache();
             }
         }
@@ -395,7 +395,7 @@ namespace MerchantTails.Core
             ClearAllCache();
             Resources.UnloadUnusedAssets();
             GC.Collect();
-            ErrorHandler.LogWarning("Emergency cache clear executed", "ResourceManager");
+            ErrorHandler.LogWarning("Emergency cache clear executed", null, "ResourceManager");
         }
 
         /// <summary>

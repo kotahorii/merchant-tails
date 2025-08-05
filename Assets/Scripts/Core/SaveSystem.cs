@@ -6,6 +6,10 @@ using System.Security.Cryptography;
 using System.Text;
 using System.Threading.Tasks;
 using MerchantTails.Data;
+using MerchantTails.Inventory;
+using MerchantTails.Market;
+using MerchantTails.Systems;
+using MerchantTails.Tutorial;
 using Newtonsoft.Json; // Unity 6の新しいJSON統合
 using Unity.Burst;
 using Unity.Collections;
@@ -201,7 +205,7 @@ namespace MerchantTails.Core
             catch (Exception e)
             {
                 OnSaveError?.Invoke(e.Message);
-                ErrorHandler.LogError($"Save failed: {e.Message}", "SaveSystem");
+                ErrorHandler.LogError($"Save failed: {e.Message}", e, "SaveSystem");
                 return false;
             }
         }
@@ -251,7 +255,7 @@ namespace MerchantTails.Core
             catch (Exception e)
             {
                 OnLoadError?.Invoke(e.Message);
-                ErrorHandler.LogError($"Load failed: {e.Message}", "SaveSystem");
+                ErrorHandler.LogError($"Load failed: {e.Message}", e, "SaveSystem");
                 return false;
             }
         }
@@ -349,7 +353,7 @@ namespace MerchantTails.Core
             if (featureUnlockSystem != null)
             {
                 saveData.unlockedFeatures = featureUnlockSystem.GetUnlockedFeatures()
-                    .Select(f => f.ToString())
+                    .Select(f => f.feature.ToString())
                     .ToList();
             }
 
@@ -442,12 +446,15 @@ namespace MerchantTails.Core
             var timeManager = TimeManager.Instance;
             if (timeManager != null)
             {
-                timeManager.LoadTimeData(
-                    saveData.currentDay,
-                    saveData.currentSeason,
-                    saveData.currentPhase,
-                    saveData.dayProgress
-                );
+                var timeData = new TimeData
+                {
+                    currentDay = saveData.currentDay,
+                    currentSeason = saveData.currentSeason,
+                    currentPhase = saveData.currentPhase,
+                    currentYear = 1, // saveDataにyearが含まれていない場合のデフォルト値
+                    phaseTimer = saveData.dayProgress
+                };
+                timeManager.LoadTimeData(timeData);
             }
 
             // 在庫データ
@@ -830,7 +837,7 @@ namespace MerchantTails.Core
 
                 if (string.IsNullOrEmpty(backupFiles))
                 {
-                    ErrorHandler.LogWarning("No backup files found", "SaveSystem");
+                    ErrorHandler.LogWarning("No backup files found", null, "SaveSystem");
                     return false;
                 }
 
@@ -839,7 +846,9 @@ namespace MerchantTails.Core
                 File.Copy(backupFiles, targetPath, true);
 
                 // ロード実行
-                return Load(currentSlot);
+                var task = LoadAsync(currentSlot);
+                task.Wait();
+                return task.Result;
             }
             catch (Exception e)
             {
@@ -853,7 +862,7 @@ namespace MerchantTails.Core
         /// </summary>
         public void QuickSave()
         {
-            Save(currentSlot);
+            _ = SaveAsync(currentSlot);
         }
 
         /// <summary>
@@ -861,7 +870,7 @@ namespace MerchantTails.Core
         /// </summary>
         public void QuickLoad()
         {
-            Load(currentSlot);
+            _ = LoadAsync(currentSlot);
         }
 
         /// <summary>

@@ -167,7 +167,7 @@ namespace MerchantTails.Core
                         }
                         catch (Exception e)
                         {
-                            ErrorHandler.LogError($"Update error: {e.Message}", "UpdateManager");
+                            ErrorHandler.LogError($"Update error: {e.Message}", e, "UpdateManager");
                         }
                     }
                 }
@@ -184,7 +184,7 @@ namespace MerchantTails.Core
                     }
                     catch (Exception e)
                     {
-                        ErrorHandler.LogError($"Update error: {e.Message}", "UpdateManager");
+                        ErrorHandler.LogError($"Update error: {e.Message}", e, "UpdateManager");
                     }
                 }
             }
@@ -205,7 +205,7 @@ namespace MerchantTails.Core
                     }
                     catch (Exception e)
                     {
-                        ErrorHandler.LogError($"Fixed update error: {e.Message}", "UpdateManager");
+                        ErrorHandler.LogError($"Fixed update error: {e.Message}", e, "UpdateManager");
                     }
                 }
             }
@@ -226,7 +226,7 @@ namespace MerchantTails.Core
                     }
                     catch (Exception e)
                     {
-                        ErrorHandler.LogError($"Slow update error: {e.Message}", "UpdateManager");
+                        ErrorHandler.LogError($"Slow update error: {e.Message}", e, "UpdateManager");
                     }
                 }
             }
@@ -247,7 +247,7 @@ namespace MerchantTails.Core
                     }
                     catch (Exception e)
                     {
-                        ErrorHandler.LogError($"Very slow update error: {e.Message}", "UpdateManager");
+                        ErrorHandler.LogError($"Very slow update error: {e.Message}", e, "UpdateManager");
                     }
                 }
             }
@@ -292,7 +292,7 @@ namespace MerchantTails.Core
                 AdjustPerformanceSettings();
 
                 EventBus.Publish(new PerformanceLevelChangedEvent(currentPerformanceLevel));
-                ErrorHandler.LogWarning($"Performance level changed: {currentPerformanceLevel}", "UpdateManager");
+                ErrorHandler.LogWarning($"Performance level changed: {currentPerformanceLevel}", null, "UpdateManager");
             }
         }
 
@@ -338,7 +338,7 @@ namespace MerchantTails.Core
                 particle.enableEmission = false;
             }
             
-            ErrorHandler.LogWarning("Performance critical: Disabled non-essential effects", "UpdateManager");
+            ErrorHandler.LogWarning("Performance critical: Disabled non-essential effects", null, "UpdateManager");
         }
 
         // 登録・解除メソッド
@@ -424,7 +424,7 @@ namespace MerchantTails.Core
                 return obj?.GetComponent<T>();
             }
 
-            ErrorHandler.LogWarning($"Pool not found for type: {type}", "UpdateManager");
+            ErrorHandler.LogWarning($"Pool not found for type: {type}", null, "UpdateManager");
             return null;
         }
 

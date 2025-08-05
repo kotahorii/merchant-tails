@@ -2,7 +2,6 @@ using System.Collections;
 using System.Collections.Generic;
 using MerchantTails.Core;
 using MerchantTails.Data;
-using MerchantTails.Core;
 using MerchantTails.Inventory;
 using MerchantTails.Market;
 using UnityEngine;

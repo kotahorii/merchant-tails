@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.Profiling;
+using UnityEngine.Scripting;
 
 namespace MerchantTails.Core
 {
@@ -102,8 +103,8 @@ namespace MerchantTails.Core
             // インクリメンタルGCの設定
             if (enableIncrementalGC)
             {
-                GarbageCollector.GCMode = GarbageCollector.Mode.Enabled;
-                GarbageCollector.incrementalTimeSliceNanoseconds = incrementalGCTimeSlice;
+                GarbageUtility.GCMode = GarbageUtility.Mode.Enabled;
+                GarbageUtility.incrementalTimeSliceNanoseconds = incrementalGCTimeSlice;
             }
 
             // 初期メモリ状態を記録
@@ -204,7 +205,7 @@ namespace MerchantTails.Core
         {
             if (enableIncrementalGC)
             {
-                GarbageCollector.CollectIncremental(incrementalGCTimeSlice);
+                GarbageUtility.CollectIncremental(incrementalGCTimeSlice);
             }
         }
 

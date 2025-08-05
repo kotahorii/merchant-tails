@@ -1,6 +1,5 @@
 using System.Collections.Generic;
 using MerchantTails.Core;
-using MerchantTails.Core;
 using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
@@ -93,7 +92,7 @@ namespace MerchantTails.UI
 
             if (bankSystem == null)
             {
-                ErrorHandler.LogError("BankSystem not found!", "BankPanel");
+                ErrorHandler.LogError("BankSystem not found!", null, "BankPanel");
                 return;
             }
 
