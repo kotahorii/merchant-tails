@@ -3,11 +3,6 @@
     "rootNamespace": "MerchantTails.Core",
     "references": [
         "MerchantTails.Data",
-        "MerchantTails.UI",
-        "MerchantTails.Inventory",
-        "MerchantTails.Market",
-        "MerchantTails.Systems",
-        "MerchantTails.Tutorial",
         "Unity.TextMeshPro",
         "Unity.Addressables",
         "Unity.Mathematics",
