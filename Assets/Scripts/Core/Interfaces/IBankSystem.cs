@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using MerchantTails.Data;
 
 namespace MerchantTails.Core
 {
@@ -7,15 +8,19 @@ namespace MerchantTails.Core
     /// </summary>
     public interface IBankSystem
     {
+        float RegularDeposit { get; }
+        float TotalDeposits { get; }
         float TotalInterestEarned { get; }
+        float CurrentInterestRate { get; }
+        bool IsUnlocked { get; }
         
-        bool CreateDeposit(float amount, int termDays);
-        bool WithdrawDeposit(string depositId);
-        List<Deposit> GetAllDeposits();
-        Deposit GetDeposit(string depositId);
+        bool Deposit(float amount);
+        bool Withdraw(float amount);
+        bool CreateTermDeposit(int typeIndex, float amount);
+        bool BreakTermDeposit(string depositId, bool isEarlyWithdrawal = false);
+        List<TermDeposit> GetTermDeposits();
+        TermDepositType GetTermDepositType(int index);
         float GetTotalDeposits();
-        float GetAvailableBalance();
-        void ProcessMaturedDeposits();
         
         // BankSystem静的プロパティを設定するためのメソッド
         void RegisterAsInstance();

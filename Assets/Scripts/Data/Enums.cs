@@ -100,4 +100,64 @@ namespace MerchantTails.Data
         /// <summary>優良品 - 最高価格、最高需要</summary>
         Excellent,
     }
+
+    /// <summary>
+    /// 店舗アップグレードの種類
+    /// </summary>
+    public enum ShopUpgradeType
+    {
+        /// <summary>陳列棚 - 在庫上限を増加</summary>
+        DisplayShelf,
+
+        /// <summary>看板 - 客足を増加</summary>
+        Signboard,
+
+        /// <summary>保管庫 - 品質劣化を抑制</summary>
+        Storage,
+
+        /// <summary>装飾 - 価格交渉力を向上</summary>
+        Decoration,
+    }
+
+    /// <summary>
+    /// ゲーム機能の種類
+    /// </summary>
+    public enum GameFeature
+    {
+        /// <summary>基本的な取引</summary>
+        BasicTrading,
+
+        /// <summary>簡易在庫管理</summary>
+        SimpleInventory,
+
+        /// <summary>価格予測</summary>
+        PricePrediction,
+
+        /// <summary>市場トレンド分析</summary>
+        MarketTrends,
+
+        /// <summary>銀行口座</summary>
+        BankAccount,
+
+        /// <summary>高度な分析</summary>
+        AdvancedAnalytics,
+
+        /// <summary>イベント予測</summary>
+        EventPrediction,
+
+        /// <summary>店舗投資</summary>
+        ShopInvestment,
+
+        /// <summary>自動価格設定</summary>
+        AutoPricing,
+
+        /// <summary>商人ネットワーク</summary>
+        MerchantNetwork,
+
+        /// <summary>市場影響力</summary>
+        MarketManipulation,
+
+        /// <summary>独占取引</summary>
+        ExclusiveDeals,
+    }
 }
