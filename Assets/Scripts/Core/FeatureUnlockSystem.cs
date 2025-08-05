@@ -1,7 +1,6 @@
 using System;
 using System.Collections.Generic;
 using MerchantTails.Data;
-using MerchantTails.UI;
 using UnityEngine;
 
 namespace MerchantTails.Core
@@ -216,13 +215,14 @@ namespace MerchantTails.Core
                 if (!string.IsNullOrEmpty(unlock.unlockMessage))
                 {
                     // UIManagerを通じて通知を表示
-                    if (UIManager.Instance != null)
+                    var uiManager = ServiceLocator.GetService<IUIManager>();
+                    if (uiManager != null)
                     {
-                        UIManager.Instance.ShowNotification(
+                        uiManager.ShowNotification(
                             "新機能解放！",
                             unlock.unlockMessage,
                             5f,
-                            UIManager.NotificationType.Success
+                            NotificationType.Success
                         );
                     }
 

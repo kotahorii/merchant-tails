@@ -3,11 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using MerchantTails.Data;
-using MerchantTails.Inventory;
-using MerchantTails.Market;
-using MerchantTails.Systems;
-using MerchantTails.Tutorial;
-using MerchantTails.UI;
+// 他のアセンブリへの直接参照を削除し、ServiceLocatorを使用
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -632,10 +628,13 @@ namespace MerchantTails.Core
 
         private void AddItem(ItemType type, int quantity)
         {
-            var inventory = InventorySystem.Instance;
+            var inventory = ServiceLocator.GetService<IInventorySystem>();
             if (inventory != null)
             {
-                bool success = inventory.AddItem(type, quantity, InventoryLocation.Trading);
+                // InventoryLocationパラメータがインターフェースにない場合は、デフォルトを想定
+                // TODO: IInventorySystemインターフェースの調整が必要かもしれない
+                float avgPrice = 100f; // デバッグ用のデフォルト価格
+                bool success = inventory.AddItem(type, quantity, avgPrice);
                 if (success)
                 {
                     LogDebug($"Added {quantity}x {type} to inventory");
@@ -658,14 +657,11 @@ namespace MerchantTails.Core
 
         private void ClearInventory()
         {
-            var inventory = InventorySystem.Instance;
+            var inventory = ServiceLocator.GetService<IInventorySystem>();
             if (inventory != null)
             {
-                var items = inventory.GetAllItems().ToList();
-                foreach (var item in items)
-                {
-                    inventory.RemoveItem(item.id);
-                }
+                // ClearInventoryメソッドを使用
+                inventory.ClearInventory();
                 LogDebug("Cleared all inventory");
             }
         }
@@ -719,7 +715,7 @@ namespace MerchantTails.Core
 
         private void ResetTutorial()
         {
-            var tutorialSystem = TutorialSystem.Instance;
+            var tutorialSystem = ServiceLocator.GetService<ITutorialSystem>();
             if (tutorialSystem != null)
             {
                 PlayerPrefs.DeleteKey("TutorialCompleted");

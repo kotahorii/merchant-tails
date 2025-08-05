@@ -1,7 +1,6 @@
 using System;
 using System.Collections.Generic;
 using MerchantTails.Data;
-using MerchantTails.UI;
 using UnityEngine;
 
 namespace MerchantTails.Core
@@ -393,15 +392,16 @@ namespace MerchantTails.Core
                     OnTermDepositMatured?.Invoke(deposit);
 
                     // 通知を表示
-                    if (UIManager.Instance != null)
+                    var uiManager = ServiceLocator.GetService<IUIManager>();
+                    if (uiManager != null)
                     {
                         var type = termDepositTypes[deposit.typeIndex];
                         float maturityAmount = deposit.principal * (1 + deposit.interestRate);
-                        UIManager.Instance.ShowNotification(
+                        uiManager.ShowNotification(
                             "定期預金満期",
                             $"{type.name}が満期になりました！\n元本: {deposit.principal}G → {maturityAmount}G",
                             5f,
-                            UIManager.NotificationType.Success
+                            NotificationType.Success
                         );
                     }
 

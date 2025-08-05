@@ -2,8 +2,6 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using MerchantTails.Data;
-using MerchantTails.Inventory;
-using MerchantTails.UI;
 using UnityEngine;
 
 namespace MerchantTails.Core
@@ -372,9 +370,10 @@ namespace MerchantTails.Core
         private void OnPurchaseCompleted(PurchaseCompletedEvent e)
         {
             // 宝石収集家
-            if (InventorySystem.Instance != null)
+            var inventorySystem = ServiceLocator.GetService<IInventorySystem>();
+            if (inventorySystem != null)
             {
-                var gemCount = InventorySystem.Instance.GetItemCount(ItemType.Gem);
+                var gemCount = inventorySystem.GetItemCount(ItemType.Gem);
                 UpdateProgress("gem_collector", gemCount);
             }
         }
@@ -443,13 +442,14 @@ namespace MerchantTails.Core
             progress.unlockedDate = DateTime.Now;
 
             // 通知を表示
-            if (UIManager.Instance != null)
+            var uiManager = ServiceLocator.GetService<IUIManager>();
+            if (uiManager != null)
             {
-                UIManager.Instance.ShowNotification(
+                uiManager.ShowNotification(
                     "実績解除！",
                     $"{achievement.name}\n{achievement.description}",
                     5f,
-                    UIManager.NotificationType.Success
+                    NotificationType.Success
                 );
             }
 

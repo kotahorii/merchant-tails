@@ -6,10 +6,7 @@ using System.Security.Cryptography;
 using System.Text;
 using System.Threading.Tasks;
 using MerchantTails.Data;
-using MerchantTails.Inventory;
-using MerchantTails.Market;
-using MerchantTails.Systems;
-using MerchantTails.Tutorial;
+// 他のアセンブリへの直接参照を削除し、ServiceLocatorを使用
 using Newtonsoft.Json; // Unity 6の新しいJSON統合
 using Unity.Burst;
 using Unity.Collections;
@@ -304,7 +301,7 @@ namespace MerchantTails.Core
             }
 
             // 在庫データ
-            var inventorySystem = InventorySystem.Instance;
+            var inventorySystem = ServiceLocator.GetService<IInventorySystem>();
             if (inventorySystem != null)
             {
                 saveData.inventoryData = new SerializableInventory();
@@ -319,7 +316,7 @@ namespace MerchantTails.Core
             }
 
             // 市場データ
-            var marketSystem = MarketSystem.Instance;
+            var marketSystem = ServiceLocator.GetService<IMarketSystem>();
             if (marketSystem != null)
             {
                 saveData.marketData = new SerializableMarket();
@@ -377,7 +374,7 @@ namespace MerchantTails.Core
             }
 
             // 投資データ
-            var shopInvestmentSystem = ShopInvestmentSystem.Instance;
+            var shopInvestmentSystem = ServiceLocator.GetService<IShopInvestmentSystem>();
             if (shopInvestmentSystem != null)
             {
                 saveData.shopInvestments = shopInvestmentSystem.GetAllInvestments()
@@ -389,7 +386,7 @@ namespace MerchantTails.Core
                     }).ToList();
             }
 
-            var merchantInvestmentSystem = MerchantInvestmentSystem.Instance;
+            var merchantInvestmentSystem = ServiceLocator.GetService<IMerchantInvestmentSystem>();
             if (merchantInvestmentSystem != null)
             {
                 saveData.merchantInvestments = merchantInvestmentSystem.GetAvailableMerchants()
@@ -414,7 +411,7 @@ namespace MerchantTails.Core
             }
 
             // チュートリアル進行状況
-            var tutorialSystem = TutorialSystem.Instance;
+            var tutorialSystem = ServiceLocator.GetService<ITutorialSystem>();
             if (tutorialSystem != null)
             {
                 saveData.tutorialCompleted = tutorialSystem.IsCompleted;
@@ -458,7 +455,7 @@ namespace MerchantTails.Core
             }
 
             // 在庫データ
-            var inventorySystem = InventorySystem.Instance;
+            var inventorySystem = ServiceLocator.GetService<IInventorySystem>();
             if (inventorySystem != null && saveData.inventoryData != null)
             {
                 inventorySystem.ClearInventory();
@@ -477,7 +474,7 @@ namespace MerchantTails.Core
             }
 
             // 市場データ
-            var marketSystem = MarketSystem.Instance;
+            var marketSystem = ServiceLocator.GetService<IMarketSystem>();
             if (marketSystem != null && saveData.marketData != null)
             {
                 foreach (var history in saveData.marketData.priceHistories)
