@@ -360,8 +360,8 @@ func (im *InventoryManager) OptimizePlacement() {
 		}
 
 		// Move items
-		im.WarehouseInventory.RemoveItem(p.itemID, toMove)
-		im.ShopInventory.AddItem(p.item, toMove)
+		_ = im.WarehouseInventory.RemoveItem(p.itemID, toMove)
+		_ = im.ShopInventory.AddItem(p.item, toMove)
 		shopSpace -= toMove
 	}
 }
@@ -522,13 +522,13 @@ func (im *InventoryManager) RestoreFromSnapshot(snapshot *InventorySnapshot) err
 		// Note: In real implementation, would need item registry to get item details
 		// For now, creating dummy items
 		restoredItem, _ := item.NewItem(itemID, "Restored Item", item.CategoryFruit, 10)
-		im.ShopInventory.AddItem(restoredItem, quantity)
+		_ = im.ShopInventory.AddItem(restoredItem, quantity)
 	}
 
 	// Restore warehouse items
 	for itemID, quantity := range snapshot.WarehouseItems {
 		restoredItem, _ := item.NewItem(itemID, "Restored Item", item.CategoryWeapon, 200)
-		im.WarehouseInventory.AddItem(restoredItem, quantity)
+		_ = im.WarehouseInventory.AddItem(restoredItem, quantity)
 	}
 
 	return nil
