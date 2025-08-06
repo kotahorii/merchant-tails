@@ -7,6 +7,7 @@
         "MerchantTails.Market",
         "MerchantTails.UI",
         "MerchantTails.Inventory",
+        "Unity.TextMeshPro",
         "UnityEngine.TestRunner",
         "UnityEditor.TestRunner"
     ],

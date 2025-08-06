@@ -88,7 +88,7 @@ namespace MerchantTails.Testing
                     randomSeed = 12345,
                     deltaTime = 0.016f,
                     calculatedPrices = calculatedPrices,
-                    priceChanges = priceChanges
+                    priceChanges = priceChanges,
                 };
 
                 var handle = job.Schedule(itemCount, 1);
@@ -136,7 +136,7 @@ namespace MerchantTails.Testing
                 {
                     uncompressedData = uncompressedData,
                     compressedData = compressedData,
-                    compressedSize = compressedSize
+                    compressedSize = compressedSize,
                 };
 
                 var handle = job.Schedule();
@@ -294,7 +294,8 @@ namespace MerchantTails.Testing
             var updateManager = testGameObject.AddComponent<UpdateManager>();
             bool performanceChanged = false;
 
-            updateManager.OnPerformanceLevelChanged += (level) => {
+            updateManager.OnPerformanceLevelChanged += (level) =>
+            {
                 performanceChanged = true;
             };
 
@@ -349,21 +350,22 @@ namespace MerchantTails.Testing
         #region Performance Tests
 
         [Test]
-        [Performance]
+        // [Performance] // Unity.PerformanceTesting package required
         public void MarketPriceCalculation_Performance()
         {
             // Job System版の価格計算パフォーマンステスト
-            Measure.Method(() =>
-            {
-                marketSystem.UpdatePrices();
-            })
-            .WarmupCount(10)
-            .MeasurementCount(100)
-            .Run();
+            Measure
+                .Method(() =>
+                {
+                    marketSystem.UpdatePrices();
+                })
+                .WarmupCount(10)
+                .MeasurementCount(100)
+                .Run();
         }
 
         [Test]
-        [Performance]
+        // [Performance] // Unity.PerformanceTesting package required
         public void SaveSystemCompression_Performance()
         {
             // 圧縮処理のパフォーマンステスト
@@ -373,28 +375,29 @@ namespace MerchantTails.Testing
                 testData[i] = (byte)(i % 256);
             }
 
-            Measure.Method(() =>
-            {
-                var uncompressed = new NativeArray<byte>(testData, Allocator.TempJob);
-                var compressed = new NativeArray<byte>(testData.Length * 2, Allocator.TempJob);
-                var size = new NativeArray<int>(1, Allocator.TempJob);
-
-                var job = new SaveDataCompressionJob
+            Measure
+                .Method(() =>
                 {
-                    uncompressedData = uncompressed,
-                    compressedData = compressed,
-                    compressedSize = size
-                };
+                    var uncompressed = new NativeArray<byte>(testData, Allocator.TempJob);
+                    var compressed = new NativeArray<byte>(testData.Length * 2, Allocator.TempJob);
+                    var size = new NativeArray<int>(1, Allocator.TempJob);
 
-                job.Schedule().Complete();
+                    var job = new SaveDataCompressionJob
+                    {
+                        uncompressedData = uncompressed,
+                        compressedData = compressed,
+                        compressedSize = size,
+                    };
 
-                uncompressed.Dispose();
-                compressed.Dispose();
-                size.Dispose();
-            })
-            .WarmupCount(5)
-            .MeasurementCount(50)
-            .Run();
+                    job.Schedule().Complete();
+
+                    uncompressed.Dispose();
+                    compressed.Dispose();
+                    size.Dispose();
+                })
+                .WarmupCount(5)
+                .MeasurementCount(50)
+                .Run();
         }
 
         #endregion

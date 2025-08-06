@@ -10,7 +10,7 @@ namespace MerchantTails.Testing
     /// 統合テスト実行管理クラス
     /// SystemTestControllerとIntegrationTestを連携管理
     /// </summary>
-    public class TestRunner : MonoBehaviour
+    public class TestRunnerComponent : MonoBehaviour
     {
         [Header("UI References")]
         [SerializeField]

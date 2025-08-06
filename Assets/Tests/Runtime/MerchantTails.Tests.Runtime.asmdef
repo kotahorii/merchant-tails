@@ -9,6 +9,7 @@
         "MerchantTails.Inventory",
         "MerchantTails.Tutorial",
         "MerchantTails.Systems",
+        "MerchantTails.Testing",
         "UnityEngine.TestRunner",
         "UnityEditor.TestRunner",
         "Unity.TextMeshPro",

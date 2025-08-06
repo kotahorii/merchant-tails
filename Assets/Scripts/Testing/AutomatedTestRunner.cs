@@ -13,7 +13,7 @@ namespace MerchantTails.Tests
     /// </summary>
     public class AutomatedTestRunner
     {
-        private TestRunner testRunner;
+        private TestRunnerComponent testRunner;
         private SystemTestController systemTestController;
         private IntegrationTest integrationTest;
         private StabilityTest stabilityTest;
@@ -26,7 +26,7 @@ namespace MerchantTails.Tests
             var testGameObject = new GameObject("AutomatedTestRunner");
 
             // Add all required components
-            testRunner = testGameObject.AddComponent<TestRunner>();
+            testRunner = testGameObject.AddComponent<TestRunnerComponent>();
             systemTestController = testGameObject.AddComponent<SystemTestController>();
             integrationTest = testGameObject.AddComponent<IntegrationTest>();
             stabilityTest = testGameObject.AddComponent<StabilityTest>();
@@ -247,7 +247,7 @@ namespace MerchantTails.Tests
         public void ConfigurationVerification()
         {
             // Verify that all required components are properly configured
-            Assert.IsNotNull(testRunner, "TestRunner component missing");
+            Assert.IsNotNull(testRunner, "TestRunnerComponent component missing");
             Assert.IsNotNull(systemTestController, "SystemTestController component missing");
             Assert.IsNotNull(integrationTest, "IntegrationTest component missing");
             Assert.IsNotNull(stabilityTest, "StabilityTest component missing");

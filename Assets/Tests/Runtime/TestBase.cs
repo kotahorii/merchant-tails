@@ -2,9 +2,9 @@ using System;
 using System.Collections;
 using MerchantTails.Core;
 using MerchantTails.Data;
+using NUnit.Framework;
 using UnityEngine;
 using UnityEngine.TestTools;
-using NUnit.Framework;
 
 namespace MerchantTails.Testing
 {
@@ -19,7 +19,8 @@ namespace MerchantTails.Testing
         protected TimeManager timeManager;
         protected MarketSystem marketSystem;
         protected InventorySystem inventorySystem;
-        protected EventSystem eventSystem;
+
+        // EventSystem is replaced by EventBus static class
 
         [SetUp]
         public virtual void Setup()
@@ -112,9 +113,10 @@ namespace MerchantTails.Testing
 
             foreach (var type in types)
             {
-                var instanceField = type.GetField("instance",
-                    System.Reflection.BindingFlags.NonPublic |
-                    System.Reflection.BindingFlags.Static);
+                var instanceField = type.GetField(
+                    "instance",
+                    System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Static
+                );
 
                 if (instanceField != null)
                 {
@@ -138,17 +140,17 @@ namespace MerchantTails.Testing
             };
         }
 
-        protected ItemData CreateTestItem(ItemType type, int quantity = 1, float? price = null)
+        protected InventoryItem CreateTestItem(ItemType type, int quantity = 1, float? price = null)
         {
-            return new ItemData
+            return new InventoryItem
             {
-                id = Guid.NewGuid().ToString(),
-                type = type,
-                basePrice = price ?? GetTestBasePrice(type),
-                currentPrice = price ?? GetTestBasePrice(type),
-                quantity = quantity,
-                quality = ItemQuality.Normal,
-                isInShop = false,
+                uniqueId = Guid.NewGuid().ToString(),
+                itemType = type,
+                purchasePrice = price ?? GetTestBasePrice(type),
+                quality = ItemQuality.Common,
+                purchaseDay = 1,
+                expiryDay = -1,
+                location = InventoryLocation.Trading,
             };
         }
 
@@ -171,14 +173,12 @@ namespace MerchantTails.Testing
         // アサーションヘルパー
         protected void AssertFloatEquals(float expected, float actual, float tolerance = 0.01f)
         {
-            Assert.That(actual, Is.EqualTo(expected).Within(tolerance),
-                $"Expected {expected} but was {actual}");
+            Assert.That(actual, Is.EqualTo(expected).Within(tolerance), $"Expected {expected} but was {actual}");
         }
 
         protected void AssertInRange(float value, float min, float max)
         {
-            Assert.That(value, Is.InRange(min, max),
-                $"Value {value} is not in range [{min}, {max}]");
+            Assert.That(value, Is.InRange(min, max), $"Value {value} is not in range [{min}, {max}]");
         }
 
         // コルーチンテスト用のヘルパー

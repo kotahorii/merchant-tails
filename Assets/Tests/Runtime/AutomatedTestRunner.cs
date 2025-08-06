@@ -1,9 +1,9 @@
 using System.Collections;
-using UnityEngine;
-using UnityEngine.TestTools;
-using NUnit.Framework;
 using MerchantTails.Core;
 using MerchantTails.Testing;
+using NUnit.Framework;
+using UnityEngine;
+using UnityEngine.TestTools;
 
 namespace MerchantTails.Tests
 {
@@ -13,7 +13,7 @@ namespace MerchantTails.Tests
     /// </summary>
     public class AutomatedTestRunner
     {
-        private TestRunner testRunner;
+        private TestRunnerComponent testRunner;
         private SystemTestController systemTestController;
         private IntegrationTest integrationTest;
         private StabilityTest stabilityTest;
@@ -27,7 +27,7 @@ namespace MerchantTails.Tests
             Object.DontDestroyOnLoad(testGameObject);
 
             // Add all required components
-            testRunner = testGameObject.AddComponent<TestRunner>();
+            testRunner = testGameObject.AddComponent<TestRunnerComponent>();
             systemTestController = testGameObject.AddComponent<SystemTestController>();
             integrationTest = testGameObject.AddComponent<IntegrationTest>();
             stabilityTest = testGameObject.AddComponent<StabilityTest>();
@@ -134,10 +134,21 @@ namespace MerchantTails.Tests
             var report = stabilityTest.GetLastReport();
 
             // Assert stability criteria (relaxed for CI)
-            Assert.GreaterOrEqual(report.successRate, 90f, $"Stability test success rate too low: {report.successRate}%");
-            Assert.LessOrEqual(report.criticalErrors.Count, 1, $"Too many critical errors: {string.Join(", ", report.criticalErrors)}");
+            Assert.GreaterOrEqual(
+                report.successRate,
+                90f,
+                $"Stability test success rate too low: {report.successRate}%"
+            );
+            Assert.LessOrEqual(
+                report.criticalErrors.Count,
+                1,
+                $"Too many critical errors: {string.Join(", ", report.criticalErrors)}"
+            );
 
-            ErrorHandler.LogInfo($"✓ Stability tests passed: {report.successRate:F1}% success rate", "AutomatedTestRunner");
+            ErrorHandler.LogInfo(
+                $"✓ Stability tests passed: {report.successRate:F1}% success rate",
+                "AutomatedTestRunner"
+            );
         }
 
         [UnityTest]
@@ -163,7 +174,10 @@ namespace MerchantTails.Tests
             // Assert recovery criteria
             Assert.GreaterOrEqual(successRate, 75f, $"Error recovery success rate too low: {successRate}%");
 
-            ErrorHandler.LogInfo($"✓ Error recovery tests passed: {successRate:F1}% success rate", "AutomatedTestRunner");
+            ErrorHandler.LogInfo(
+                $"✓ Error recovery tests passed: {successRate:F1}% success rate",
+                "AutomatedTestRunner"
+            );
         }
 
         [UnityTest]
@@ -184,10 +198,17 @@ namespace MerchantTails.Tests
             Assert.Greater(fruitPrice, 0, "Market system not functioning - invalid fruit price");
 
             // Test inventory system
-            bool addResult = InventorySystem.Instance.AddItem(MerchantTails.Data.ItemType.Fruit, 10, MerchantTails.Data.InventoryLocation.Trading);
+            bool addResult = InventorySystem.Instance.AddItem(
+                MerchantTails.Data.ItemType.Fruit,
+                10,
+                MerchantTails.Data.InventoryLocation.Trading
+            );
             Assert.IsTrue(addResult, "Inventory system not functioning - failed to add items");
 
-            int itemCount = InventorySystem.Instance.GetItemCount(MerchantTails.Data.ItemType.Fruit, MerchantTails.Data.InventoryLocation.Trading);
+            int itemCount = InventorySystem.Instance.GetItemCount(
+                MerchantTails.Data.ItemType.Fruit,
+                MerchantTails.Data.InventoryLocation.Trading
+            );
             Assert.AreEqual(10, itemCount, "Inventory system not functioning - incorrect item count");
 
             // Test event system
@@ -224,7 +245,10 @@ namespace MerchantTails.Tests
 
             Assert.Less(memoryUsage, memoryThreshold, $"Memory usage too high: {memoryUsage / 1024 / 1024}MB");
 
-            ErrorHandler.LogInfo($"✓ Memory usage verification passed: {memoryUsage / 1024 / 1024}MB", "AutomatedTestRunner");
+            ErrorHandler.LogInfo(
+                $"✓ Memory usage verification passed: {memoryUsage / 1024 / 1024}MB",
+                "AutomatedTestRunner"
+            );
         }
 
         [Test]
@@ -233,7 +257,7 @@ namespace MerchantTails.Tests
         public void ConfigurationVerification()
         {
             // Verify that all required components are properly configured
-            Assert.IsNotNull(testRunner, "TestRunner component missing");
+            Assert.IsNotNull(testRunner, "TestRunnerComponent component missing");
             Assert.IsNotNull(systemTestController, "SystemTestController component missing");
             Assert.IsNotNull(integrationTest, "IntegrationTest component missing");
             Assert.IsNotNull(stabilityTest, "StabilityTest component missing");
@@ -259,7 +283,11 @@ namespace MerchantTails.Tests
             float price = MarketSystem.Instance.GetCurrentPrice(MerchantTails.Data.ItemType.Fruit);
             Assert.Greater(price, 0, "Invalid fruit price");
 
-            bool addSuccess = InventorySystem.Instance.AddItem(MerchantTails.Data.ItemType.Fruit, 1, MerchantTails.Data.InventoryLocation.Trading);
+            bool addSuccess = InventorySystem.Instance.AddItem(
+                MerchantTails.Data.ItemType.Fruit,
+                1,
+                MerchantTails.Data.InventoryLocation.Trading
+            );
             Assert.IsTrue(addSuccess, "Failed to add item");
 
             ErrorHandler.LogInfo("✓ Smoke test passed", "AutomatedTestRunner");
