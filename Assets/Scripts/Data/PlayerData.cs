@@ -323,5 +323,21 @@ namespace MerchantTails.Data
                     + $"Profit: {totalProfit}, Transactions: {successfulTransactions}, Day: {daysSinceStart}"
             );
         }
+
+        /// <summary>
+        /// セーブデータをJSON形式で取得
+        /// </summary>
+        public string GetSaveData()
+        {
+            return JsonUtility.ToJson(this);
+        }
+
+        /// <summary>
+        /// プレイヤー名を設定
+        /// </summary>
+        public void SetPlayerName(string name)
+        {
+            playerName = name;
+        }
     }
 }
