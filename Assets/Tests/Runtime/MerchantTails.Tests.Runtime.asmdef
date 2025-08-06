@@ -17,8 +17,7 @@
         "Unity.Mathematics",
         "Unity.Burst",
         "Unity.Collections",
-        "Unity.Jobs",
-        "Unity.PerformanceTesting"
+        "Unity.Jobs"
     ],
     "includePlatforms": [],
     "excludePlatforms": [],

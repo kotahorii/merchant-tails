@@ -349,8 +349,10 @@ namespace MerchantTails.Testing
 
         #region Performance Tests
 
+        // Performance tests disabled until Unity.PerformanceTesting package is installed
+        /*
         [Test]
-        // [Performance] // Unity.PerformanceTesting package required
+        [Performance]
         public void MarketPriceCalculation_Performance()
         {
             // Job System版の価格計算パフォーマンステスト
@@ -365,7 +367,7 @@ namespace MerchantTails.Testing
         }
 
         [Test]
-        // [Performance] // Unity.PerformanceTesting package required
+        [Performance]
         public void SaveSystemCompression_Performance()
         {
             // 圧縮処理のパフォーマンステスト
@@ -399,6 +401,7 @@ namespace MerchantTails.Testing
                 .MeasurementCount(50)
                 .Run();
         }
+        */
 
         #endregion
     }

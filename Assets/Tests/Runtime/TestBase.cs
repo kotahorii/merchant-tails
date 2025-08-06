@@ -90,7 +90,7 @@ namespace MerchantTails.Testing
 
         protected virtual void SetupEventSystem()
         {
-            eventSystem = testGameObject.AddComponent<EventSystem>();
+            // EventSystem is replaced by EventBus static class - no setup needed
         }
 
         protected virtual void ClearStaticInstances()
@@ -102,7 +102,6 @@ namespace MerchantTails.Testing
                 typeof(TimeManager),
                 typeof(MarketSystem),
                 typeof(InventorySystem),
-                typeof(EventSystem),
                 typeof(SaveSystem),
                 typeof(ResourceManager),
                 typeof(UpdateManager),
