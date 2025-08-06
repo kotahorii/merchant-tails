@@ -321,4 +321,38 @@ namespace MerchantTails.Core
             Report = report;
         }
     }
+
+    /// <summary>
+    /// 在庫が変更されたときのイベント
+    /// </summary>
+    public class InventoryChangedEvent : BaseGameEvent
+    {
+        public ItemType ItemType { get; }
+        public int QuantityChange { get; }
+        public InventoryLocation Location { get; }
+
+        public InventoryChangedEvent(ItemType itemType, int quantityChange, InventoryLocation location)
+        {
+            ItemType = itemType;
+            QuantityChange = quantityChange;
+            Location = location;
+        }
+    }
+
+    /// <summary>
+    /// 時間が進んだときのイベント
+    /// </summary>
+    public class TimeAdvancedEvent : BaseGameEvent
+    {
+        public DayPhase CurrentPhase { get; }
+        public int CurrentDay { get; }
+        public Season CurrentSeason { get; }
+
+        public TimeAdvancedEvent(DayPhase currentPhase, int currentDay, Season currentSeason)
+        {
+            CurrentPhase = currentPhase;
+            CurrentDay = currentDay;
+            CurrentSeason = currentSeason;
+        }
+    }
 }
