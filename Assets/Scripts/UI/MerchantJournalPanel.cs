@@ -105,14 +105,12 @@ namespace MerchantTails.UI
 
         protected virtual void OnEnable()
         {
-            base.OnEnable();
             SubscribeToEvents();
             RefreshDisplay();
         }
 
         protected virtual void OnDisable()
         {
-            base.OnDisable();
             UnsubscribeFromEvents();
         }
 

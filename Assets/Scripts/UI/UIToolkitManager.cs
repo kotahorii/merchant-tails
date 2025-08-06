@@ -378,7 +378,7 @@ namespace MerchantTails.UI
             {
                 // スケーリング設定
                 panelSettings.scaleMode = PanelScaleMode.ScaleWithScreenSize;
-                panelSettings.referenceResolution = new Vector2(1920, 1080);
+                panelSettings.referenceResolution = new Vector2Int(1920, 1080);
 
                 // アンチエイリアシング
                 panelSettings.targetTexture = null; // 画面に直接描画

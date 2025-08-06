@@ -94,7 +94,7 @@ namespace MerchantTails.UI
 
             if (closeButton != null)
             {
-                closeButton.onClick.AddListener(Hide);
+                closeButton.onClick.AddListener(() => Hide());
             }
 
             if (detailsButton != null)
@@ -570,10 +570,9 @@ namespace MerchantTails.UI
         public void AnimateIn(float delay)
         {
             transform.localScale = Vector3.zero;
-            LeanTween
-                .scale(gameObject, Vector3.one, 0.5f)
-                .setDelay(delay)
-                .setEaseOutBack();
+            // TODO: Add animation system (LeanTween or DOTween)
+            // LeanTween.scale(gameObject, Vector3.one, 0.5f).setDelay(delay).setEaseOutBack();
+            transform.localScale = Vector3.one; // Instant scale for now
         }
     }
 

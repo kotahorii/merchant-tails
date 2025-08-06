@@ -234,7 +234,7 @@ namespace MerchantTails.UI
             // 価格変動
             if (priceChangeText != null && priceHistory.Count > 1)
             {
-                float previousPrice = priceHistory[priceHistory.Count - 2];
+                float previousPrice = priceHistory[priceHistory.Count - 2].price;
                 float change = currentPrice - previousPrice;
                 float changePercent = (change / previousPrice) * 100f;
 

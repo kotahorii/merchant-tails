@@ -58,6 +58,8 @@ namespace MerchantTails.Inventory
         public int TradingCapacityUsed => tradingInventory.Values.Sum(list => list.Count);
         public int StorefrontCapacityRemaining => maxStorefrontCapacity - StorefrontCapacityUsed;
         public int TradingCapacityRemaining => maxTradingCapacity - TradingCapacityUsed;
+        public int StorefrontCapacityTotal => maxStorefrontCapacity;
+        public int TradingCapacityTotal => maxTradingCapacity;
 
         private void Awake()
         {
@@ -301,6 +303,32 @@ namespace MerchantTails.Inventory
             }
 
             return expiringItems;
+        }
+
+        // Helper methods for UI
+        public Dictionary<ItemType, int> GetStorefrontItems()
+        {
+            var result = new Dictionary<ItemType, int>();
+            foreach (var kvp in storefrontInventory)
+            {
+                result[kvp.Key] = kvp.Value.Count;
+            }
+            return result;
+        }
+
+        public Dictionary<ItemType, int> GetTradingItems()
+        {
+            var result = new Dictionary<ItemType, int>();
+            foreach (var kvp in tradingInventory)
+            {
+                result[kvp.Key] = kvp.Value.Count;
+            }
+            return result;
+        }
+
+        public int GetItemExpiryDays(ItemType itemType)
+        {
+            return GetDecayDays(itemType);
         }
 
         // Private helper methods

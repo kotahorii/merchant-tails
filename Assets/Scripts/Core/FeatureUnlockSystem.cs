@@ -218,12 +218,7 @@ namespace MerchantTails.Core
                     var uiManager = ServiceLocator.GetService<IUIManager>();
                     if (uiManager != null)
                     {
-                        uiManager.ShowNotification(
-                            "新機能解放！",
-                            unlock.unlockMessage,
-                            5f,
-                            NotificationType.Success
-                        );
+                        uiManager.ShowNotification("新機能解放！", unlock.unlockMessage, 5f, NotificationType.Success);
                     }
 
                     // イベントを発行
@@ -272,6 +267,14 @@ namespace MerchantTails.Core
                 return new List<FeatureUnlock>(); // 既に最高ランク
 
             return featureUnlocks.FindAll(f => f.requiredRank == nextRank);
+        }
+
+        /// <summary>
+        /// 特定のランクで解放される機能のリストを取得
+        /// </summary>
+        public List<FeatureUnlock> GetFeaturesForRank(MerchantRank rank)
+        {
+            return featureUnlocks.FindAll(f => f.requiredRank == rank);
         }
 
         private MerchantRank GetNextRank(MerchantRank currentRank)
@@ -334,5 +337,4 @@ namespace MerchantTails.Core
         public string unlockMessage;
         public Sprite icon;
     }
-
 }

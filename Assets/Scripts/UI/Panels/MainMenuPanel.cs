@@ -1,5 +1,6 @@
 using System;
 using MerchantTails.Core;
+using MerchantTails.Data;
 using UnityEngine;
 using UnityEngine.UIElements;
 
@@ -18,10 +19,13 @@ namespace MerchantTails.UI.Panels
         private Button exitButton;
         private Label versionLabel;
 
+        public MainMenuPanel(UIType type, VisualElement rootElement)
+            : base(type, rootElement) { }
+
         protected override void OnInitialize()
         {
             base.OnInitialize();
-            
+
             // UI要素の取得
             newGameButton = Element.Q<Button>("new-game-button");
             continueButton = Element.Q<Button>("continue-button");
@@ -29,10 +33,10 @@ namespace MerchantTails.UI.Panels
             creditsButton = Element.Q<Button>("credits-button");
             exitButton = Element.Q<Button>("exit-button");
             versionLabel = Element.Q<Label>("version-label");
-            
+
             // イベントハンドラの設定
             SetupEventHandlers();
-            
+
             // 初期状態の設定
             UpdateUI();
         }
@@ -43,22 +47,22 @@ namespace MerchantTails.UI.Panels
             {
                 newGameButton.clicked += OnNewGameClicked;
             }
-            
+
             if (continueButton != null)
             {
                 continueButton.clicked += OnContinueClicked;
             }
-            
+
             if (settingsButton != null)
             {
                 settingsButton.clicked += OnSettingsClicked;
             }
-            
+
             if (creditsButton != null)
             {
                 creditsButton.clicked += OnCreditsClicked;
             }
-            
+
             if (exitButton != null)
             {
                 exitButton.clicked += OnExitClicked;
@@ -68,12 +72,12 @@ namespace MerchantTails.UI.Panels
         protected override void OnShow()
         {
             base.OnShow();
-            
+
             // BGMの再生
             // AudioManager.Instance?.PlayBGM("MainMenuTheme");
-            
+
             UpdateUI();
-            
+
             // Unity 6のアニメーション機能を使用
             AnimateMenuEntrance();
         }
@@ -82,13 +86,13 @@ namespace MerchantTails.UI.Panels
         {
             // セーブデータの確認
             bool hasSaveData = SaveSystem.Instance?.HasSaveData ?? false;
-            
+
             if (continueButton != null)
             {
                 continueButton.SetEnabled(hasSaveData);
                 continueButton.style.opacity = hasSaveData ? 1f : 0.5f;
             }
-            
+
             // バージョン情報の更新
             if (versionLabel != null)
             {
@@ -104,13 +108,16 @@ namespace MerchantTails.UI.Panels
             {
                 logoContainer.style.opacity = 0;
                 logoContainer.style.translate = new Translate(0, -50);
-                
-                logoContainer.schedule.Execute(() => {
-                    logoContainer.style.opacity = 1;
-                    logoContainer.style.translate = new Translate(0, 0);
-                }).StartingIn(100);
+
+                logoContainer
+                    .schedule.Execute(() =>
+                    {
+                        logoContainer.style.opacity = 1;
+                        logoContainer.style.translate = new Translate(0, 0);
+                    })
+                    .StartingIn(100);
             }
-            
+
             // ボタンの順次アニメーション
             var buttons = Element.Query<Button>(className: "menu-button").ToList();
             for (int i = 0; i < buttons.Count; i++)
@@ -118,32 +125,39 @@ namespace MerchantTails.UI.Panels
                 var button = buttons[i];
                 button.style.opacity = 0;
                 button.style.translate = new Translate(-50, 0);
-                
+
                 int delay = 200 + (i * 50);
-                button.schedule.Execute(() => {
-                    button.style.opacity = 1;
-                    button.style.translate = new Translate(0, 0);
-                }).StartingIn(delay);
+                button
+                    .schedule.Execute(() =>
+                    {
+                        button.style.opacity = 1;
+                        button.style.translate = new Translate(0, 0);
+                    })
+                    .StartingIn(delay);
             }
         }
 
         private void OnNewGameClicked()
         {
             ErrorHandler.LogInfo("New Game clicked", "MainMenuPanel");
-            
+
             // 新規ゲーム開始の確認ダイアログ
-            UIToolkitManager.Instance?.ShowModal(UIType.Confirmation, (confirmed) => {
-                if (confirmed)
+            UIToolkitManager.Instance?.ShowModal(
+                UIType.Confirmation,
+                (confirmed) =>
                 {
-                    StartNewGame();
+                    if (confirmed)
+                    {
+                        StartNewGame();
+                    }
                 }
-            });
+            );
         }
 
         private void OnContinueClicked()
         {
             ErrorHandler.LogInfo("Continue clicked", "MainMenuPanel");
-            
+
             // セーブデータの読み込み
             _ = LoadGameAsync();
         }
@@ -151,11 +165,11 @@ namespace MerchantTails.UI.Panels
         private async void LoadGameAsync()
         {
             UIToolkitManager.Instance?.ShowLoading("Loading save data...");
-            
+
             bool success = await SaveSystem.Instance.LoadAsync();
-            
+
             UIToolkitManager.Instance?.HideLoading();
-            
+
             if (success)
             {
                 // ゲーム画面へ遷移
@@ -187,62 +201,69 @@ namespace MerchantTails.UI.Panels
         private void OnExitClicked()
         {
             ErrorHandler.LogInfo("Exit clicked", "MainMenuPanel");
-            
+
             // 終了確認ダイアログ
-            UIToolkitManager.Instance?.ShowModal(UIType.Confirmation, (confirmed) => {
-                if (confirmed)
+            UIToolkitManager.Instance?.ShowModal(
+                UIType.Confirmation,
+                (confirmed) =>
                 {
+                    if (confirmed)
+                    {
 #if UNITY_EDITOR
-                    UnityEditor.EditorApplication.isPlaying = false;
+                        UnityEditor.EditorApplication.isPlaying = false;
 #else
-                    Application.Quit();
+                        Application.Quit();
 #endif
+                    }
                 }
-            });
+            );
         }
 
         private void StartNewGame()
         {
             // 新規ゲームの初期化
             GameManager.Instance?.StartNewGame();
-            
+
             // チュートリアルの確認
-            UIToolkitManager.Instance?.ShowModal(UIType.Tutorial, (showTutorial) => {
-                if (showTutorial)
+            UIToolkitManager.Instance?.ShowModal(
+                UIType.Tutorial,
+                (showTutorial) =>
                 {
-                    GameManager.Instance?.ChangeState(GameState.Tutorial);
+                    if (showTutorial)
+                    {
+                        GameManager.Instance?.ChangeState(GameState.Tutorial);
+                    }
+                    else
+                    {
+                        GameManager.Instance?.ChangeState(GameState.Shopping);
+                    }
                 }
-                else
-                {
-                    GameManager.Instance?.ChangeState(GameState.Shopping);
-                }
-            });
+            );
         }
 
         public new void Cleanup()
         {
-            
             // イベントハンドラの解除
             if (newGameButton != null)
             {
                 newGameButton.clicked -= OnNewGameClicked;
             }
-            
+
             if (continueButton != null)
             {
                 continueButton.clicked -= OnContinueClicked;
             }
-            
+
             if (settingsButton != null)
             {
                 settingsButton.clicked -= OnSettingsClicked;
             }
-            
+
             if (creditsButton != null)
             {
                 creditsButton.clicked -= OnCreditsClicked;
             }
-            
+
             if (exitButton != null)
             {
                 exitButton.clicked -= OnExitClicked;

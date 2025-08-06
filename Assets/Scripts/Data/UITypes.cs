@@ -54,6 +54,12 @@ namespace MerchantTails.Data
         /// <summary>ポーズメニュー</summary>
         PauseMenu,
 
+        /// <summary>確認画面</summary>
+        Confirmation,
+
+        /// <summary>クレジット画面</summary>
+        Credits,
+
         /// <summary>該当なし</summary>
         None,
     }

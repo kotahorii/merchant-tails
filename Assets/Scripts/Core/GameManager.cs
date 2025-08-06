@@ -38,6 +38,7 @@ namespace MerchantTails.Core
 
         public TimeManager TimeManager => timeManager;
         public PlayerData PlayerData => playerData;
+
         // TODO: AssetCalculator integration
         // public AssetCalculator AssetCalculator => assetCalculator;
         public FeatureUnlockSystem FeatureUnlockSystem => featureUnlockSystem;
@@ -154,11 +155,12 @@ namespace MerchantTails.Core
             PlayerPrefs.Save();
         }
 
-        public void LoadGame()
+        public bool LoadGame()
         {
             Debug.Log("[GameManager] Loading game...");
             // TODO: Implement load system
             tutorialCompleted = PlayerPrefs.GetInt("TutorialCompleted", 0) == 1;
+            return HasSaveData();
         }
 
         public void SetTutorialCompleted(bool completed)
@@ -205,6 +207,32 @@ namespace MerchantTails.Core
             var newPlayerData = ScriptableObject.CreateInstance<PlayerData>();
             // TODO: Initialize with default values
             return newPlayerData;
+        }
+
+        // Public API methods for UI
+        public PlayerData GetPlayerData()
+        {
+            return playerData;
+        }
+
+        public DateTime GetLastSaveDate()
+        {
+            // TODO: Implement proper save date tracking
+            return DateTime.Now;
+        }
+
+        public void StartNewGame()
+        {
+            Debug.Log("[GameManager] Starting new game...");
+            playerData = CreateDefaultPlayerData();
+            tutorialCompleted = false;
+            ChangeState(GameState.Tutorial);
+        }
+
+        public void StartTutorial()
+        {
+            Debug.Log("[GameManager] Starting tutorial...");
+            ChangeState(GameState.Tutorial);
         }
 
         private void OnApplicationPause(bool pauseStatus)
