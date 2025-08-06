@@ -101,7 +101,28 @@ namespace MerchantTails.Market
         public int remainingDuration;
         public string description;
 
+        private System.Collections.Generic.Dictionary<ItemType, float> _priceModifiers;
+
         public bool IsActive => remainingDuration > 0;
+
+        /// <summary>
+        /// 価格修正係数のディクショナリを取得
+        /// </summary>
+        public System.Collections.Generic.Dictionary<ItemType, float> priceModifiers
+        {
+            get
+            {
+                if (_priceModifiers == null && affectedItems != null && modifiers != null)
+                {
+                    _priceModifiers = new System.Collections.Generic.Dictionary<ItemType, float>();
+                    for (int i = 0; i < affectedItems.Length && i < modifiers.Length; i++)
+                    {
+                        _priceModifiers[affectedItems[i]] = modifiers[i];
+                    }
+                }
+                return _priceModifiers ?? new System.Collections.Generic.Dictionary<ItemType, float>();
+            }
+        }
 
         public void DecreaseDuration()
         {

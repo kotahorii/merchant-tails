@@ -72,9 +72,8 @@ namespace MerchantTails.UI
             SetupButtons();
         }
 
-        protected override void OnDestroy()
+        protected virtual void OnDestroy()
         {
-            base.OnDestroy();
 
             if (instance == this)
             {

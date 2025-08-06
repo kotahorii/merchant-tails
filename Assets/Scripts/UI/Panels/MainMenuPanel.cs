@@ -219,9 +219,8 @@ namespace MerchantTails.UI.Panels
             });
         }
 
-        public override void Cleanup()
+        public new void Cleanup()
         {
-            base.Cleanup();
             
             // イベントハンドラの解除
             if (newGameButton != null)

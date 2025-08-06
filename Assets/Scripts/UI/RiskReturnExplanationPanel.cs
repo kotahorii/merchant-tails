@@ -449,11 +449,14 @@ namespace MerchantTails.UI
             }
         }
 
-        public override void Show()
+        public override void Show(bool animated = true)
         {
-            base.Show();
+            base.Show(animated);
             // アニメーション演出
-            AnimateIn();
+            if (animated)
+            {
+                AnimateIn();
+            }
         }
 
         private void AnimateIn()
