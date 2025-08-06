@@ -21,12 +21,14 @@ linters:
     - unparam
     - unused
     - whitespace
+    - embeddedstructfieldcheck
+    - noinlineerr
 
 formatters:
   enable:
-    - gofumpt
     - goimports
     - gofmt
+    - swaggo
 
 run:
   timeout: 5m
