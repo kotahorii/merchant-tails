@@ -86,9 +86,9 @@ build: build-go build-godot ## Build everything
 build-go: ## Build Go GDExtension
 	@echo "$(GREEN)Building Go GDExtension...$(NC)"
 	@mkdir -p $(GODOT_DIR)/bin
-	CGO_ENABLED=1 $(GOBUILD) -buildmode=c-shared \
-		-o $(GODOT_DIR)/bin/merchant_game.so \
-		$(GAME_DIR)/cmd/gdextension/main.go
+	cd $(GAME_DIR) && CGO_ENABLED=1 $(GOBUILD) -buildmode=c-shared \
+		-o ../$(GODOT_DIR)/bin/merchant_game.so \
+		./cmd/gdextension/main.go
 
 .PHONY: build-godot
 build-godot: ## Build Godot project
