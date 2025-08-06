@@ -286,7 +286,7 @@ namespace MerchantTails.Core
                 saveData.playerName = playerData.PlayerName;
                 saveData.currentMoney = playerData.CurrentMoney;
                 saveData.currentRank = playerData.CurrentRank;
-                saveData.totalTransactions = playerData.TotalTransactions;
+                saveData.totalTransactions = playerData.SuccessfulTransactions;
                 saveData.totalProfit = playerData.TotalProfit;
             }
 
@@ -834,7 +834,7 @@ namespace MerchantTails.Core
 
                 if (string.IsNullOrEmpty(backupFiles))
                 {
-                    ErrorHandler.LogWarning("No backup files found", null, "SaveSystem");
+                    ErrorHandler.LogWarning("No backup files found", "SaveSystem");
                     return false;
                 }
 

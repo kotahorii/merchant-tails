@@ -292,7 +292,7 @@ namespace MerchantTails.Core
                 AdjustPerformanceSettings();
 
                 EventBus.Publish(new PerformanceLevelChangedEvent(currentPerformanceLevel));
-                ErrorHandler.LogWarning($"Performance level changed: {currentPerformanceLevel}", null, "UpdateManager");
+                ErrorHandler.LogWarning($"Performance level changed: {currentPerformanceLevel}", "UpdateManager");
             }
         }
 
@@ -338,7 +338,7 @@ namespace MerchantTails.Core
                 particle.enableEmission = false;
             }
             
-            ErrorHandler.LogWarning("Performance critical: Disabled non-essential effects", null, "UpdateManager");
+            ErrorHandler.LogWarning("Performance critical: Disabled non-essential effects", "UpdateManager");
         }
 
         // 登録・解除メソッド
@@ -424,7 +424,7 @@ namespace MerchantTails.Core
                 return obj?.GetComponent<T>();
             }
 
-            ErrorHandler.LogWarning($"Pool not found for type: {type}", null, "UpdateManager");
+            ErrorHandler.LogWarning($"Pool not found for type: {type}", "UpdateManager");
             return null;
         }
 

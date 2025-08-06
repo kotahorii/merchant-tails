@@ -251,15 +251,17 @@ namespace MerchantTails.Core
                     allHealthy = false;
                 }
 
-                if (MarketSystem.Instance == null)
+                var marketSystem = ServiceLocator.GetService<IMarketSystem>();
+                if (marketSystem == null)
                 {
-                    LogWarning("MarketSystem instance is null", "HealthCheck");
+                    LogWarning("MarketSystem service is null", "HealthCheck");
                     allHealthy = false;
                 }
 
-                if (InventorySystem.Instance == null)
+                var inventorySystem = ServiceLocator.GetService<IInventorySystem>();
+                if (inventorySystem == null)
                 {
-                    LogWarning("InventorySystem instance is null", "HealthCheck");
+                    LogWarning("InventorySystem service is null", "HealthCheck");
                     allHealthy = false;
                 }
 
@@ -363,24 +365,24 @@ namespace MerchantTails.Core
 
         private static bool RecoverMarketSystem()
         {
-            if (MarketSystem.Instance == null && GameManager.Instance != null)
+            var marketSystem = ServiceLocator.GetService<IMarketSystem>();
+            if (marketSystem == null)
             {
-                GameManager.Instance.gameObject.AddComponent<MarketSystem>();
-                LogInfo("MarketSystem recovery attempted", "Recovery");
-                return MarketSystem.Instance != null;
+                LogWarning("MarketSystem service not found", "Recovery");
+                return false;
             }
-            return MarketSystem.Instance != null;
+            return true;
         }
 
         private static bool RecoverInventorySystem()
         {
-            if (InventorySystem.Instance == null && GameManager.Instance != null)
+            var inventorySystem = ServiceLocator.GetService<IInventorySystem>();
+            if (inventorySystem == null)
             {
-                GameManager.Instance.gameObject.AddComponent<InventorySystem>();
-                LogInfo("InventorySystem recovery attempted", "Recovery");
-                return InventorySystem.Instance != null;
+                LogWarning("InventorySystem service not found", "Recovery");
+                return false;
             }
-            return InventorySystem.Instance != null;
+            return true;
         }
 
         private static void Log(string message, LogLevel level, string stackTrace = "")

@@ -205,7 +205,8 @@ namespace MerchantTails.Core
         {
             if (enableIncrementalGC)
             {
-                GarbageUtility.CollectIncremental(incrementalGCTimeSlice);
+                // Unity 6では GarbageCollector.CollectIncremental を使用
+                UnityEngine.Scripting.GarbageCollector.CollectIncremental((ulong)(incrementalGCTimeSlice * 1000000));
             }
         }
 

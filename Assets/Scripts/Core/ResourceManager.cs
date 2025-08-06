@@ -345,7 +345,7 @@ namespace MerchantTails.Core
             }
             else if (memoryUsage > memoryWarningThreshold)
             {
-                ErrorHandler.LogWarning($"High memory usage: {memoryUsage:P0}", null, "ResourceManager");
+                ErrorHandler.LogWarning($"High memory usage: {memoryUsage:P0}", "ResourceManager");
                 ClearUnusedCache();
             }
         }
@@ -395,7 +395,7 @@ namespace MerchantTails.Core
             ClearAllCache();
             Resources.UnloadUnusedAssets();
             GC.Collect();
-            ErrorHandler.LogWarning("Emergency cache clear executed", null, "ResourceManager");
+            ErrorHandler.LogWarning("Emergency cache clear executed", "ResourceManager");
         }
 
         /// <summary>

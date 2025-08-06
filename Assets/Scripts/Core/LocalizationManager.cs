@@ -309,7 +309,7 @@ namespace MerchantTails.Core
                 return value;
             }
 
-            ErrorHandler.LogWarning($"Localization key not found: {key}", null, "LocalizationManager");
+            ErrorHandler.LogWarning($"Localization key not found: {key}", "LocalizationManager");
             return $"[{key}]";
         }
 

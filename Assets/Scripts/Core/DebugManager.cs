@@ -609,9 +609,16 @@ namespace MerchantTails.Core
             if (gameManager != null && gameManager.PlayerData != null)
             {
                 int previousMoney = gameManager.PlayerData.CurrentMoney;
-                int newMoney = previousMoney + (int)amount;
-                gameManager.AddMoney((int)amount);
-                LogDebug($"Added {amount:C} to player money. New total: {newMoney:C}");
+                bool success = gameManager.PlayerData.ChangeMoney((int)amount);
+                if (success)
+                {
+                    int newMoney = gameManager.PlayerData.CurrentMoney;
+                    LogDebug($"Added {amount:C} to player money. New total: {newMoney:C}");
+                }
+                else
+                {
+                    LogDebug($"Failed to add {amount:C} to player money");
+                }
             }
         }
 
@@ -621,8 +628,9 @@ namespace MerchantTails.Core
             if (gameManager != null && gameManager.PlayerData != null)
             {
                 MerchantRank previousRank = gameManager.PlayerData.CurrentRank;
-                gameManager.UpdatePlayerRank(rank);
-                LogDebug($"Set merchant rank to: {rank}");
+                // Use SetRank method on PlayerData
+                gameManager.PlayerData.SetRank(rank);
+                LogDebug($"Set merchant rank from {previousRank} to: {rank}");
             }
         }
 
