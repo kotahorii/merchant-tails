@@ -9,7 +9,7 @@ namespace MerchantTails.Core
     /// 商人銀行システム
     /// 預金、複利計算、定期預金などを管理
     /// </summary>
-    public class BankSystem : MonoBehaviour
+    public class BankSystem : MonoBehaviour, IBankSystem
     {
         private static BankSystem instance;
         public static BankSystem Instance => instance;

@@ -4,7 +4,6 @@
     "references": [
         "MerchantTails.Core",
         "MerchantTails.Data",
-        "MerchantTails.Events",
         "MerchantTails.Market",
         "MerchantTails.Inventory",
         "Unity.TextMeshPro",

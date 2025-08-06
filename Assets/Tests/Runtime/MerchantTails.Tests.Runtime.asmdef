@@ -4,10 +4,11 @@
     "references": [
         "MerchantTails.Core",
         "MerchantTails.Data",
-        "MerchantTails.Events",
         "MerchantTails.Market",
         "MerchantTails.UI",
         "MerchantTails.Inventory",
+        "MerchantTails.Tutorial",
+        "MerchantTails.Systems",
         "UnityEngine.TestRunner",
         "UnityEditor.TestRunner",
         "Unity.TextMeshPro",

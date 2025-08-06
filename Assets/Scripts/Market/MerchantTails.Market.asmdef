@@ -4,7 +4,6 @@
     "references": [
         "MerchantTails.Core",
         "MerchantTails.Data",
-        "MerchantTails.Events",
         "Unity.Mathematics",
         "Unity.Burst",
         "Unity.Collections",

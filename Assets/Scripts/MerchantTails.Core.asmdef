@@ -10,7 +10,8 @@
         "Unity.Collections",
         "Unity.Jobs",
         "Unity.UIElements",
-        "UnityEngine.UI"
+        "UnityEngine.UI",
+        "Newtonsoft.Json"
     ],
     "includePlatforms": [],
     "excludePlatforms": [],

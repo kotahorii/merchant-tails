@@ -3,8 +3,7 @@
     "rootNamespace": "MerchantTails.Inventory",
     "references": [
         "MerchantTails.Core",
-        "MerchantTails.Data",
-        "MerchantTails.Events"
+        "MerchantTails.Data"
     ],
     "includePlatforms": [],
     "excludePlatforms": [],

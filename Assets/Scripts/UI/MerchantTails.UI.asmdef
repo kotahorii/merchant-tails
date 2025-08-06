@@ -4,7 +4,6 @@
     "references": [
         "MerchantTails.Core",
         "MerchantTails.Data",
-        "MerchantTails.Events",
         "Unity.TextMeshPro",
         "Unity.Addressables",
         "UnityEngine.UI"
