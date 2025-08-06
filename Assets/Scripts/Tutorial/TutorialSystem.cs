@@ -243,10 +243,8 @@ namespace MerchantTails.Tutorial
             if (uiManager != null && step != null)
             {
                 string message = step.description;
-                if (!string.IsNullOrEmpty(step.instruction))
-                {
-                    message += "\n\n" + step.instruction;
-                }
+                // Note: instruction property doesn't exist in TutorialStep
+                // Using description only for the notification
                 uiManager.ShowNotification(step.stepName, message, 0f, NotificationType.Info);
             }
 

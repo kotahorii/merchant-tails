@@ -131,7 +131,7 @@ namespace MerchantTails.Systems
             lastCalculatedAssets = totalAssets;
 
             // 資産変動イベントを発行
-            EventBus.Publish(new AssetChangedEvent(totalAssets, GetAssetBreakdown()));
+            EventBus.Publish(new Events.AssetChangedEvent(totalAssets, GetAssetBreakdown()));
 
             return totalAssets;
         }
@@ -145,24 +145,37 @@ namespace MerchantTails.Systems
                 return 0f;
 
             float inventoryValue = 0f;
-            var allItems = inventorySystem.GetAllItems();
+
+            // Get items from both locations
+            var storefrontItems = inventorySystem.GetAllItems(InventoryLocation.Storefront);
+            var tradingItems = inventorySystem.GetAllItems(InventoryLocation.Trading);
+
+            // Combine all items
+            var allItems = new List<InventoryItem>();
+            allItems.AddRange(storefrontItems);
+            allItems.AddRange(tradingItems);
 
             foreach (var item in allItems)
             {
                 // 劣化したアイテムを除外する場合
-                if (!includeDecayedItems && item.Value.condition <= 0f)
+                int currentDay = TimeManager.Instance?.CurrentDay ?? 1;
+                float freshness = item.GetFreshness(currentDay);
+                if (!includeDecayedItems && freshness <= 0f)
                     continue;
 
                 // 現在の市場価格を取得
-                float marketPrice = marketSystem.GetCurrentPrice(item.Key);
+                float marketPrice = marketSystem.GetCurrentPrice(item.itemType);
 
-                // 在庫の総価値 = 数量 × 市場価格 × 評価率 × 品質
-                float itemValue = item.Value.count * marketPrice * inventoryValueMultiplier;
+                // 在庫の総価値 = 市場価格 × 評価率 × 品質
+                float itemValue = marketPrice * inventoryValueMultiplier;
 
                 // 品質による価値の調整
-                if (item.Value.condition > 0f && item.Value.condition < 1f)
+                itemValue *= item.GetQualityMultiplier();
+
+                // 新鮮度による価値の調整
+                if (freshness > 0f && freshness < 1f)
                 {
-                    itemValue *= item.Value.condition;
+                    itemValue *= freshness;
                 }
 
                 inventoryValue += itemValue;
@@ -311,7 +324,7 @@ namespace MerchantTails.Systems
                 breakdown = GetAssetBreakdown(),
             };
 
-            EventBus.Publish(new DailyAssetReportEvent(report));
+            EventBus.Publish(new Events.DailyAssetReportEvent(report));
         }
     }
 }
