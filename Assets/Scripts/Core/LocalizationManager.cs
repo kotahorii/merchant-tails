@@ -129,7 +129,7 @@ namespace MerchantTails.Core
         {
             if (!supportedLanguages.Contains(language))
             {
-                ErrorHandler.LogWarning($"Unsupported language: {language}", null, "LocalizationManager");
+                ErrorHandler.LogWarning($"Unsupported language: {language}", "LocalizationManager");
                 return;
             }
 

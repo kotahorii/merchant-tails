@@ -115,7 +115,7 @@ namespace MerchantTails.Core
             }
             else
             {
-                ErrorHandler.LogWarning($"Resource not found: {path}", null, "ResourceManager");
+                ErrorHandler.LogWarning($"Resource not found: {path}", "ResourceManager");
             }
 
             return resource;
