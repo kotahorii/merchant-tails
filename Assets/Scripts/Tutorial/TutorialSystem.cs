@@ -238,17 +238,24 @@ namespace MerchantTails.Tutorial
 
         private void ShowTutorialUI(TutorialStep step)
         {
-            // Show the tutorial panel
-            if (TutorialPanel.Instance != null)
+            // Show the tutorial panel as a notification
+            var uiManager = ServiceLocator.GetService<IUIManager>();
+            if (uiManager != null && step != null)
             {
-                TutorialPanel.Instance.ShowStep(step);
+                string message = step.description;
+                if (!string.IsNullOrEmpty(step.instruction))
+                {
+                    message += "\n\n" + step.instruction;
+                }
+                uiManager.ShowNotification(step.stepName, message, 0f, NotificationType.Info);
             }
 
             // Navigate to target UI if needed
+            // Note: UI navigation will be handled by the UI system when it's implemented
             if (step.targetUI != UIType.None)
             {
-                var uiManager = ServiceLocator.GetService<IUIManager>();
-                uiManager?.ShowPanel(step.targetUI);
+                // TODO: Implement UI navigation when UIManager.ShowPanel is available
+                ErrorHandler.LogInfo($"Tutorial requested navigation to {step.targetUI}", "TutorialSystem");
             }
         }
 
@@ -267,11 +274,8 @@ namespace MerchantTails.Tutorial
             isWaitingForAction = false;
 
             // Hide tutorial UI
-            var uiManager = ServiceLocator.GetService<IUIManager>();
-            if (uiManager != null)
-            {
-                uiManager.HideNotification();
-            }
+            // Note: Tutorial notifications will auto-hide based on duration
+            ErrorHandler.LogInfo("Tutorial step completed, notification will auto-hide", "TutorialSystem");
 
             // Notify step completed
             OnStepCompleted?.Invoke(currentStepIndex);
