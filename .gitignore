@@ -12,7 +12,6 @@
 *.test
 *.prof
 *.out
-go.sum
 
 # Go workspace files
 go.work
