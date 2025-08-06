@@ -2,7 +2,6 @@ using System;
 using System.Collections.Generic;
 using MerchantTails.Core;
 using MerchantTails.Data;
-using MerchantTails.UI;
 using UnityEngine;
 
 namespace MerchantTails.Tutorial
@@ -392,9 +391,10 @@ namespace MerchantTails.Tutorial
             ErrorHandler.LogInfo($"Displaying hint: {hint.id}", "HintSystem");
 
             // UI経由でヒントを表示
-            if (UIManager.Instance != null)
+            var uiManager = ServiceLocator.GetService<IUIManager>();
+            if (uiManager != null)
             {
-                UIManager.Instance.ShowNotification(
+                uiManager.ShowNotification(
                     hint.title,
                     hint.message,
                     hint.displayDuration,
@@ -403,15 +403,15 @@ namespace MerchantTails.Tutorial
             }
         }
 
-        private UIManager.NotificationType GetNotificationTypeFromPriority(HintPriority priority)
+        private NotificationType GetNotificationTypeFromPriority(HintPriority priority)
         {
             return priority switch
             {
-                HintPriority.Critical => UIManager.NotificationType.Error,
-                HintPriority.High => UIManager.NotificationType.Warning,
-                HintPriority.Medium => UIManager.NotificationType.Info,
-                HintPriority.Low => UIManager.NotificationType.Success,
-                _ => UIManager.NotificationType.Info,
+                HintPriority.Critical => NotificationType.Error,
+                HintPriority.High => NotificationType.Warning,
+                HintPriority.Medium => NotificationType.Info,
+                HintPriority.Low => NotificationType.Success,
+                _ => NotificationType.Info,
             };
         }
 

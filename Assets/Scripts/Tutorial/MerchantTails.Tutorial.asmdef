@@ -3,8 +3,7 @@
     "rootNamespace": "MerchantTails.Tutorial",
     "references": [
         "MerchantTails.Core",
-        "MerchantTails.Data",
-        "MerchantTails.UI"
+        "MerchantTails.Data"
     ],
     "includePlatforms": [],
     "excludePlatforms": [],

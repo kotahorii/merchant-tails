@@ -3,7 +3,6 @@ using System.Collections;
 using System.Collections.Generic;
 using MerchantTails.Core;
 using MerchantTails.Data;
-using MerchantTails.UI;
 using UnityEngine;
 
 namespace MerchantTails.Tutorial

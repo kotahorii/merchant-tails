@@ -1,4 +1,4 @@
-namespace MerchantTails.UI
+namespace MerchantTails.Data
 {
     /// <summary>
     /// UI画面の種類を定義する列挙型
@@ -53,6 +53,9 @@ namespace MerchantTails.UI
 
         /// <summary>ポーズメニュー</summary>
         PauseMenu,
+
+        /// <summary>該当なし</summary>
+        None,
     }
 
     /// <summary>
