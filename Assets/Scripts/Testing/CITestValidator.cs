@@ -62,6 +62,9 @@ namespace MerchantTails.Testing
 
         private IEnumerator ValidateSystemAvailability()
         {
+            bool errorOccurred = false;
+            System.Exception caughtException = null;
+
             try
             {
                 // Check if Unity is running properly
@@ -79,18 +82,31 @@ namespace MerchantTails.Testing
                 // Check memory availability
                 long totalMemory = System.GC.GetTotalMemory(false);
                 ErrorHandler.LogInfo($"Initial memory usage: {totalMemory / 1024 / 1024}MB", "CITestValidator");
-
-                yield return new WaitForSeconds(0.1f);
             }
             catch (System.Exception e)
             {
-                ErrorHandler.LogError($"System availability validation failed: {e.Message}", e, "CITestValidator");
+                errorOccurred = true;
+                caughtException = e;
+            }
+
+            if (errorOccurred)
+            {
+                ErrorHandler.LogError(
+                    $"System availability validation failed: {caughtException.Message}",
+                    caughtException,
+                    "CITestValidator"
+                );
                 validationSuccess = false;
             }
+
+            yield return new WaitForSeconds(0.1f);
         }
 
         private IEnumerator ValidateScriptCompilation()
         {
+            bool errorOccurred = false;
+            System.Exception caughtException = null;
+
             try
             {
                 // Check if core types exist
@@ -140,33 +156,97 @@ namespace MerchantTails.Testing
                 }
 
                 ErrorHandler.LogInfo("Script compilation validation completed", "CITestValidator");
-                yield return new WaitForSeconds(0.1f);
             }
             catch (System.Exception e)
             {
-                ErrorHandler.LogError($"Script compilation validation failed: {e.Message}", e, "CITestValidator");
+                errorOccurred = true;
+                caughtException = e;
+            }
+
+            if (errorOccurred)
+            {
+                ErrorHandler.LogError(
+                    $"Script compilation validation failed: {caughtException.Message}",
+                    caughtException,
+                    "CITestValidator"
+                );
                 validationSuccess = false;
             }
+
+            yield return new WaitForSeconds(0.1f);
         }
 
         private IEnumerator ValidateComponentInstantiation()
         {
+            GameObject testGO = null;
+            GameManager gameManager = null;
+            TimeManager timeManager = null;
+            MarketSystem marketSystem = null;
+            InventorySystem inventorySystem = null;
+            bool errorOccurred = false;
+            System.Exception caughtException = null;
+
             try
             {
                 // Create temporary game object for testing
-                var testGO = new GameObject("ValidationTest");
+                testGO = new GameObject("ValidationTest");
 
                 // Try to add core components
-                var gameManager = testGO.AddComponent<GameManager>();
+                gameManager = testGO.AddComponent<GameManager>();
+            }
+            catch (System.Exception e)
+            {
+                errorOccurred = true;
+                caughtException = e;
+            }
+
+            if (!errorOccurred)
+            {
                 yield return new WaitForSeconds(0.1f);
 
-                var timeManager = testGO.AddComponent<TimeManager>();
+                try
+                {
+                    timeManager = testGO.AddComponent<TimeManager>();
+                }
+                catch (System.Exception e)
+                {
+                    errorOccurred = true;
+                    caughtException = e;
+                }
+            }
+
+            if (!errorOccurred)
+            {
                 yield return new WaitForSeconds(0.1f);
 
-                var marketSystem = testGO.AddComponent<MarketSystem>();
+                try
+                {
+                    marketSystem = testGO.AddComponent<MarketSystem>();
+                }
+                catch (System.Exception e)
+                {
+                    errorOccurred = true;
+                    caughtException = e;
+                }
+            }
+
+            if (!errorOccurred)
+            {
                 yield return new WaitForSeconds(0.1f);
 
-                var inventorySystem = testGO.AddComponent<InventorySystem>();
+                try
+                {
+                    inventorySystem = testGO.AddComponent<InventorySystem>();
+                }
+                catch (System.Exception e)
+                {
+                    errorOccurred = true;
+                    caughtException = e;
+                }
+            }
+
+            if (!errorOccurred)
+            {
                 yield return new WaitForSeconds(0.1f);
 
                 // Verify components were added
@@ -194,85 +274,120 @@ namespace MerchantTails.Testing
                     validationSuccess = false;
                 }
 
-                // Cleanup
-                DestroyImmediate(testGO);
-
                 ErrorHandler.LogInfo("Component instantiation validation completed", "CITestValidator");
             }
-            catch (System.Exception e)
+            else
             {
-                ErrorHandler.LogError($"Component instantiation validation failed: {e.Message}", e, "CITestValidator");
+                ErrorHandler.LogError(
+                    $"Component instantiation validation failed: {caughtException.Message}",
+                    caughtException,
+                    "CITestValidator"
+                );
                 validationSuccess = false;
+            }
+
+            // Cleanup
+            if (testGO != null)
+            {
+                DestroyImmediate(testGO);
             }
         }
 
         private IEnumerator ValidateBasicFunctionality()
         {
+            GameObject testGO = null;
+            bool errorOccurred = false;
+            System.Exception caughtException = null;
+
             try
             {
                 // Create test environment
-                var testGO = new GameObject("FunctionalityTest");
+                testGO = new GameObject("FunctionalityTest");
                 var gameManager = testGO.AddComponent<GameManager>();
                 var timeManager = testGO.AddComponent<TimeManager>();
                 var marketSystem = testGO.AddComponent<MarketSystem>();
                 var inventorySystem = testGO.AddComponent<InventorySystem>();
-
-                // Wait for initialization
-                yield return new WaitForSeconds(1f);
-
-                // Test basic functionality
-                if (GameManager.Instance != null)
-                {
-                    ErrorHandler.LogInfo("GameManager singleton working", "CITestValidator");
-                }
-                else
-                {
-                    ErrorHandler.LogError("GameManager singleton not working", null, "CITestValidator");
-                    validationSuccess = false;
-                }
-
-                if (TimeManager.Instance != null)
-                {
-                    var currentTime = TimeManager.Instance.GetFormattedTime();
-                    ErrorHandler.LogInfo($"TimeManager working: {currentTime}", "CITestValidator");
-                }
-                else
-                {
-                    ErrorHandler.LogError("TimeManager not working", null, "CITestValidator");
-                    validationSuccess = false;
-                }
-
-                if (MarketSystem.Instance != null)
-                {
-                    var fruitPrice = MarketSystem.Instance.GetCurrentPrice(MerchantTails.Data.ItemType.Fruit);
-                    ErrorHandler.LogInfo($"MarketSystem working: fruit price {fruitPrice}", "CITestValidator");
-                }
-                else
-                {
-                    ErrorHandler.LogError("MarketSystem not working", null, "CITestValidator");
-                    validationSuccess = false;
-                }
-
-                if (InventorySystem.Instance != null)
-                {
-                    var capacity = InventorySystem.Instance.StorefrontCapacityRemaining;
-                    ErrorHandler.LogInfo($"InventorySystem working: capacity {capacity}", "CITestValidator");
-                }
-                else
-                {
-                    ErrorHandler.LogError("InventorySystem not working", null, "CITestValidator");
-                    validationSuccess = false;
-                }
-
-                // Cleanup
-                DestroyImmediate(testGO);
-
-                ErrorHandler.LogInfo("Basic functionality validation completed", "CITestValidator");
             }
             catch (System.Exception e)
             {
-                ErrorHandler.LogError($"Basic functionality validation failed: {e.Message}", e, "CITestValidator");
+                errorOccurred = true;
+                caughtException = e;
+            }
+
+            if (!errorOccurred)
+            {
+                // Wait for initialization
+                yield return new WaitForSeconds(1f);
+
+                try
+                {
+                    // Test basic functionality
+                    if (GameManager.Instance != null)
+                    {
+                        ErrorHandler.LogInfo("GameManager singleton working", "CITestValidator");
+                    }
+                    else
+                    {
+                        ErrorHandler.LogError("GameManager singleton not working", null, "CITestValidator");
+                        validationSuccess = false;
+                    }
+
+                    if (TimeManager.Instance != null)
+                    {
+                        var currentTime = TimeManager.Instance.GetFormattedTime();
+                        ErrorHandler.LogInfo($"TimeManager working: {currentTime}", "CITestValidator");
+                    }
+                    else
+                    {
+                        ErrorHandler.LogError("TimeManager not working", null, "CITestValidator");
+                        validationSuccess = false;
+                    }
+
+                    if (MarketSystem.Instance != null)
+                    {
+                        var fruitPrice = MarketSystem.Instance.GetCurrentPrice(MerchantTails.Data.ItemType.Fruit);
+                        ErrorHandler.LogInfo($"MarketSystem working: fruit price {fruitPrice}", "CITestValidator");
+                    }
+                    else
+                    {
+                        ErrorHandler.LogError("MarketSystem not working", null, "CITestValidator");
+                        validationSuccess = false;
+                    }
+
+                    if (InventorySystem.Instance != null)
+                    {
+                        var capacity = InventorySystem.Instance.StorefrontCapacityRemaining;
+                        ErrorHandler.LogInfo($"InventorySystem working: capacity {capacity}", "CITestValidator");
+                    }
+                    else
+                    {
+                        ErrorHandler.LogError("InventorySystem not working", null, "CITestValidator");
+                        validationSuccess = false;
+                    }
+
+                    ErrorHandler.LogInfo("Basic functionality validation completed", "CITestValidator");
+                }
+                catch (System.Exception e)
+                {
+                    errorOccurred = true;
+                    caughtException = e;
+                }
+            }
+
+            if (errorOccurred)
+            {
+                ErrorHandler.LogError(
+                    $"Basic functionality validation failed: {caughtException.Message}",
+                    caughtException,
+                    "CITestValidator"
+                );
                 validationSuccess = false;
+            }
+
+            // Cleanup
+            if (testGO != null)
+            {
+                DestroyImmediate(testGO);
             }
         }
 

@@ -165,6 +165,9 @@ namespace MerchantTails.Testing
             var testResult = new TestResult { testName = "Market-to-Inventory Integration" };
             float startTime = Time.time;
 
+            bool errorOccurred = false;
+            System.Exception caughtException = null;
+
             try
             {
                 // Add items to inventory
@@ -188,8 +191,20 @@ namespace MerchantTails.Testing
                     );
 
                     EventBus.Publish(transactionEvent);
-                    yield return new WaitForSeconds(0.1f);
+                }
+            }
+            catch (System.Exception e)
+            {
+                errorOccurred = true;
+                caughtException = e;
+            }
 
+            if (!errorOccurred && testResult.passed != false)
+            {
+                yield return new WaitForSeconds(0.1f);
+
+                try
+                {
                     // Check if inventory was affected
                     int remainingItems = InventorySystem.Instance.GetItemCount(
                         ItemType.Potion,
@@ -199,17 +214,21 @@ namespace MerchantTails.Testing
                     testResult.passed = true; // Transaction event was published successfully
                     testResult.message = $"Transaction processed, remaining items: {remainingItems}";
                 }
-
-                testResult.duration = Time.time - startTime;
-                LogTestResult(testResult);
+                catch (System.Exception e)
+                {
+                    errorOccurred = true;
+                    caughtException = e;
+                }
             }
-            catch (System.Exception e)
+
+            if (errorOccurred)
             {
                 testResult.passed = false;
-                testResult.message = $"Exception: {e.Message}";
-                testResult.duration = Time.time - startTime;
-                LogTestResult(testResult);
+                testResult.message = $"Exception: {caughtException.Message}";
             }
+
+            testResult.duration = Time.time - startTime;
+            LogTestResult(testResult);
         }
 
         private IEnumerator TestCompleteGameLoop()
@@ -217,64 +236,105 @@ namespace MerchantTails.Testing
             var testResult = new TestResult { testName = "Complete Game Loop" };
             float startTime = Time.time;
 
+            int initialDay = 0;
+            Season initialSeason = Season.Spring;
+            bool addResult = false;
+            bool moveResult = false;
+            int newDay = 0;
+            bool dayAdvanced = false;
+            float weaponPrice = 0f;
+            bool priceExists = false;
+            int storefrontCount = 0;
+            int tradingCount = 0;
+            bool errorOccurred = false;
+            System.Exception caughtException = null;
+
             try
             {
                 // Simulate a complete trading cycle
 
                 // 1. Check initial state
-                int initialDay = TimeManager.Instance.CurrentDay;
-                Season initialSeason = TimeManager.Instance.CurrentSeason;
+                initialDay = TimeManager.Instance.CurrentDay;
+                initialSeason = TimeManager.Instance.CurrentSeason;
 
                 // 2. Add items to inventory
-                bool addResult = InventorySystem.Instance.AddItem(ItemType.Weapon, 5, InventoryLocation.Trading);
+                addResult = InventorySystem.Instance.AddItem(ItemType.Weapon, 5, InventoryLocation.Trading);
 
                 // 3. Move items to storefront
-                bool moveResult = InventorySystem.Instance.MoveItem(
+                moveResult = InventorySystem.Instance.MoveItem(
                     ItemType.Weapon,
                     2,
                     InventoryLocation.Trading,
                     InventoryLocation.Storefront
                 );
-
-                // 4. Advance time significantly
-                for (int i = 0; i < 8; i++) // Advance 2 days (4 phases each)
-                {
-                    TimeManager.Instance.SkipToNextPhase();
-                    yield return new WaitForSeconds(0.02f);
-                }
-
-                // 5. Check that time advanced
-                int newDay = TimeManager.Instance.CurrentDay;
-                bool dayAdvanced = newDay > initialDay;
-
-                // 6. Check that market prices have updated
-                float weaponPrice = MarketSystem.Instance.GetCurrentPrice(ItemType.Weapon);
-                bool priceExists = weaponPrice > 0;
-
-                // 7. Verify inventory state
-                int storefrontCount = InventorySystem.Instance.GetItemCount(
-                    ItemType.Weapon,
-                    InventoryLocation.Storefront
-                );
-                int tradingCount = InventorySystem.Instance.GetItemCount(ItemType.Weapon, InventoryLocation.Trading);
-
-                bool allOperationsSuccessful = addResult && moveResult && dayAdvanced && priceExists;
-
-                testResult.passed = allOperationsSuccessful;
-                testResult.message = allOperationsSuccessful
-                    ? $"Complete cycle: Day {initialDay}->{newDay}, Price {weaponPrice:F2}, Items S:{storefrontCount} T:{tradingCount}"
-                    : $"Cycle incomplete: Add:{addResult} Move:{moveResult} DayAdv:{dayAdvanced} Price:{priceExists}";
-
-                testResult.duration = Time.time - startTime;
-                LogTestResult(testResult);
             }
             catch (System.Exception e)
             {
-                testResult.passed = false;
-                testResult.message = $"Exception: {e.Message}";
-                testResult.duration = Time.time - startTime;
-                LogTestResult(testResult);
+                errorOccurred = true;
+                caughtException = e;
             }
+
+            if (!errorOccurred)
+            {
+                // 4. Advance time significantly
+                for (int i = 0; i < 8; i++) // Advance 2 days (4 phases each)
+                {
+                    try
+                    {
+                        TimeManager.Instance.SkipToNextPhase();
+                    }
+                    catch (System.Exception e)
+                    {
+                        errorOccurred = true;
+                        caughtException = e;
+                        break;
+                    }
+
+                    yield return new WaitForSeconds(0.02f);
+                }
+            }
+
+            if (!errorOccurred)
+            {
+                try
+                {
+                    // 5. Check that time advanced
+                    newDay = TimeManager.Instance.CurrentDay;
+                    dayAdvanced = newDay > initialDay;
+
+                    // 6. Check that market prices have updated
+                    weaponPrice = MarketSystem.Instance.GetCurrentPrice(ItemType.Weapon);
+                    priceExists = weaponPrice > 0;
+
+                    // 7. Verify inventory state
+                    storefrontCount = InventorySystem.Instance.GetItemCount(
+                        ItemType.Weapon,
+                        InventoryLocation.Storefront
+                    );
+                    tradingCount = InventorySystem.Instance.GetItemCount(ItemType.Weapon, InventoryLocation.Trading);
+
+                    bool allOperationsSuccessful = addResult && moveResult && dayAdvanced && priceExists;
+
+                    testResult.passed = allOperationsSuccessful;
+                    testResult.message = allOperationsSuccessful
+                        ? $"Complete cycle: Day {initialDay}->{newDay}, Price {weaponPrice:F2}, Items S:{storefrontCount} T:{tradingCount}"
+                        : $"Cycle incomplete: Add:{addResult} Move:{moveResult} DayAdv:{dayAdvanced} Price:{priceExists}";
+                }
+                catch (System.Exception e)
+                {
+                    errorOccurred = true;
+                    caughtException = e;
+                }
+            }
+
+            if (errorOccurred)
+            {
+                testResult.passed = false;
+                testResult.message = $"Exception: {caughtException.Message}";
+            }
+
+            testResult.duration = Time.time - startTime;
+            LogTestResult(testResult);
         }
 
         private IEnumerator TestEventPropagation()
@@ -282,14 +342,18 @@ namespace MerchantTails.Testing
             var testResult = new TestResult { testName = "Event Propagation" };
             float startTime = Time.time;
 
+            bool phaseEventReceived = false;
+            bool priceEventReceived = false;
+            System.Action<PhaseChangedEvent> phaseHandler = null;
+            System.Action<PriceChangedEvent> priceHandler = null;
+            bool errorOccurred = false;
+            System.Exception caughtException = null;
+
             try
             {
-                bool phaseEventReceived = false;
-                bool priceEventReceived = false;
-
                 // Subscribe to events temporarily
-                System.Action<PhaseChangedEvent> phaseHandler = (evt) => phaseEventReceived = true;
-                System.Action<PriceChangedEvent> priceHandler = (evt) => priceEventReceived = true;
+                phaseHandler = (evt) => phaseEventReceived = true;
+                priceHandler = (evt) => priceEventReceived = true;
 
                 EventBus.Subscribe<PhaseChangedEvent>(phaseHandler);
                 EventBus.Subscribe<PriceChangedEvent>(priceHandler);
@@ -306,27 +370,57 @@ namespace MerchantTails.Testing
                     1
                 );
                 EventBus.Publish(marketEvent);
-
-                yield return new WaitForSeconds(0.2f); // Wait for events to propagate
-
-                // Cleanup subscriptions
-                EventBus.Unsubscribe<PhaseChangedEvent>(phaseHandler);
-                EventBus.Unsubscribe<PriceChangedEvent>(priceHandler);
-
-                bool eventsWorking = phaseEventReceived; // At minimum phase event should work
-
-                testResult.passed = eventsWorking;
-                testResult.message = $"Events received - Phase: {phaseEventReceived}, Price: {priceEventReceived}";
-                testResult.duration = Time.time - startTime;
-                LogTestResult(testResult);
             }
             catch (System.Exception e)
             {
-                testResult.passed = false;
-                testResult.message = $"Exception: {e.Message}";
-                testResult.duration = Time.time - startTime;
-                LogTestResult(testResult);
+                errorOccurred = true;
+                caughtException = e;
             }
+
+            if (!errorOccurred)
+            {
+                yield return new WaitForSeconds(0.2f); // Wait for events to propagate
+
+                try
+                {
+                    // Cleanup subscriptions
+                    if (phaseHandler != null)
+                        EventBus.Unsubscribe<PhaseChangedEvent>(phaseHandler);
+                    if (priceHandler != null)
+                        EventBus.Unsubscribe<PriceChangedEvent>(priceHandler);
+
+                    bool eventsWorking = phaseEventReceived; // At minimum phase event should work
+
+                    testResult.passed = eventsWorking;
+                    testResult.message = $"Events received - Phase: {phaseEventReceived}, Price: {priceEventReceived}";
+                }
+                catch (System.Exception e)
+                {
+                    errorOccurred = true;
+                    caughtException = e;
+                }
+            }
+
+            if (errorOccurred)
+            {
+                testResult.passed = false;
+                testResult.message = $"Exception: {caughtException.Message}";
+
+                // Cleanup on error
+                try
+                {
+                    if (phaseHandler != null)
+                        EventBus.Unsubscribe<PhaseChangedEvent>(phaseHandler);
+                    if (priceHandler != null)
+                        EventBus.Unsubscribe<PriceChangedEvent>(priceHandler);
+                }
+                catch
+                { /* Ignore cleanup errors */
+                }
+            }
+
+            testResult.duration = Time.time - startTime;
+            LogTestResult(testResult);
         }
 
         private IEnumerator TestDataPersistence()
@@ -334,32 +428,42 @@ namespace MerchantTails.Testing
             var testResult = new TestResult { testName = "Data Persistence" };
             float startTime = Time.time;
 
+            bool timeDataValid = false;
+            bool inventoryDataValid = false;
+            bool errorOccurred = false;
+            System.Exception caughtException = null;
+
             try
             {
                 // Test time data persistence
                 var timeData = TimeManager.Instance.GetTimeData();
-                bool timeDataValid =
+                timeDataValid =
                     timeData.currentDay > 0 && timeData.currentSeason != Season.Spring
                     || timeData.currentSeason == Season.Spring;
 
                 // Test inventory data persistence
                 var inventoryData = InventorySystem.Instance.GetInventoryData();
-                bool inventoryDataValid = inventoryData != null;
+                inventoryDataValid = inventoryData != null;
 
                 testResult.passed = timeDataValid && inventoryDataValid;
                 testResult.message = $"Data persistence - Time: {timeDataValid}, Inventory: {inventoryDataValid}";
-                testResult.duration = Time.time - startTime;
-                LogTestResult(testResult);
-
-                yield return null;
             }
             catch (System.Exception e)
             {
-                testResult.passed = false;
-                testResult.message = $"Exception: {e.Message}";
-                testResult.duration = Time.time - startTime;
-                LogTestResult(testResult);
+                errorOccurred = true;
+                caughtException = e;
             }
+
+            if (errorOccurred)
+            {
+                testResult.passed = false;
+                testResult.message = $"Exception: {caughtException.Message}";
+            }
+
+            testResult.duration = Time.time - startTime;
+            LogTestResult(testResult);
+
+            yield return null;
         }
 
         private IEnumerator TestErrorRecovery()
@@ -367,13 +471,19 @@ namespace MerchantTails.Testing
             var testResult = new TestResult { testName = "Error Recovery" };
             float startTime = Time.time;
 
+            bool healthCheckPassed = false;
+            bool safeExecutionWorked = false;
+            bool safeExecutionHandledException = false;
+            bool errorOccurred = false;
+            System.Exception caughtException = null;
+
             try
             {
                 // Test system health check
-                bool healthCheckPassed = ErrorHandler.CheckSystemHealth();
+                healthCheckPassed = ErrorHandler.CheckSystemHealth();
 
                 // Test safe execution
-                bool safeExecutionWorked = ErrorHandler.SafeExecute(
+                safeExecutionWorked = ErrorHandler.SafeExecute(
                     () =>
                     {
                         // This should not throw
@@ -383,7 +493,7 @@ namespace MerchantTails.Testing
                 );
 
                 // Test safe execution with exception
-                bool safeExecutionHandledException = !ErrorHandler.SafeExecute(
+                safeExecutionHandledException = ErrorHandler.SafeExecute(
                     () =>
                     {
                         throw new System.Exception("Test exception");
@@ -396,18 +506,23 @@ namespace MerchantTails.Testing
                 testResult.passed = allRecoveryTestsPassed;
                 testResult.message =
                     $"Recovery tests - Health: {healthCheckPassed}, Safe: {safeExecutionWorked}, Exception: {safeExecutionHandledException}";
-                testResult.duration = Time.time - startTime;
-                LogTestResult(testResult);
-
-                yield return null;
             }
             catch (System.Exception e)
             {
-                testResult.passed = false;
-                testResult.message = $"Exception: {e.Message}";
-                testResult.duration = Time.time - startTime;
-                LogTestResult(testResult);
+                errorOccurred = true;
+                caughtException = e;
             }
+
+            if (errorOccurred)
+            {
+                testResult.passed = false;
+                testResult.message = $"Exception: {caughtException.Message}";
+            }
+
+            testResult.duration = Time.time - startTime;
+            LogTestResult(testResult);
+
+            yield return null;
         }
 
         private void LogTestResult(TestResult result)

@@ -85,10 +85,13 @@ namespace MerchantTails.Testing
 
             ErrorHandler.LogInfo("Testing null reference recovery", "ErrorRecoveryTest");
 
+            bool recovered = true;
+            bool errorOccurred = false;
+            System.Exception caughtException = null;
+
             try
             {
                 // Simulate null reference scenarios
-                bool recovered = true;
 
                 // Test 1: Null component access
                 recovered &= ErrorHandler.SafeExecute(
@@ -141,7 +144,17 @@ namespace MerchantTails.Testing
             }
             catch (System.Exception e)
             {
-                ErrorHandler.LogError($"Null reference recovery test failed: {e.Message}", e, "ErrorRecoveryTest");
+                errorOccurred = true;
+                caughtException = e;
+            }
+
+            if (errorOccurred)
+            {
+                ErrorHandler.LogError(
+                    $"Null reference recovery test failed: {caughtException.Message}",
+                    caughtException,
+                    "ErrorRecoveryTest"
+                );
             }
 
             yield return null;
@@ -154,56 +167,117 @@ namespace MerchantTails.Testing
 
             ErrorHandler.LogInfo("Testing system recovery capabilities", "ErrorRecoveryTest");
 
+            bool allRecovered = true;
+            bool gameManagerRecovered = false;
+            bool timeManagerRecovered = false;
+            bool marketSystemRecovered = false;
+            bool inventorySystemRecovered = false;
+            bool systemsHealthy = false;
+            bool errorOccurred = false;
+            System.Exception caughtException = null;
+
             try
             {
-                bool allRecovered = true;
-
                 // Test GameManager recovery
-                bool gameManagerRecovered = ErrorHandler.AttemptRecovery("gamemanager");
+                gameManagerRecovered = ErrorHandler.AttemptRecovery("gamemanager");
                 allRecovered &= gameManagerRecovered;
-
-                yield return new WaitForSeconds(0.1f);
-
-                // Test TimeManager recovery
-                bool timeManagerRecovered = ErrorHandler.AttemptRecovery("timemanager");
-                allRecovered &= timeManagerRecovered;
-
-                yield return new WaitForSeconds(0.1f);
-
-                // Test MarketSystem recovery
-                bool marketSystemRecovered = ErrorHandler.AttemptRecovery("marketsystem");
-                allRecovered &= marketSystemRecovered;
-
-                yield return new WaitForSeconds(0.1f);
-
-                // Test InventorySystem recovery
-                bool inventorySystemRecovered = ErrorHandler.AttemptRecovery("inventorysystem");
-                allRecovered &= inventorySystemRecovered;
-
-                yield return new WaitForSeconds(0.1f);
-
-                // Verify systems are functional after recovery
-                bool systemsHealthy = ErrorHandler.CheckSystemHealth();
-
-                float recoveryTime = Time.time - startTime;
-
-                var result = new RecoveryTestResult
-                {
-                    testName = "System Recovery",
-                    recoverySuccessful = allRecovered && systemsHealthy,
-                    recoveryTime = recoveryTime,
-                    errorDetails =
-                        $"GM:{gameManagerRecovered} TM:{timeManagerRecovered} MS:{marketSystemRecovered} IS:{inventorySystemRecovered} Health:{systemsHealthy}",
-                };
-
-                LogRecoveryResult(result);
-
-                if (result.recoverySuccessful)
-                    successfulRecoveries++;
             }
             catch (System.Exception e)
             {
-                ErrorHandler.LogError($"System recovery test failed: {e.Message}", e, "ErrorRecoveryTest");
+                errorOccurred = true;
+                caughtException = e;
+            }
+
+            if (!errorOccurred)
+            {
+                yield return new WaitForSeconds(0.1f);
+
+                try
+                {
+                    // Test TimeManager recovery
+                    timeManagerRecovered = ErrorHandler.AttemptRecovery("timemanager");
+                    allRecovered &= timeManagerRecovered;
+                }
+                catch (System.Exception e)
+                {
+                    errorOccurred = true;
+                    caughtException = e;
+                }
+            }
+
+            if (!errorOccurred)
+            {
+                yield return new WaitForSeconds(0.1f);
+
+                try
+                {
+                    // Test MarketSystem recovery
+                    marketSystemRecovered = ErrorHandler.AttemptRecovery("marketsystem");
+                    allRecovered &= marketSystemRecovered;
+                }
+                catch (System.Exception e)
+                {
+                    errorOccurred = true;
+                    caughtException = e;
+                }
+            }
+
+            if (!errorOccurred)
+            {
+                yield return new WaitForSeconds(0.1f);
+
+                try
+                {
+                    // Test InventorySystem recovery
+                    inventorySystemRecovered = ErrorHandler.AttemptRecovery("inventorysystem");
+                    allRecovered &= inventorySystemRecovered;
+                }
+                catch (System.Exception e)
+                {
+                    errorOccurred = true;
+                    caughtException = e;
+                }
+            }
+
+            if (!errorOccurred)
+            {
+                yield return new WaitForSeconds(0.1f);
+
+                try
+                {
+                    // Verify systems are functional after recovery
+                    systemsHealthy = ErrorHandler.CheckSystemHealth();
+
+                    float recoveryTime = Time.time - startTime;
+
+                    var result = new RecoveryTestResult
+                    {
+                        testName = "System Recovery",
+                        recoverySuccessful = allRecovered && systemsHealthy,
+                        recoveryTime = recoveryTime,
+                        errorDetails =
+                            $"GM:{gameManagerRecovered} TM:{timeManagerRecovered} MS:{marketSystemRecovered} IS:{inventorySystemRecovered} Health:{systemsHealthy}",
+                    };
+
+                    LogRecoveryResult(result);
+
+                    if (result.recoverySuccessful)
+                        successfulRecoveries++;
+                }
+                catch (System.Exception e)
+                {
+                    errorOccurred = true;
+                    caughtException = e;
+                }
+            }
+
+            if (errorOccurred)
+            {
+                ErrorHandler.LogError(
+                    $"System recovery test failed: {caughtException.Message}",
+                    caughtException,
+                    "ErrorRecoveryTest"
+                );
             }
         }
 
@@ -214,10 +288,13 @@ namespace MerchantTails.Testing
 
             ErrorHandler.LogInfo("Testing exception handling", "ErrorRecoveryTest");
 
+            bool allHandled = true;
+            bool systemStillFunctional = true;
+            bool errorOccurred = false;
+            System.Exception caughtException = null;
+
             try
             {
-                bool allHandled = true;
-
                 // Test ArgumentException handling
                 allHandled &= ErrorHandler.SafeExecute(
                     () =>
@@ -247,8 +324,6 @@ namespace MerchantTails.Testing
                 );
 
                 // Test that the system continues to function after exceptions
-                bool systemStillFunctional = true;
-
                 systemStillFunctional &= ErrorHandler.SafeExecute(
                     () =>
                     {
@@ -275,7 +350,17 @@ namespace MerchantTails.Testing
             }
             catch (System.Exception e)
             {
-                ErrorHandler.LogError($"Exception handling test failed: {e.Message}", e, "ErrorRecoveryTest");
+                errorOccurred = true;
+                caughtException = e;
+            }
+
+            if (errorOccurred)
+            {
+                ErrorHandler.LogError(
+                    $"Exception handling test failed: {caughtException.Message}",
+                    caughtException,
+                    "ErrorRecoveryTest"
+                );
             }
 
             yield return null;
@@ -288,14 +373,20 @@ namespace MerchantTails.Testing
 
             ErrorHandler.LogInfo("Testing memory pressure recovery", "ErrorRecoveryTest");
 
+            long initialMemory = 0;
+            var memoryHogs = new System.Collections.Generic.List<byte[]>();
+            bool memoryHandled = false;
+            bool memoryRecovered = false;
+            bool systemsHealthy = false;
+            bool errorOccurred = false;
+            System.Exception caughtException = null;
+
             try
             {
-                long initialMemory = System.GC.GetTotalMemory(false);
+                initialMemory = System.GC.GetTotalMemory(false);
 
                 // Create memory pressure
-                var memoryHogs = new System.Collections.Generic.List<byte[]>();
-
-                bool memoryHandled = ErrorHandler.SafeExecute(
+                memoryHandled = ErrorHandler.SafeExecute(
                     () =>
                     {
                         for (int i = 0; i < 100; i++)
@@ -317,34 +408,55 @@ namespace MerchantTails.Testing
                 System.GC.Collect();
                 System.GC.WaitForPendingFinalizers();
                 System.GC.Collect();
-
-                yield return new WaitForSeconds(1f);
-
-                long finalMemory = System.GC.GetTotalMemory(true);
-                bool memoryRecovered = (finalMemory - initialMemory) < 10 * 1024 * 1024; // Within 10MB of initial
-
-                // Verify systems still work after memory pressure
-                bool systemsHealthy = ErrorHandler.CheckSystemHealth();
-
-                float recoveryTime = Time.time - startTime;
-
-                var result = new RecoveryTestResult
-                {
-                    testName = "Memory Pressure Recovery",
-                    recoverySuccessful = memoryHandled && memoryRecovered && systemsHealthy,
-                    recoveryTime = recoveryTime,
-                    errorDetails =
-                        $"Memory handled: {memoryHandled}, Recovered: {memoryRecovered}, Systems healthy: {systemsHealthy}",
-                };
-
-                LogRecoveryResult(result);
-
-                if (result.recoverySuccessful)
-                    successfulRecoveries++;
             }
             catch (System.Exception e)
             {
-                ErrorHandler.LogError($"Memory pressure recovery test failed: {e.Message}", e, "ErrorRecoveryTest");
+                errorOccurred = true;
+                caughtException = e;
+            }
+
+            if (!errorOccurred)
+            {
+                yield return new WaitForSeconds(1f);
+
+                try
+                {
+                    long finalMemory = System.GC.GetTotalMemory(true);
+                    memoryRecovered = (finalMemory - initialMemory) < 10 * 1024 * 1024; // Within 10MB of initial
+
+                    // Verify systems still work after memory pressure
+                    systemsHealthy = ErrorHandler.CheckSystemHealth();
+
+                    float recoveryTime = Time.time - startTime;
+
+                    var result = new RecoveryTestResult
+                    {
+                        testName = "Memory Pressure Recovery",
+                        recoverySuccessful = memoryHandled && memoryRecovered && systemsHealthy,
+                        recoveryTime = recoveryTime,
+                        errorDetails =
+                            $"Memory handled: {memoryHandled}, Recovered: {memoryRecovered}, Systems healthy: {systemsHealthy}",
+                    };
+
+                    LogRecoveryResult(result);
+
+                    if (result.recoverySuccessful)
+                        successfulRecoveries++;
+                }
+                catch (System.Exception e)
+                {
+                    errorOccurred = true;
+                    caughtException = e;
+                }
+            }
+
+            if (errorOccurred)
+            {
+                ErrorHandler.LogError(
+                    $"Memory pressure recovery test failed: {caughtException.Message}",
+                    caughtException,
+                    "ErrorRecoveryTest"
+                );
             }
         }
 
@@ -355,10 +467,14 @@ namespace MerchantTails.Testing
 
             ErrorHandler.LogInfo("Testing event system recovery", "ErrorRecoveryTest");
 
+            bool eventSystemRecovered = true;
+            bool eventSystemFunctional = true;
+            int eventsReceived = 0;
+            bool errorOccurred = false;
+            System.Exception caughtException = null;
+
             try
             {
-                bool eventSystemRecovered = true;
-
                 // Test event handling with null handlers
                 eventSystemRecovered &= ErrorHandler.SafeExecute(
                     () =>
@@ -392,44 +508,74 @@ namespace MerchantTails.Testing
                     },
                     "RapidEventTest"
                 );
-
-                yield return new WaitForSeconds(0.5f);
-
-                // Verify event system is still functional
-                bool eventSystemFunctional = true;
-                int eventsReceived = 0;
-
-                System.Action<PriceChangedEvent> testHandler = (evt) => eventsReceived++;
-                EventBus.Subscribe<PriceChangedEvent>(testHandler);
-
-                var testEvent = new PriceChangedEvent(Data.ItemType.Gem, 200f, 220f);
-                EventBus.Publish(testEvent);
-
-                yield return new WaitForSeconds(0.1f);
-
-                EventBus.Unsubscribe<PriceChangedEvent>(testHandler);
-
-                eventSystemFunctional = eventsReceived > 0;
-
-                float recoveryTime = Time.time - startTime;
-
-                var result = new RecoveryTestResult
-                {
-                    testName = "Event System Recovery",
-                    recoverySuccessful = eventSystemRecovered && eventSystemFunctional,
-                    recoveryTime = recoveryTime,
-                    errorDetails =
-                        $"Recovery: {eventSystemRecovered}, Functional: {eventSystemFunctional}, Events received: {eventsReceived}",
-                };
-
-                LogRecoveryResult(result);
-
-                if (result.recoverySuccessful)
-                    successfulRecoveries++;
             }
             catch (System.Exception e)
             {
-                ErrorHandler.LogError($"Event system recovery test failed: {e.Message}", e, "ErrorRecoveryTest");
+                errorOccurred = true;
+                caughtException = e;
+            }
+
+            if (!errorOccurred)
+            {
+                yield return new WaitForSeconds(0.5f);
+
+                try
+                {
+                    // Verify event system is still functional
+                    System.Action<PriceChangedEvent> testHandler = (evt) => eventsReceived++;
+                    EventBus.Subscribe<PriceChangedEvent>(testHandler);
+
+                    var testEvent = new PriceChangedEvent(Data.ItemType.Gem, 200f, 220f);
+                    EventBus.Publish(testEvent);
+                }
+                catch (System.Exception e)
+                {
+                    errorOccurred = true;
+                    caughtException = e;
+                }
+            }
+
+            if (!errorOccurred)
+            {
+                yield return new WaitForSeconds(0.1f);
+
+                try
+                {
+                    System.Action<PriceChangedEvent> testHandler = (evt) => eventsReceived++;
+                    EventBus.Unsubscribe<PriceChangedEvent>(testHandler);
+
+                    eventSystemFunctional = eventsReceived > 0;
+
+                    float recoveryTime = Time.time - startTime;
+
+                    var result = new RecoveryTestResult
+                    {
+                        testName = "Event System Recovery",
+                        recoverySuccessful = eventSystemRecovered && eventSystemFunctional,
+                        recoveryTime = recoveryTime,
+                        errorDetails =
+                            $"Recovery: {eventSystemRecovered}, Functional: {eventSystemFunctional}, Events received: {eventsReceived}",
+                    };
+
+                    LogRecoveryResult(result);
+
+                    if (result.recoverySuccessful)
+                        successfulRecoveries++;
+                }
+                catch (System.Exception e)
+                {
+                    errorOccurred = true;
+                    caughtException = e;
+                }
+            }
+
+            if (errorOccurred)
+            {
+                ErrorHandler.LogError(
+                    $"Event system recovery test failed: {caughtException.Message}",
+                    caughtException,
+                    "ErrorRecoveryTest"
+                );
             }
         }
 
