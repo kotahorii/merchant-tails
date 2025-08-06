@@ -309,7 +309,7 @@ namespace MerchantTails.UI
         private int CalculateDailyProfit()
         {
             // 本日の利益計算（簡易実装）
-            return Random.Range(-500, 2000);
+            return UnityEngine.Random.Range(-500, 2000);
         }
 
         private int CalculateCustomerCount()

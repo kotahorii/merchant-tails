@@ -257,7 +257,7 @@ namespace MerchantTails.UI
 
             // アイテム情報を設定
             float currentPrice = MarketSystem.Instance?.GetCurrentPrice(itemType) ?? 0f;
-            int? expiryDays = InventorySystem.Instance.GetItemExpiryDays(itemType, location);
+            int? expiryDays = InventorySystem.Instance.GetItemExpiryDays(itemType);
 
             itemUI.Setup(itemType, quantity, currentPrice, location, expiryDays);
             itemUI.OnItemSelected += OnInventoryItemSelected;

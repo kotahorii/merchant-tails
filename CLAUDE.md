@@ -126,3 +126,4 @@ The game must teach investment concepts without explicitly using financial terms
 ## Development Best Practices
 
 - PUSH したあとは必ず CI が成功しているかを確認すること
+- 新規実装、修正を行った際はUnity Editorでエラーが出ていないかチェックすること

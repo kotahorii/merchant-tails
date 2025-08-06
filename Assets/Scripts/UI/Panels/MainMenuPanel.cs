@@ -159,7 +159,7 @@ namespace MerchantTails.UI.Panels
             ErrorHandler.LogInfo("Continue clicked", "MainMenuPanel");
 
             // セーブデータの読み込み
-            _ = LoadGameAsync();
+            LoadGameAsync();
         }
 
         private async void LoadGameAsync()

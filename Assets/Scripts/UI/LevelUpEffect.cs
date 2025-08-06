@@ -367,7 +367,13 @@ namespace MerchantTails.UI
             if (featureUnlockSystem == null)
                 return new List<GameFeature>();
 
-            return featureUnlockSystem.GetFeaturesForRank(rank);
+            var unlocks = featureUnlockSystem.GetFeaturesForRank(rank);
+            var features = new List<GameFeature>();
+            foreach (var unlock in unlocks)
+            {
+                features.Add(unlock.feature);
+            }
+            return features;
         }
 
         /// <summary>

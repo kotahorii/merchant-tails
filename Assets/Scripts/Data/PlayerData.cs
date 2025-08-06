@@ -115,6 +115,35 @@ namespace MerchantTails.Data
         }
 
         /// <summary>
+        /// お金を消費する
+        /// </summary>
+        /// <param name="amount">消費する金額</param>
+        /// <returns>消費が成功したかどうか</returns>
+        public bool SpendMoney(int amount)
+        {
+            if (amount < 0)
+            {
+                Debug.LogWarning($"[PlayerData] SpendMoney called with negative amount: {amount}");
+                return false;
+            }
+            return ChangeMoney(-amount);
+        }
+
+        /// <summary>
+        /// お金を獲得する
+        /// </summary>
+        /// <param name="amount">獲得する金額</param>
+        public void EarnMoney(int amount)
+        {
+            if (amount < 0)
+            {
+                Debug.LogWarning($"[PlayerData] EarnMoney called with negative amount: {amount}");
+                return;
+            }
+            ChangeMoney(amount);
+        }
+
+        /// <summary>
         /// 利益を記録し、ランクアップをチェックする
         /// </summary>
         /// <param name="profit">今回の利益</param>
