@@ -1,60 +1,32 @@
-# golangci-lint v2 configuration
 version: "2"
+
+linters:
+  default: none
+  enable:
+    - bodyclose
+    - dogsled
+    - errcheck
+    - goconst
+    - gocritic
+    - goprintffuncname
+    - gosec
+    - govet
+    - ineffassign
+    - misspell
+    - nakedret
+    - noctx
+    - nolintlint
+    - staticcheck
+    - unconvert
+    - unparam
+    - unused
+    - whitespace
+
+formatters:
+  enable:
+    - gofumpt
+    - goimports
+    - gofmt
 
 run:
   timeout: 5m
-  tests: true
-  issues-exit-code: 1
-  build-tags:
-    - test
-
-linters:
-  enable:
-    # Core Go checks
-    - govet
-    - ineffassign
-    - staticcheck
-
-    # Bug Prevention
-    - errcheck
-    - bodyclose
-    - nilerr
-
-    # Code Quality
-    - goconst
-    - gocritic
-
-    # Security
-    - gosec
-
-linters-settings:
-  govet:
-    check-shadowing: false
-
-  errcheck:
-    check-type-assertions: false
-    check-blank: false
-
-  gosec:
-    severity: low
-    confidence: low
-
-issues:
-  max-issues-per-linter: 50
-  max-same-issues: 10
-
-  exclude-rules:
-    # Exclude error checks in tests
-    - path: _test\.go
-      linters:
-        - errcheck
-        - gosec
-
-    # Exclude specific directories
-    - path: internal/domain/merchant
-      linters:
-        - errcheck
-
-    # Allow unused in test files
-    - path: _test\.go
-      text: "unused"

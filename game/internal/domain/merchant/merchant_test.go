@@ -156,7 +156,7 @@ func TestMerchant_MakeTradingDecision(t *testing.T) {
 	marketSys.RegisterItem(apple)
 
 	// Add item to merchant inventory
-	merchant.Inventory.AddItem(apple, 5)
+	_ = merchant.Inventory.AddItem(apple, 5)
 
 	tests := []struct {
 		name           string
@@ -348,7 +348,7 @@ func TestMerchant_ExecuteTrade(t *testing.T) {
 	apple, _ := item.NewItem("apple_001", "Apple", item.CategoryFruit, 10)
 
 	// Add some apples to inventory
-	merchant.Inventory.AddItem(apple, 10)
+	_ = merchant.Inventory.AddItem(apple, 10)
 
 	tests := []struct {
 		name          string

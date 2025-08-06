@@ -239,16 +239,17 @@ func (m *Merchant) ExecuteTrade(trade *Trade) bool {
 
 	totalCost := trade.Quantity * trade.Price
 
-	if trade.Action == ActionBuy {
+	switch trade.Action {
+	case ActionBuy:
 		if m.Gold < totalCost {
 			m.Stats.FailedDeals++
 			return false
 		}
 		m.Gold -= totalCost
-		m.Inventory.AddItem(trade.Item, trade.Quantity)
+		_ = m.Inventory.AddItem(trade.Item, trade.Quantity)
 		m.Stats.SuccessfulDeals++
 		m.Stats.TotalVolume += totalCost
-	} else if trade.Action == ActionSell {
+	case ActionSell:
 		if m.Inventory.GetQuantity(trade.Item.ID) < trade.Quantity {
 			m.Stats.FailedDeals++
 			return false
@@ -262,6 +263,9 @@ func (m *Merchant) ExecuteTrade(trade *Trade) bool {
 		m.Stats.SuccessfulDeals++
 		m.Stats.TotalVolume += totalCost
 		m.Stats.TotalProfit += totalCost - (trade.Item.BasePrice * trade.Quantity)
+	default:
+		// ActionHold or unknown action - do nothing
+		return false
 	}
 
 	return true
@@ -354,7 +358,7 @@ func (ai *AIMerchant) SimulateBehavior(state *market.MarketState) []*Trade {
 	trades := make([]*Trade, 0)
 
 	// Random chance based on activity level
-	if rand.Float64() > ai.ActivityLevel {
+	if rand.Float64() > ai.ActivityLevel { //nolint:gosec // weak random is OK for game simulation
 		return trades
 	}
 
@@ -363,9 +367,10 @@ func (ai *AIMerchant) SimulateBehavior(state *market.MarketState) []*Trade {
 		// Simulate some trading logic
 		// This is simplified - real implementation would be more complex
 		action := ActionHold
-		if state.CurrentDemand == market.DemandHigh {
+		switch state.CurrentDemand {
+		case market.DemandHigh:
 			action = ActionSell
-		} else if state.CurrentDemand == market.DemandLow {
+		case market.DemandLow:
 			action = ActionBuy
 		}
 
@@ -373,7 +378,7 @@ func (ai *AIMerchant) SimulateBehavior(state *market.MarketState) []*Trade {
 			// Create a simulated trade
 			trade := &Trade{
 				Action:    action,
-				Quantity:  rand.Intn(10) + 1,
+				Quantity:  rand.Intn(10) + 1, //nolint:gosec // weak random is OK for game simulation
 				Timestamp: time.Now(),
 			}
 			trades = append(trades, trade)
@@ -404,7 +409,7 @@ func (mn *MerchantNetwork) ShareInformation(info *MarketInformation) map[string]
 	if relationships, exists := mn.Relationships[info.Source]; exists {
 		for targetID, strength := range relationships {
 			// Information spreads based on relationship strength
-			if rand.Float64() < strength {
+			if rand.Float64() < strength { //nolint:gosec // weak random is OK for game simulation
 				propagation[targetID] = true
 			}
 		}

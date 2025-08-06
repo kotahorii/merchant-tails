@@ -114,7 +114,7 @@ func TestInventoryManager_TransferToWarehouse(t *testing.T) {
 	apple, _ := item.NewItem("apple_001", "Apple", item.CategoryFruit, 10)
 
 	// Setup: Add items to shop
-	manager.AddToShop(apple, 10)
+	_ = manager.AddToShop(apple, 10)
 
 	tests := []struct {
 		name              string
@@ -174,7 +174,7 @@ func TestInventoryManager_TransferToShop(t *testing.T) {
 	apple, _ := item.NewItem("apple_001", "Apple", item.CategoryFruit, 10)
 
 	// Setup: Add items to warehouse
-	manager.AddToWarehouse(apple, 15)
+	_ = manager.AddToWarehouse(apple, 15)
 
 	tests := []struct {
 		name              string
@@ -238,9 +238,9 @@ func TestInventoryManager_OptimizePlacement(t *testing.T) {
 	potion, _ := item.NewItem("potion_001", "Health Potion", item.CategoryPotion, 50)
 
 	// Add items to warehouse
-	manager.AddToWarehouse(apple, 10)
-	manager.AddToWarehouse(sword, 5)
-	manager.AddToWarehouse(potion, 8)
+	_ = manager.AddToWarehouse(apple, 10)
+	_ = manager.AddToWarehouse(sword, 5)
+	_ = manager.AddToWarehouse(potion, 8)
 
 	// Set sales velocity (simulating which items sell faster)
 	manager.SetSalesVelocity("apple_001", 5.0)
@@ -270,9 +270,9 @@ func TestInventoryManager_HandleSpoilage(t *testing.T) {
 	sword.Durability = -1 // Never spoils
 
 	// Add items
-	manager.AddToShop(apple, 5)
-	manager.AddToShop(sword, 2)
-	manager.AddToWarehouse(apple, 10)
+	_ = manager.AddToShop(apple, 5)
+	_ = manager.AddToShop(sword, 2)
+	_ = manager.AddToWarehouse(apple, 10)
 
 	// Simulate passage of time
 	for i := 0; i < 3; i++ {
@@ -333,8 +333,8 @@ func TestInventoryManager_GetLowStockItems(t *testing.T) {
 	manager.SetMinimumStock("potion_001", 5)
 
 	// Add items below minimum
-	manager.AddToShop(apple, 3)
-	manager.AddToShop(potion, 6)
+	_ = manager.AddToShop(apple, 3)
+	_ = manager.AddToShop(potion, 6)
 
 	lowStock := manager.GetLowStockItems()
 
@@ -405,8 +405,8 @@ func TestInventorySnapshot(t *testing.T) {
 	apple, _ := item.NewItem("apple_001", "Apple", item.CategoryFruit, 10)
 	sword, _ := item.NewItem("sword_001", "Iron Sword", item.CategoryWeapon, 200)
 
-	manager.AddToShop(apple, 5)
-	manager.AddToWarehouse(sword, 2)
+	_ = manager.AddToShop(apple, 5)
+	_ = manager.AddToWarehouse(sword, 2)
 
 	// Create snapshot
 	snapshot := manager.CreateSnapshot()
@@ -436,8 +436,8 @@ func TestInventoryManager_GetTurnoverRate(t *testing.T) {
 	apple, _ := item.NewItem("apple_001", "Apple", item.CategoryFruit, 10)
 	sword, _ := item.NewItem("sword_001", "Iron Sword", item.CategoryWeapon, 200)
 
-	manager.AddToShop(apple, 10)
-	manager.AddToShop(sword, 2)
+	_ = manager.AddToShop(apple, 10)
+	_ = manager.AddToShop(sword, 2)
 
 	appleTurnover := manager.GetTurnoverRate("apple_001")
 	swordTurnover := manager.GetTurnoverRate("sword_001")

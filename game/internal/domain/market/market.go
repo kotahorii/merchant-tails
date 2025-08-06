@@ -168,7 +168,7 @@ func NewPricingEngine() *PricingEngine {
 		baseFormula:    &DefaultPriceFormula{},
 		modifiers:      []PriceModifier{},
 		volatilityCalc: &DefaultVolatilityCalculator{},
-		random:         rand.New(rand.NewSource(time.Now().UnixNano())),
+		random:         rand.New(rand.NewSource(time.Now().UnixNano())), //nolint:gosec // weak random is OK for market simulation
 	}
 }
 
@@ -401,11 +401,12 @@ func (ph *PriceHistory) updateTrend() {
 
 	threshold := float64(olderAvg) * 0.05 // 5% threshold for trend detection
 
-	if float64(recentAvg) > float64(olderAvg)+threshold {
+	switch {
+	case float64(recentAvg) > float64(olderAvg)+threshold:
 		ph.Trend = TrendUp
-	} else if float64(recentAvg) < float64(olderAvg)-threshold {
+	case float64(recentAvg) < float64(olderAvg)-threshold:
 		ph.Trend = TrendDown
-	} else {
+	default:
 		ph.Trend = TrendStable
 	}
 }
@@ -502,7 +503,6 @@ func (ms *MarketSystem) GetCurrentPrice(itemID string) int {
 type EventScheduler struct {
 	events        []*MarketEvent
 	scheduledTime map[int]time.Time
-	mu            sync.RWMutex
 }
 
 // NewEventScheduler creates a new event scheduler

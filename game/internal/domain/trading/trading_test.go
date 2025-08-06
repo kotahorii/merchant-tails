@@ -132,7 +132,7 @@ func TestTradingSystem_SellToCustomer(t *testing.T) {
 	marketSystem.SetBasePrice("apple_001", 10)
 
 	// Setup: Add items to shop
-	invManager.AddToShop(apple, 10)
+	_ = invManager.AddToShop(apple, 10)
 	tradingSystem.SetGold(100)
 
 	tests := []struct {
@@ -204,7 +204,7 @@ func TestTradingSystem_MarketOrder(t *testing.T) {
 	marketSystem.SetBasePrice("sword_001", 200)
 
 	// Setup: Add items and set gold
-	invManager.AddToShop(sword, 5)
+	_ = invManager.AddToShop(sword, 5)
 	tradingSystem.SetGold(500)
 
 	tests := []struct {
@@ -382,15 +382,15 @@ func TestTradingSystem_TransactionHistory(t *testing.T) {
 	marketSystem.SetBasePrice("sword_001", 200)
 
 	// Perform some transactions
-	invManager.AddToShop(apple, 10)
-	invManager.AddToShop(sword, 5)
+	_ = invManager.AddToShop(apple, 10)
+	_ = invManager.AddToShop(sword, 5)
 	tradingSystem.SetGold(1000)
 
 	// Buy apples
-	tradingSystem.BuyFromSupplier(apple, 5)
+	_, _ = tradingSystem.BuyFromSupplier(apple, 5)
 
 	// Sell sword
-	tradingSystem.SellToCustomer("sword_001", 2, 500)
+	_, _ = tradingSystem.SellToCustomer("sword_001", 2, 500)
 
 	// Get history
 	history := tradingSystem.GetTransactionHistory()
@@ -432,14 +432,14 @@ func TestTradingSystem_ProfitCalculation(t *testing.T) {
 	marketSystem.SetBasePrice("apple_001", 10)
 
 	// Setup
-	invManager.AddToShop(apple, 10)
+	_ = invManager.AddToShop(apple, 10)
 	tradingSystem.SetGold(1000)
 
 	// Record buy price
 	tradingSystem.RecordPurchasePrice("apple_001", 8) // Bought at 8 gold each
 
 	// Sell at market price
-	tradingSystem.SellToCustomer("apple_001", 5, 100)
+	_, _ = tradingSystem.SellToCustomer("apple_001", 5, 100)
 
 	// Calculate profit
 	profit := tradingSystem.CalculateProfit("apple_001", 5)
@@ -464,18 +464,18 @@ func TestTradingSystem_CustomerReputation(t *testing.T) {
 
 	apple, _ := item.NewItem("apple_001", "Apple", item.CategoryFruit, 10)
 	marketSystem.SetBasePrice("apple_001", 10)
-	invManager.AddToShop(apple, 20)
+	_ = invManager.AddToShop(apple, 20)
 
 	// Initial reputation
 	assert.Equal(t, 50, tradingSystem.GetReputation())
 
 	// Successful transaction improves reputation
-	tradingSystem.SellToCustomer("apple_001", 5, 100)
+	_, _ = tradingSystem.SellToCustomer("apple_001", 5, 100)
 	assert.Greater(t, tradingSystem.GetReputation(), 50)
 
 	// Fair pricing improves reputation
 	tradingSystem.SetFairPricing(true)
-	tradingSystem.SellToCustomer("apple_001", 3, 50)
+	_, _ = tradingSystem.SellToCustomer("apple_001", 3, 50)
 	assert.Greater(t, tradingSystem.GetReputation(), 51)
 
 	// Reputation affects prices
