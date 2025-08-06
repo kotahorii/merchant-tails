@@ -11,14 +11,10 @@
             "id": "13f0807022d6e1a7",
             "type": "leaf",
             "state": {
-              "type": "markdown",
-              "state": {
-                "file": "development-todo.md",
-                "mode": "source",
-                "source": false
-              },
+              "type": "empty",
+              "state": {},
               "icon": "lucide-file",
-              "title": "development-todo"
+              "title": "New tab"
             }
           }
         ]
@@ -183,6 +179,13 @@
   },
   "active": "13f0807022d6e1a7",
   "lastOpenFiles": [
+    "development-todo.md.tmp.69665.1754494107299",
+    "development-todo.md",
+    "design-doc.md",
+    "godot-go-optimization.md",
+    "unity-to-godot-mapping.md",
+    "godot-architecture.md",
+    "godot-migration-plan.md",
     "development-todo.md.tmp.97287.1754285536559",
     "development-todo.md.tmp.97287.1754284634382",
     "development-todo.md.tmp.97287.1754284608064",
@@ -195,8 +198,6 @@
     "unity-version-decision.md.tmp.97287.1754241142610",
     "unity-version-decision.md",
     "Welcome.md",
-    "prd.md",
-    "development-todo.md",
-    "design-doc.md"
+    "prd.md"
   ]
 }

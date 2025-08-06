@@ -1,597 +1,555 @@
-# マーチャントテイル ～商人物語～ 設計書
+# 「マーチャントテイル」技術設計書（Design Document）
 
-## 1. システム概要
+## 1. アーキテクチャ概要
 
-### 1.1 アーキテクチャ概要
+### 1.1 技術スタック
+- **ゲームエンジン**: Godot Engine 4.4.1
+- **コア言語**: Go 1.23+（ゲームロジック）
+- **バインディング**: GDExtension（Go-Godot連携）
+- **UI/レンダリング**: GDScript（軽量処理のみ）
+- **データ形式**: Protocol Buffers（セーブデータ）
+- **ビルドツール**: Mage（Go）+ SCons（Godot）
 
+### 1.2 アーキテクチャ原則
 ```
-┌─────────────────┐    ┌─────────────────┐    ┌─────────────────┐
-│   Presentation  │    │    Business     │    │      Data       │
-│     Layer       │◄──►│     Logic       │◄──►│     Layer       │
-│                 │    │     Layer       │    │                 │
-└─────────────────┘    └─────────────────┘    └─────────────────┘
-│ UI/Input Manager│    │ Game Manager    │    │ Save System     │
-│ Scene Manager   │    │ Market System   │    │ Data Models     │
-│ Audio Manager   │    │ Inventory System│    │ Configuration   │
-└─────────────────┘    │ Event System    │    └─────────────────┘
-                       │ Tutorial System │
-                       └─────────────────┘
-```
-
-### 1.2 技術スタック
-
--   **エンジン**: Unity 6.1 LTS (6000.1.14f1)
--   **言語**: C#
--   **アーキテクチャパターン**: MVC + Observer Pattern
--   **データ永続化**: JSON + PlayerPrefs (Unity 6の新しいNewtonsoft.Json統合)
--   **状態管理**: Finite State Machine
--   **UI フレームワーク**: UI Toolkit (Unity 6対応)
--   **並列処理**: Job System + Burst Compiler
--   **アセット管理**: Addressables 2.0
-
-## 2. コアシステム設計
-
-### 2.1 ゲームマネージャー
-
-```csharp
-public class GameManager : MonoBehaviour
-{
-    public GameState CurrentState { get; private set; }
-    public TimeManager TimeManager { get; private set; }
-    public PlayerData PlayerData { get; private set; }
-
-    public void ChangeState(GameState newState);
-    public void SaveGame();
-    public void LoadGame();
-}
-
-public enum GameState
-{
-    MainMenu,
-    Tutorial,
-    Shopping,
-    StoreManagement,
-    MarketView,
-    Paused
-}
+1. Clean Architecture準拠
+2. Domain-Driven Design（DDD）
+3. Event-Driven Architecture（EDA）
+4. Data-Oriented Design（DOD）for performance
 ```
 
-### 2.2 時間管理システム
+### 1.3 レイヤー構成
 
-```csharp
-public class TimeManager : MonoBehaviour
-{
-    public Season CurrentSeason { get; private set; }
-    public int CurrentDay { get; private set; }
-    public DayPhase CurrentPhase { get; private set; }
-
-    public event Action<DayPhase> OnPhaseChanged;
-    public event Action<Season> OnSeasonChanged;
-
-    private void AdvanceTime();
-    private void TriggerPhaseEvents();
-}
-
-public enum Season { Spring, Summer, Autumn, Winter }
-public enum DayPhase { Morning, Afternoon, Evening, Night }
+```mermaid
+graph TD
+    A[Presentation Layer - Godot/GDScript] --> B[Application Layer - Go]
+    B --> C[Domain Layer - Go]
+    C --> D[Infrastructure Layer - Go]
+    D --> E[External Systems]
 ```
 
-### 2.3 市場システム
+## 2. プロジェクト構造
 
-```csharp
-public class MarketSystem : MonoBehaviour
-{
-    private Dictionary<ItemType, MarketData> marketPrices;
-    private EventSystem eventSystem;
-    private JobHandle priceCalculationHandle; // Unity 6 Job System
+```
+merchant-tails/
+├── godot/                      # Godotプロジェクト
+│   ├── scenes/                 # シーンファイル
+│   ├── scripts/                # GDScript（UIのみ）
+│   ├── resources/              # アセット・リソース
+│   └── project.godot           # プロジェクト設定
+│
+├── game/                       # Goゲームロジック
+│   ├── cmd/                    # エントリーポイント
+│   │   └── gdextension/        # GDExtension main
+│   ├── internal/               # 内部パッケージ
+│   │   ├── domain/             # ドメインモデル
+│   │   │   ├── merchant/       # 商人システム
+│   │   │   ├── market/         # 市場システム
+│   │   │   ├── inventory/      # 在庫管理
+│   │   │   └── event/          # イベントシステム
+│   │   ├── application/        # アプリケーションサービス
+│   │   │   ├── usecase/        # ユースケース
+│   │   │   └── dto/            # データ転送オブジェクト
+│   │   ├── infrastructure/     # インフラストラクチャ
+│   │   │   ├── persistence/    # データ永続化
+│   │   │   ├── gdextension/    # Godotバインディング
+│   │   │   └── config/         # 設定管理
+│   │   └── presentation/       # プレゼンテーション
+│   │       └── api/            # GDExtension API
+│   ├── pkg/                    # 公開パッケージ
+│   │   ├── ecs/                # Entity Component System
+│   │   ├── fsm/                # Finite State Machine
+│   │   └── math/               # 数学ライブラリ
+│   └── go.mod
+│
+├── proto/                      # Protocol Buffers定義
+│   ├── save/                   # セーブデータ
+│   └── config/                 # 設定データ
+│
+├── scripts/                    # ビルド・デプロイスクリプト
+├── tests/                      # テストコード
+└── docs/                       # ドキュメント
+```
 
-    public float GetCurrentPrice(ItemType itemType);
-    public float GetBasePrice(ItemType itemType);
-    public List<PriceHistory> GetPriceHistory(ItemType itemType);
+## 3. コアシステム設計
 
-    // Job System対応の並列価格計算
-    private void UpdatePricesParallel();
-    private void ApplySeasonalEffects();
-    private void ApplyEventEffects();
+### 3.1 ゲームループアーキテクチャ
+
+```go
+// game/internal/domain/core/gameloop.go
+type GameLoop interface {
+    Initialize(ctx context.Context) error
+    Update(deltaTime float64) error
+    FixedUpdate() error  // 物理・ロジック更新（60FPS固定）
+    LateUpdate() error   // レンダリング前の最終更新
+    Shutdown() error
 }
 
-[System.Serializable]
-public class MarketData
-{
-    public float basePrice;
-    public float currentPrice;
-    public float volatility;
-    public List<PriceHistory> history;
-    public SeasonalModifier seasonalModifier;
-}
-
-// Unity 6 Job System用の価格計算Job
-[BurstCompile]
-public struct MarketPriceCalculationJob : IJobParallelFor
-{
-    // 並列処理による高速価格計算
+type GameState struct {
+    CurrentPhase  GamePhase
+    TimeManager   *TimeManager
+    EventBus      *EventBus
+    SystemManager *SystemManager
 }
 ```
 
-### 2.4 在庫管理システム
+### 3.2 ECS（Entity Component System）設計
 
-```csharp
-public class InventorySystem : MonoBehaviour
-{
-    private Dictionary<ItemType, InventorySlot> inventory;
-
-    public bool AddItem(ItemType itemType, int quantity, float purchasePrice);
-    public bool RemoveItem(ItemType itemType, int quantity);
-    public bool TransferToMarket(ItemType itemType, int quantity);
-    public bool TransferToStore(ItemType itemType, int quantity);
-
-    public int GetTotalQuantity(ItemType itemType);
-    public int GetStoreQuantity(ItemType itemType);
-    public int GetMarketQuantity(ItemType itemType);
+```go
+// game/pkg/ecs/world.go
+type World struct {
+    entities   []Entity
+    components map[ComponentType][]Component
+    systems    []System
 }
 
-[System.Serializable]
-public class InventorySlot
-{
-    public ItemType itemType;
-    public int storeQuantity;
-    public int marketQuantity;
-    public float averagePurchasePrice;
-    public DateTime lastUpdated;
-}
-```
-
-## 3. データモデル設計
-
-### 3.1 プレイヤーデータ
-
-```csharp
-[System.Serializable]
-public class PlayerData
-{
-    public string playerName;
-    public float gold;
-    public int currentDay;
-    public Season currentSeason;
-    public MerchantRank rank;
-    public ShopData shopData;
-    public Dictionary<ItemType, InventorySlot> inventory;
-    public List<Transaction> transactionHistory;
-    public TutorialProgress tutorialProgress;
-    public AchievementData achievements;
+// 商品エンティティの例
+type ItemEntity struct {
+    ID          EntityID
+    Components  []Component
 }
 
-public enum MerchantRank
-{
-    Apprentice,    // 見習い (～1,000G)
-    Skilled,       // 一人前 (～5,000G)
-    Veteran,       // ベテラン (～10,000G)
-    Master         // マスター (10,000G～)
-}
-```
-
-### 3.2 商品データ
-
-```csharp
-[System.Serializable]
-public class ItemData
-{
-    public ItemType itemType;
-    public string itemName;
-    public string description;
-    public Sprite icon;
-    public float basePrice;
-    public float volatility;
-    public int shelfLife;
-    public SeasonalModifier seasonalModifier;
-    public EventSensitivity eventSensitivity;
-    public InvestmentType investmentType;
+// コンポーネント例
+type PriceComponent struct {
+    BasePrice    int
+    CurrentPrice int
+    Volatility   float32
 }
 
-public enum ItemType
-{
-    Fruit,       // くだもの (短期投資)
-    Potion,      // ポーション (成長株)
-    Weapon,      // 武器 (優良株)
-    Accessory,   // アクセサリー (投機株)
-    MagicBook,   // 魔法書 (債券)
-    Gem          // 宝石 (ハイリスク投資)
-}
-
-public enum InvestmentType
-{
-    ShortTerm,   // 短期投資
-    GrowthStock, // 成長株
-    BlueChip,    // 優良株
-    Speculative, // 投機株
-    Bond,        // 債券
-    HighRisk     // ハイリスク投資
+type InventoryComponent struct {
+    Quantity     int
+    Location     InventoryLocation
+    Condition    ItemCondition
 }
 ```
 
 ### 3.3 イベントシステム
 
-```csharp
-[System.Serializable]
-public class GameEvent
-{
-    public string eventId;
-    public string eventName;
-    public string description;
-    public EventType eventType;
-    public int duration;
-    public Dictionary<ItemType, float> priceModifiers;
-    public Dictionary<ItemType, float> demandModifiers;
-    public List<string> prerequisiteEvents;
-    public bool isRepeatable;
+```go
+// game/internal/domain/event/bus.go
+type EventBus struct {
+    subscribers map[EventType][]EventHandler
+    queue       *PriorityQueue
+    mu          sync.RWMutex
 }
 
-public enum EventType
-{
-    Regular,     // 定期イベント (給料日、ギルド定例会)
-    Seasonal,    // 季節イベント
-    Major,       // 大型イベント (ドラゴン討伐、収穫祭)
-    Random       // ランダムイベント
+type Event interface {
+    Type() EventType
+    Timestamp() time.Time
+    Priority() int
 }
 
-public class EventSystem : MonoBehaviour
-{
-    private Queue<GameEvent> scheduledEvents;
-    private List<GameEvent> activeEvents;
-
-    public void ScheduleEvent(GameEvent gameEvent, int daysUntilEvent);
-    public void TriggerEvent(GameEvent gameEvent);
-    public void EndEvent(string eventId);
-    public List<GameEvent> GetActiveEvents();
+// イベント例
+type MarketPriceChangeEvent struct {
+    ItemID    string
+    OldPrice  int
+    NewPrice  int
+    Reason    PriceChangeReason
 }
 ```
 
-## 4. UI/UX システム設計 (Unity 6 UI Toolkit対応)
+## 4. ゲームシステム詳細設計
 
-### 4.1 画面遷移
+### 4.1 市場価格システム
 
-```csharp
-// Unity 6 UI Toolkit対応の新しいUI管理システム
-public class UIToolkitManager : MonoBehaviour
-{
-    private Stack<VisualElement> screenStack;
-    private Dictionary<ScreenType, UIDocument> screens;
-    private PanelSettings panelSettings; // Unity 6 UI Toolkit
-
-    public void PushScreen(ScreenType screenType);
-    public void PopScreen();
-    public void ReplaceScreen(ScreenType screenType);
-    public void ClearStack();
-    
-    // データバインディング対応
-    public void BindData<T>(string elementName, T data);
+```go
+// game/internal/domain/market/pricing.go
+type PricingEngine struct {
+    baseFormula    PriceFormula
+    modifiers      []PriceModifier
+    volatilityCalc VolatilityCalculator
 }
 
-public enum ScreenType
-{
-    MainMenu,
-    Shop,
-    Market,
-    Inventory,
-    Journal,
-    Settings,
-    Tutorial
+type PriceFormula interface {
+    Calculate(item *Item, market *MarketState) float64
+}
+
+// 価格計算アルゴリズム
+type DynamicPricingFormula struct {
+    // 基本価格 = ベース価格 × (1 + 需給バランス × 変動係数)
+    // 需給バランス = (需要 - 供給) / (需要 + 供給)
 }
 ```
 
-### 4.2 情報表示システム
+### 4.2 在庫管理システム
 
-```csharp
-public class InfoDisplaySystem : MonoBehaviour
-{
-    public void ShowPriceChart(ItemType itemType, int dayRange);
-    public void ShowProfitLossGraph();
-    public void ShowInventoryStatus();
-    public void ShowMarketTrends();
-
-    // 段階的情報開示
-    public bool IsFeatureUnlocked(FeatureType feature, MerchantRank playerRank);
+```go
+// game/internal/domain/inventory/manager.go
+type InventoryManager struct {
+    storage     map[LocationID]*Storage
+    strategies  map[ItemType]SellStrategy
+    optimizer   *InventoryOptimizer
 }
 
-public enum FeatureType
-{
-    BasicTrading,
-    PriceForecasting,
-    AdvancedAnalytics,
-    InvestmentOptions
+type SellStrategy interface {
+    Decide(item *Item, market *MarketState) SellDecision
+}
+
+type SellDecision struct {
+    Action    SellAction  // HOLD, SELL_NOW, SELL_MARKET
+    Quantity  int
+    TargetPrice int
 }
 ```
 
-## 5. チュートリアルシステム
+### 4.3 AI商人システム
 
-### 5.1 段階的学習設計
-
-```csharp
-public class TutorialSystem : MonoBehaviour
-{
-    private List<TutorialStep> tutorialSteps;
-    private int currentStepIndex;
-
-    public void StartTutorial();
-    public void NextStep();
-    public void SkipTutorial();
-    public bool IsTutorialComplete();
+```go
+// game/internal/domain/merchant/ai.go
+type AIBehavior interface {
+    DecideAction(state *GameState) MerchantAction
+    UpdateStrategy(market *MarketState)
 }
 
-[System.Serializable]
-public class TutorialStep
-{
-    public string stepId;
-    public string title;
-    public string description;
-    public TutorialType type;
-    public object targetObject;
-    public bool isCompleted;
-}
-
-public enum TutorialType
-{
-    Introduction,
-    BasicPurchase,
-    BasicSale,
-    InventoryManagement,
-    MarketAnalysis,
-    SeasonalEffects,
-    EventResponse,
-    InvestmentBasics
+type MerchantPersonality struct {
+    RiskTolerance float32  // 0.0-1.0
+    Greediness    float32  // 0.0-1.0
+    Information   float32  // 情報収集力
+    Capital       int      // 資本力
 }
 ```
 
-## 6. セーブ/ロードシステム
+## 5. データ構造
 
-### 6.1 データ永続化 (Unity 6 最適化)
+### 5.1 ゲーム状態
 
-```csharp
-public class SaveSystem : MonoBehaviour
-{
-    private const string SAVE_KEY = "MerchantTales_SaveData";
-    private JobHandle saveJobHandle; // Unity 6 Job System
+```protobuf
+// proto/save/gamestate.proto
+message GameState {
+    message PlayerData {
+        string id = 1;
+        int32 gold = 2;
+        int32 reputation = 3;
+        repeated OwnedItem inventory = 4;
+        ShopData shop = 5;
+    }
 
-    public void SaveGame(PlayerData playerData);
-    public PlayerData LoadGame();
-    public bool HasSaveData();
-    public void DeleteSaveData();
+    message MarketData {
+        map<string, PriceHistory> prices = 1;
+        repeated MarketEvent scheduled_events = 2;
+    }
 
-    // Unity 6の新しいJSON統合を使用した高速化
-    private void SaveGameAsync();
-    private void LoadGameAsync();
-    
-    // Job Systemによる並列セーブ処理
-    private IEnumerator AutoSaveCoroutine();
+    PlayerData player = 1;
+    MarketData market = 2;
+    int32 current_day = 3;
+    Season current_season = 4;
+}
+```
+
+### 5.2 アイテムマスターデータ
+
+```go
+// game/internal/domain/item/master.go
+type ItemMaster struct {
+    ID           string
+    Name         string
+    Category     ItemCategory
+    BasePrice    int
+    Durability   int         // 腐敗までの日数
+    Volatility   float32     // 価格変動率
+    SeasonalMod  map[Season]float32
 }
 
-[System.Serializable]
-public class SaveData
-{
-    public PlayerData playerData;
-    public GameSettings gameSettings;
-    public DateTime saveTimestamp;
-    public string gameVersion;
+const (
+    CategoryFruit      ItemCategory = "FRUIT"      // 短期投資型
+    CategoryPotion     ItemCategory = "POTION"     // 成長株型
+    CategoryWeapon     ItemCategory = "WEAPON"     // 安定株型
+    CategoryAccessory  ItemCategory = "ACCESSORY"  // 投機型
+    CategoryMagicBook  ItemCategory = "MAGIC_BOOK" // 債券型
+    CategoryGem        ItemCategory = "GEM"        // ハイリスク型
+)
+```
+
+## 6. GDExtension統合
+
+### 6.1 バインディング設計
+
+```go
+// game/internal/infrastructure/gdextension/binding.go
+package gdextension
+
+// C++相当の関数をGoで実装
+//export merchant_game_init
+func merchant_game_init() *C.char {
+    game := NewGameCore()
+    return C.CString(game.GetInitStatus())
 }
 
-// Unity 6 Job System用のセーブデータ処理Job
-[BurstCompile]
-public struct SaveDataProcessingJob : IJob
-{
-    // 並列処理による高速セーブ/ロード
+//export merchant_game_update
+func merchant_game_update(delta C.double) {
+    gameInstance.Update(float64(delta))
 }
+
+//export merchant_game_handle_input
+func merchant_game_handle_input(input *C.char) {
+    gameInstance.HandleInput(C.GoString(input))
+}
+```
+
+### 6.2 Godot側の統合
+
+```gdscript
+# godot/scripts/GameController.gd
+extends Node
+
+var game_core: GDExtension
+
+func _ready():
+    game_core = preload("res://bin/merchant_game.gdextension")
+    game_core.init()
+
+func _process(delta):
+    var state = game_core.update(delta)
+    _update_ui(state)
+
+func _on_buy_button_pressed(item_id: String):
+    game_core.execute_action("buy", {"item_id": item_id})
 ```
 
 ## 7. パフォーマンス最適化
 
-### 7.1 メモリ管理 (Unity 6 Addressables 2.0)
+### 7.1 並行処理設計
 
-```csharp
-public class ResourceManager : MonoBehaviour
-{
-    private Dictionary<string, AsyncOperationHandle> loadedAssets;
-    private Queue<string> assetQueue;
+```go
+// game/internal/application/concurrent.go
+type SystemScheduler struct {
+    workers    int
+    systemPool *WorkerPool
+}
 
-    // Unity 6 Addressables 2.0を使用した効率的なアセット管理
-    public async Task<T> LoadAssetAsync<T>(string assetPath) where T : Object;
-    public void UnloadAsset(string assetPath);
-    public void PreloadAssets(List<string> assetPaths);
-    
-    // 2Dゲーム向けスプライトアトラス最適化
-    public void LoadSpriteAtlas(string atlasPath);
-    public void UnloadUnusedSprites();
+func (s *SystemScheduler) RunSystems(systems []System) {
+    // 依存関係のないシステムを並列実行
+    var wg sync.WaitGroup
+    for _, sys := range systems {
+        if !sys.HasDependencies() {
+            wg.Add(1)
+            go func(system System) {
+                defer wg.Done()
+                system.Update()
+            }(sys)
+        }
+    }
+    wg.Wait()
 }
 ```
 
-### 7.2 更新頻度最適化 (2Dノベルゲーム向け)
+### 7.2 メモリ管理
 
-```csharp
-public class UpdateManager : MonoBehaviour
-{
-    private List<IUpdatable> frameUpdates;
-    private List<IUpdatable> fixedUpdates;
-    private List<IUpdatable> slowUpdates;
+```go
+// Object Pooling
+type ItemPool struct {
+    pool sync.Pool
+}
 
-    // 2Dノベルゲーム向けに最適化された更新頻度
-    // UIの更新頻度を下げてパフォーマンス向上
-    private void Update(); // UI要素は必要時のみ更新
-    private void FixedUpdate(); // 物理演算不要のため最小限
-    private IEnumerator SlowUpdateCoroutine(); // 市場価格等の定期更新
+func (p *ItemPool) Get() *Item {
+    if item := p.pool.Get(); item != nil {
+        return item.(*Item)
+    }
+    return &Item{}
+}
+
+func (p *ItemPool) Put(item *Item) {
+    item.Reset()
+    p.pool.Put(item)
 }
 ```
 
-## 8. モジュラー設計
+## 8. テスト戦略
 
-### 8.1 システム間通信
+### 8.1 テストレベル
 
-```csharp
-public class EventBus : MonoBehaviour
-{
-    private Dictionary<Type, List<IEventHandler>> eventHandlers;
+```go
+// tests/market_test.go
+func TestPriceCalculation(t *testing.T) {
+    market := NewMarketState()
+    item := &Item{BasePrice: 100}
 
-    public void Subscribe<T>(IEventHandler<T> handler) where T : IEvent;
-    public void Unsubscribe<T>(IEventHandler<T> handler) where T : IEvent;
-    public void Publish<T>(T eventData) where T : IEvent;
+    // 需給バランステスト
+    market.SetDemand(HIGH)
+    market.SetSupply(LOW)
+
+    price := market.CalculatePrice(item)
+    assert.Greater(t, price, item.BasePrice)
 }
 
-// イベント例
-public class PriceChangedEvent : IEvent
-{
-    public ItemType ItemType { get; set; }
-    public float OldPrice { get; set; }
-    public float NewPrice { get; set; }
-}
-```
+// tests/integration_test.go
+func TestFullGameCycle(t *testing.T) {
+    game := NewGameCore()
+    game.Initialize()
 
-## 9. テスト戦略
+    // 1日のサイクルをシミュレート
+    game.StartDay()
+    game.ProcessMorningPhase()
+    game.ProcessNoonPhase()
+    game.ProcessNightPhase()
 
-### 9.1 単体テスト
-
-```csharp
-[TestFixture]
-public class MarketSystemTests
-{
-    [Test]
-    public void PriceCalculation_WithSeasonalModifier_ReturnsCorrectPrice();
-
-    [Test]
-    public void EventEffect_OnDragonSlaying_IncreasesWeaponDemand();
-
-    [Test]
-    public void InventoryManagement_WhenItemExpires_RemovesFromInventory();
+    assert.NotNil(t, game.GetDailySummary())
 }
 ```
 
-### 9.2 統合テスト
+### 8.2 ベンチマーク
 
-```csharp
-[TestFixture]
-public class GameFlowTests
-{
-    [Test]
-    public void CompleteDayFlow_FromMorningToNight_UpdatesAllSystems();
+```go
+func BenchmarkMarketUpdate(b *testing.B) {
+    market := CreateMarketWith1000Items()
+    b.ResetTimer()
 
-    [Test]
-    public void SaveLoadCycle_PreservesAllGameState();
+    for i := 0; i < b.N; i++ {
+        market.UpdatePrices()
+    }
 }
 ```
 
-## 10. 拡張性設計
+## 9. ビルド・デプロイ
 
-### 10.1 モジュール化
+### 9.1 ビルドパイプライン
 
-```csharp
-public interface IGameModule
-{
-    void Initialize();
-    void Update();
-    void Cleanup();
-    bool IsEnabled { get; }
+```makefile
+# Makefile
+.PHONY: build
+
+build-go:
+	CGO_ENABLED=1 go build -buildmode=c-shared \
+		-o godot/bin/merchant_game.so \
+		game/cmd/gdextension/main.go
+
+build-godot:
+	godot --export "Windows Desktop" builds/windows/merchant_tails.exe
+	godot --export "Linux/X11" builds/linux/merchant_tails
+	godot --export "Mac OSX" builds/mac/merchant_tails.app
+
+build-all: build-go build-godot
+
+test:
+	go test -v ./game/...
+	godot --test
+```
+
+### 9.2 CI/CD設定
+
+```yaml
+# .github/workflows/build.yml
+name: Build and Test
+
+on: [push, pull_request]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Setup Go
+        uses: actions/setup-go@v4
+        with:
+          go-version: '1.23'
+
+      - name: Setup Godot
+        uses: chickensoft-games/setup-godot@v1
+        with:
+          version: '4.4.1'
+
+      - name: Build
+        run: make build-all
+
+      - name: Test
+        run: make test
+```
+
+## 10. 開発ガイドライン
+
+### 10.1 コーディング規約
+
+```go
+// BAD: 密結合
+func UpdatePrice(item *Item) {
+    item.Price = CalculateNewPrice() // 直接変更
 }
 
-public class ModuleManager : MonoBehaviour
-{
-    private List<IGameModule> modules;
-
-    public void RegisterModule(IGameModule module);
-    public void EnableModule<T>() where T : IGameModule;
-    public void DisableModule<T>() where T : IGameModule;
+// GOOD: 疎結合
+func (m *Market) RequestPriceUpdate(itemID string) error {
+    event := NewPriceUpdateEvent(itemID)
+    return m.eventBus.Publish(event)
 }
 ```
 
-### 10.2 設定システム
+### 10.2 エラーハンドリング
 
-```csharp
-[System.Serializable]
-public class GameSettings
-{
-    public float masterVolume;
-    public bool tutorialEnabled;
-    public DifficultyLevel difficulty;
-    public LanguageType language;
-    public bool autoSaveEnabled;
-    public int autoSaveInterval;
+```go
+// カスタムエラー型
+type GameError struct {
+    Code    ErrorCode
+    Message string
+    Cause   error
 }
 
-public enum DifficultyLevel
-{
-    Easy,    // 価格変動緩やか
-    Normal,  // 標準
-    Hard     // 価格変動激しい
+func (e *GameError) Error() string {
+    return fmt.Sprintf("[%s] %s", e.Code, e.Message)
 }
-```
 
-## 11. デバッグ・開発支援
-
-### 11.1 デバッグシステム
-
-```csharp
-public class DebugManager : MonoBehaviour
-{
-    [SerializeField] private bool debugMode;
-
-    public void SetGold(float amount);
-    public void AdvanceDay(int days);
-    public void TriggerEvent(string eventId);
-    public void UnlockAllFeatures();
-    public void ResetPlayerData();
+// 使用例
+func (m *Market) BuyItem(itemID string) error {
+    item, err := m.findItem(itemID)
+    if err != nil {
+        return &GameError{
+            Code:    ErrorItemNotFound,
+            Message: "指定されたアイテムが見つかりません",
+            Cause:   err,
+        }
+    }
+    // ...
 }
 ```
 
-## 12. ローカライゼーション
+## 11. セキュリティ考慮事項
 
-### 12.1 多言語対応
+### 11.1 セーブデータ検証
 
-```csharp
-public class LocalizationManager : MonoBehaviour
-{
-    private Dictionary<string, Dictionary<LanguageType, string>> localizedText;
+```go
+func ValidateSaveData(data []byte) error {
+    // チェックサム検証
+    if !verifyChecksum(data) {
+        return ErrCorruptedSave
+    }
 
-    public string GetLocalizedText(string key);
-    public void SetLanguage(LanguageType language);
-    public void LoadLanguageFile(LanguageType language);
-}
+    // 値の妥当性検証
+    var save GameState
+    if err := proto.Unmarshal(data, &save); err != nil {
+        return err
+    }
 
-public enum LanguageType
-{
-    Japanese,
-    English
-}
-```
+    if save.Player.Gold < 0 || save.Player.Gold > MaxGold {
+        return ErrInvalidGoldAmount
+    }
 
-## 13. Unity 6/6.1 新機能活用
-
-### 13.1 2Dゲーム向け最適化
-
-```csharp
-// Unity 6の新機能を活用した2Dゲーム最適化
-public class Unity6OptimizationManager : MonoBehaviour
-{
-    // GPU Resident Drawer対応のスプライトバッチング
-    public void SetupGPUBatching();
-    
-    // UI Toolkitによる効率的なUI描画
-    public void OptimizeUIRendering();
-    
-    // Job Systemによるデータ処理の並列化
-    public void SetupParallelProcessing();
+    return nil
 }
 ```
 
-### 13.2 プラットフォーム別最適化
+## 12. 今後の拡張性
 
-```csharp
-public class PlatformOptimizer : MonoBehaviour
-{
-    // Nintendo Switch向け最適化
-    public void OptimizeForSwitch();
-    
-    // Steam向け高解像度対応
-    public void OptimizeForPC();
-    
-    // Unity 6の新しいテクスチャ圧縮
-    public void OptimizeTextureCompression();
+### 12.1 モジュラー設計
+
+- プラグインシステムによるコンテンツ追加
+- Mod対応（Godotのリソースパック機能利用）
+- DLC用の追加システムインターフェース
+
+### 12.2 マルチプラットフォーム対応
+
+```go
+// build tags for platform-specific code
+// +build windows
+
+package platform
+
+func GetSaveDirectory() string {
+    return os.Getenv("APPDATA") + "/MerchantTails"
 }
 ```
 
-この Design Document は、PRD で定義された要件を技術的に実装するための詳細な設計指針を提供します。Unity 6/6.1の新機能を活用し、2Dノベルゲーム風の静的なゲームに最適化されたアーキテクチャとなっています。各システムは独立性を保ちながら、イベントバスを通じて効率的に連携し、拡張性とメンテナンス性を確保しています。
+## 13. 参考資料
+
+- [Godot GDExtension Documentation](https://docs.godotengine.org/en/stable/tutorials/scripting/gdextension/)
+- [Go-Godot Binding Examples](https://github.com/godot-go/godot-go)
+- [Clean Architecture in Go](https://github.com/bxcodec/go-clean-arch)
+- [Game Programming Patterns](https://gameprogrammingpatterns.com/)

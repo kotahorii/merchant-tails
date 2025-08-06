@@ -134,7 +134,8 @@
 
 ### 8.1 開発環境
 
--   エンジン：Unity または GameMaker Studio
+-   エンジン：Godot Engine 4.4.1
+-   開発言語：Go言語（GDExtension経由）
 -   言語対応：日本語、英語
 
 ### 8.2 セーブデータ
