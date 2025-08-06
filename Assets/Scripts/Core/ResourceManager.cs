@@ -169,7 +169,7 @@ namespace MerchantTails.Core
             }
             else
             {
-                ErrorHandler.LogWarning($"Async resource not found: {path}", null, "ResourceManager");
+                ErrorHandler.LogWarning($"Async resource not found: {path}", "ResourceManager");
                 InvokeCallbacks(path, null);
             }
 

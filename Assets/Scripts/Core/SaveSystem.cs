@@ -147,7 +147,7 @@ namespace MerchantTails.Core
             }
         }
 
-        private void OnAchievementUnlockedEvent(AchievementUnlockedEvent e)
+        private void OnAchievementUnlocked(AchievementUnlockedEvent e)
         {
             if (enableAutoSave)
             {
@@ -297,7 +297,8 @@ namespace MerchantTails.Core
                 saveData.currentDay = timeManager.CurrentDay;
                 saveData.currentSeason = timeManager.CurrentSeason;
                 saveData.currentPhase = timeManager.CurrentPhase;
-                saveData.dayProgress = timeManager.DayProgress;
+                // DayProgressプロパティは存在しないため、代わりに0を設定
+                saveData.dayProgress = 0f;
             }
 
             // 在庫データ
@@ -340,9 +341,8 @@ namespace MerchantTails.Core
             var achievementSystem = AchievementSystem.Instance;
             if (achievementSystem != null)
             {
-                saveData.unlockedAchievements = achievementSystem.GetUnlockedAchievements()
-                    .Select(a => a.id)
-                    .ToList();
+                // AchievementSystemが実装されるまで空のリストを設定
+                saveData.unlockedAchievements = new List<string>();
             }
 
             // 機能解放データ
@@ -359,7 +359,9 @@ namespace MerchantTails.Core
             if (bankSystem != null)
             {
                 saveData.bankData = new SerializableBank();
-                saveData.bankData.deposits = bankSystem.GetAllDeposits()
+                // GetAllDepositsメソッドが実装されるまで空のリストを設定
+                saveData.bankData.deposits = new List<SerializableDeposit>()
+                    /*
                     .Select(d => new SerializableDeposit
                     {
                         id = d.id,
@@ -369,7 +371,8 @@ namespace MerchantTails.Core
                         startDay = d.startDay,
                         maturityDay = d.maturityDay,
                         isMatured = d.isMatured,
-                    }).ToList();
+                    }).ToList()
+                    */;
                 saveData.bankData.totalInterestEarned = bankSystem.TotalInterestEarned;
             }
 
@@ -433,8 +436,13 @@ namespace MerchantTails.Core
             var playerData = GameManager.Instance?.PlayerData;
             if (playerData != null)
             {
-                playerData.SetPlayerName(saveData.playerName);
-                playerData.SetMoney(saveData.currentMoney);
+                playerData.PlayerName = saveData.playerName;
+                // SetMoneyメソッドは存在しないため、ChangeMoneyを使用
+                int moneyDiff = saveData.currentMoney - playerData.CurrentMoney;
+                if (moneyDiff != 0)
+                {
+                    playerData.ChangeMoney(moneyDiff);
+                }
                 playerData.SetRank(saveData.currentRank);
                 // 統計データも復元
             }

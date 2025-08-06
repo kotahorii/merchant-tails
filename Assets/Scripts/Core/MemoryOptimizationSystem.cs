@@ -103,8 +103,9 @@ namespace MerchantTails.Core
             // インクリメンタルGCの設定
             if (enableIncrementalGC)
             {
-                GarbageUtility.GCMode = GarbageUtility.Mode.Enabled;
-                GarbageUtility.incrementalTimeSliceNanoseconds = incrementalGCTimeSlice;
+                // Unity 6ではGarbageCollectorクラスを使用
+                UnityEngine.Scripting.GarbageCollector.GCMode = UnityEngine.Scripting.GarbageCollector.Mode.Enabled;
+                UnityEngine.Scripting.GarbageCollector.incrementalTimeSliceNanoseconds = (ulong)(incrementalGCTimeSlice * 1000000);
             }
 
             // 初期メモリ状態を記録

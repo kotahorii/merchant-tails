@@ -186,16 +186,13 @@ namespace MerchantTails.Core
             UpdateErrorStatistics(context);
 
             // Publish error event for other systems to handle
-            if (EventBus != null)
+            try
             {
-                try
-                {
-                    EventBus.Publish(new ErrorOccurredEvent(message, exception, context));
-                }
-                catch
-                {
-                    // Avoid recursive error handling
-                }
+                EventBus.Publish(new ErrorOccurredEvent(message, exception, context));
+            }
+            catch
+            {
+                // Avoid recursive error handling
             }
         }
 
