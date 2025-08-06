@@ -1,5 +1,7 @@
 using System.Collections;
 using MerchantTails.Core;
+using MerchantTails.Inventory;
+using MerchantTails.Market;
 using UnityEngine;
 
 namespace MerchantTails.Testing

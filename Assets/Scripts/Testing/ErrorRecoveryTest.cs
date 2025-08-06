@@ -219,7 +219,7 @@ namespace MerchantTails.Testing
                 bool allHandled = true;
 
                 // Test ArgumentException handling
-                allHandled &= !ErrorHandler.SafeExecute(
+                allHandled &= ErrorHandler.SafeExecute(
                     () =>
                     {
                         throw new System.ArgumentException("Test argument exception");
@@ -238,7 +238,7 @@ namespace MerchantTails.Testing
                 );
 
                 // Test InvalidOperationException handling
-                allHandled &= !ErrorHandler.SafeExecute(
+                allHandled &= ErrorHandler.SafeExecute(
                     () =>
                     {
                         throw new System.InvalidOperationException("Test invalid operation");
@@ -364,7 +364,7 @@ namespace MerchantTails.Testing
                     () =>
                     {
                         // Subscribe a null handler (should be handled safely)
-                        System.Action<Events.PriceChangedEvent> nullHandler = null;
+                        System.Action<PriceChangedEvent> nullHandler = null;
                         // This would normally cause issues, but should be handled
                     },
                     "NullEventHandlerTest"
@@ -374,8 +374,8 @@ namespace MerchantTails.Testing
                 eventSystemRecovered &= ErrorHandler.SafeExecute(
                     () =>
                     {
-                        var invalidEvent = new Events.PriceChangedEvent(ItemType.Fruit, -1f, float.NaN);
-                        Events.EventBus.Publish(invalidEvent);
+                        var invalidEvent = new PriceChangedEvent(Data.ItemType.Fruit, -1f, float.NaN);
+                        EventBus.Publish(invalidEvent);
                     },
                     "InvalidEventTest"
                 );
@@ -386,8 +386,8 @@ namespace MerchantTails.Testing
                     {
                         for (int i = 0; i < 1000; i++)
                         {
-                            var rapidEvent = new Events.PriceChangedEvent(ItemType.Potion, 100f, 100f + i);
-                            Events.EventBus.Publish(rapidEvent);
+                            var rapidEvent = new PriceChangedEvent(Data.ItemType.Potion, 100f, 100f + i);
+                            EventBus.Publish(rapidEvent);
                         }
                     },
                     "RapidEventTest"
@@ -399,15 +399,15 @@ namespace MerchantTails.Testing
                 bool eventSystemFunctional = true;
                 int eventsReceived = 0;
 
-                System.Action<Events.PriceChangedEvent> testHandler = (evt) => eventsReceived++;
-                Events.EventBus.Subscribe<Events.PriceChangedEvent>(testHandler);
+                System.Action<PriceChangedEvent> testHandler = (evt) => eventsReceived++;
+                EventBus.Subscribe<PriceChangedEvent>(testHandler);
 
-                var testEvent = new Events.PriceChangedEvent(ItemType.Gem, 200f, 220f);
-                Events.EventBus.Publish(testEvent);
+                var testEvent = new PriceChangedEvent(Data.ItemType.Gem, 200f, 220f);
+                EventBus.Publish(testEvent);
 
                 yield return new WaitForSeconds(0.1f);
 
-                Events.EventBus.Unsubscribe<Events.PriceChangedEvent>(testHandler);
+                EventBus.Unsubscribe<PriceChangedEvent>(testHandler);
 
                 eventSystemFunctional = eventsReceived > 0;
 

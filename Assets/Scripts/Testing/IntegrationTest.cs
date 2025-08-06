@@ -103,32 +103,58 @@ namespace MerchantTails.Testing
             var testResult = new TestResult { testName = "Time-to-Market Integration" };
             float startTime = Time.time;
 
+            // Record initial fruit price
+            float initialPrice = 0f;
+            float newPrice = 0f;
+            bool errorOccurred = false;
+            System.Exception caughtException = null;
+
             try
             {
-                // Record initial fruit price
-                float initialPrice = MarketSystem.Instance.GetCurrentPrice(ItemType.Fruit);
-
-                // Advance time and check if market responds
+                initialPrice = MarketSystem.Instance.GetCurrentPrice(ItemType.Fruit);
                 TimeManager.Instance.SkipToNextPhase();
+            }
+            catch (System.Exception e)
+            {
+                errorOccurred = true;
+                caughtException = e;
+            }
+
+            if (!errorOccurred)
+            {
                 yield return new WaitForSeconds(0.1f);
 
-                float newPrice = MarketSystem.Instance.GetCurrentPrice(ItemType.Fruit);
+                try
+                {
+                    newPrice = MarketSystem.Instance.GetCurrentPrice(ItemType.Fruit);
+                }
+                catch (System.Exception e)
+                {
+                    errorOccurred = true;
+                    caughtException = e;
+                }
+            }
+
+            if (!errorOccurred)
+            {
+                float capturedNewPrice = newPrice;
+                float capturedInitialPrice = initialPrice;
 
                 // Check if price changed (market is responding to time)
-                bool priceChanged = !Mathf.Approximately(initialPrice, newPrice);
+                bool priceChanged = !Mathf.Approximately(capturedInitialPrice, capturedNewPrice);
 
                 testResult.passed = priceChanged;
                 testResult.message = priceChanged
-                    ? $"Price changed from {initialPrice:F2} to {newPrice:F2}"
+                    ? $"Price changed from {capturedInitialPrice:F2} to {capturedNewPrice:F2}"
                     : "Price did not change with time advancement";
 
                 testResult.duration = Time.time - startTime;
                 LogTestResult(testResult);
             }
-            catch (System.Exception e)
+            else
             {
                 testResult.passed = false;
-                testResult.message = $"Exception: {e.Message}";
+                testResult.message = $"Exception: {caughtException.Message}";
                 testResult.duration = Time.time - startTime;
                 LogTestResult(testResult);
             }

@@ -2,6 +2,8 @@ using System;
 using System.Collections;
 using MerchantTails.Core;
 using MerchantTails.Data;
+using MerchantTails.Inventory;
+using MerchantTails.Market;
 using NUnit.Framework;
 using UnityEngine;
 using UnityEngine.TestTools;
@@ -19,8 +21,6 @@ namespace MerchantTails.Testing
         protected TimeManager timeManager;
         protected MarketSystem marketSystem;
         protected InventorySystem inventorySystem;
-
-        // EventSystem is replaced by EventBus static class
 
         [SetUp]
         public virtual void Setup()
