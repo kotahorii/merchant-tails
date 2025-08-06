@@ -296,13 +296,14 @@ namespace MerchantTails.Testing
             try
             {
                 // Test ArgumentException handling
-                allHandled &= ErrorHandler.SafeExecute(
+                bool argResult = ErrorHandler.SafeExecute(
                     () =>
                     {
                         throw new System.ArgumentException("Test argument exception");
                     },
                     "ArgumentExceptionTest"
                 );
+                allHandled = allHandled && argResult;
 
                 // Test IndexOutOfRangeException handling
                 allHandled &= !ErrorHandler.SafeExecute(
@@ -315,13 +316,14 @@ namespace MerchantTails.Testing
                 );
 
                 // Test InvalidOperationException handling
-                allHandled &= ErrorHandler.SafeExecute(
+                bool opResult = ErrorHandler.SafeExecute(
                     () =>
                     {
                         throw new System.InvalidOperationException("Test invalid operation");
                     },
                     "InvalidOperationTest"
                 );
+                allHandled = allHandled && opResult;
 
                 // Test that the system continues to function after exceptions
                 systemStillFunctional &= ErrorHandler.SafeExecute(
