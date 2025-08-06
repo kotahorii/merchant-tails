@@ -24,6 +24,22 @@ namespace MerchantTails.Inventory
 
         [Header("Condition")]
         public int expiryDay = -1; // -1 means no expiry
+        public float condition = 1.0f; // Item condition (0.0 - 1.0, 1.0 = perfect condition)
+
+        // Additional properties for test compatibility
+        /// <summary>ID for test compatibility (maps to uniqueId)</summary>
+        public string id
+        {
+            get => uniqueId;
+            set => uniqueId = value;
+        }
+
+        /// <summary>Whether item is in shop display (test compatibility)</summary>
+        public bool isInShop
+        {
+            get => location == InventoryLocation.Storefront;
+            set => location = value ? InventoryLocation.Storefront : InventoryLocation.Trading;
+        }
 
         /// <summary>
         /// アイテムが期限切れかどうかチェック
@@ -114,7 +130,6 @@ namespace MerchantTails.Inventory
             return $"あと{daysLeft}日";
         }
     }
-
 
     /// <summary>
     /// 在庫データの保存用クラス

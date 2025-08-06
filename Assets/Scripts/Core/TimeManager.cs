@@ -384,6 +384,20 @@ namespace MerchantTails.Core
             Debug.Log($"[TimeManager] Time data loaded: {GetFormattedTime()}");
         }
 
+        /// <summary>
+        /// Load time data from individual parameters (for test compatibility)
+        /// </summary>
+        public void LoadTimeData(int day, Season season, DayPhase phase, float progress)
+        {
+            currentDay = day;
+            currentSeason = season;
+            currentPhase = phase;
+            currentYear = 1; // Default to year 1 for tests
+            phaseTimer = progress * phaseDuration;
+
+            Debug.Log($"[TimeManager] Time data loaded: {GetFormattedTime()}, Progress: {progress:P1}");
+        }
+
         private void OnDestroy()
         {
             if (timeCoroutine != null)

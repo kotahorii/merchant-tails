@@ -498,5 +498,233 @@ namespace MerchantTails.Inventory
                 }
             }
         }
+
+        // Additional methods for test compatibility
+
+        /// <summary>
+        /// AddItem overload that accepts a single InventoryItem (for test compatibility)
+        /// </summary>
+        public bool AddItem(InventoryItem item)
+        {
+            if (item == null)
+                return false;
+
+            var targetInventory = GetInventoryByLocation(item.location);
+            int capacity = GetCapacityByLocation(item.location);
+            int currentUsed = GetUsedCapacityByLocation(item.location);
+
+            if (currentUsed + 1 > capacity)
+            {
+                Debug.LogWarning(
+                    $"[InventorySystem] Not enough capacity in {item.location}. "
+                        + $"Available: {capacity - currentUsed}"
+                );
+                return false;
+            }
+
+            // Set unique ID if not already set
+            if (string.IsNullOrEmpty(item.uniqueId))
+            {
+                item.uniqueId = System.Guid.NewGuid().ToString();
+            }
+
+            // Set purchase day if not already set
+            if (item.purchaseDay == 0)
+            {
+                item.purchaseDay = TimeManager.Instance?.CurrentDay ?? 1;
+            }
+
+            // Calculate expiry if not set
+            if (item.expiryDay == 0)
+            {
+                item.expiryDay = CalculateExpiryDay(item.itemType, item.purchaseDay);
+            }
+
+            targetInventory[item.itemType].Add(item);
+            TriggerInventoryChangedEvent(item.itemType, 1, item.location);
+            Debug.Log($"[InventorySystem] Added {item.itemType} to {item.location}");
+            return true;
+        }
+
+        /// <summary>
+        /// RemoveItem overload that accepts item ID (for test compatibility)
+        /// </summary>
+        public bool RemoveItem(string itemId, int quantity = 1)
+        {
+            // Find the item across both inventories
+            foreach (var inventory in new[] { storefrontInventory, tradingInventory })
+            {
+                foreach (var itemList in inventory.Values)
+                {
+                    for (int i = itemList.Count - 1; i >= 0 && quantity > 0; i--)
+                    {
+                        if (itemList[i].uniqueId == itemId)
+                        {
+                            var item = itemList[i];
+                            itemList.RemoveAt(i);
+                            quantity--;
+                            TriggerInventoryChangedEvent(item.itemType, -1, item.location);
+
+                            if (quantity == 0)
+                                return true;
+                        }
+                    }
+                }
+            }
+
+            return quantity == 0;
+        }
+
+        /// <summary>
+        /// Get all items as a dictionary (for test compatibility)
+        /// </summary>
+        public Dictionary<ItemType, int> GetAllItems()
+        {
+            var result = new Dictionary<ItemType, int>();
+
+            foreach (ItemType itemType in Enum.GetValues(typeof(ItemType)))
+            {
+                if (itemType == ItemType.None)
+                    continue;
+
+                int totalCount = GetTotalItemCount(itemType);
+                if (totalCount > 0)
+                {
+                    result[itemType] = totalCount;
+                }
+            }
+
+            return result;
+        }
+
+        /// <summary>
+        /// Get total value of all items in inventory
+        /// </summary>
+        public float GetTotalValue()
+        {
+            float totalValue = 0f;
+            int currentDay = TimeManager.Instance?.CurrentDay ?? 1;
+
+            foreach (var inventory in new[] { storefrontInventory, tradingInventory })
+            {
+                foreach (var itemList in inventory.Values)
+                {
+                    foreach (var item in itemList)
+                    {
+                        totalValue +=
+                            item.purchasePrice * item.GetQualityMultiplier() * item.GetFreshnessMultiplier(currentDay);
+                    }
+                }
+            }
+
+            return totalValue;
+        }
+
+        /// <summary>
+        /// Transfer items from trading inventory to storefront
+        /// </summary>
+        public bool TransferToShop(ItemType itemType, int quantity)
+        {
+            return MoveItem(itemType, quantity, InventoryLocation.Trading, InventoryLocation.Storefront);
+        }
+
+        /// <summary>
+        /// Transfer items from storefront to trading inventory
+        /// </summary>
+        public bool TransferFromShop(ItemType itemType, int quantity)
+        {
+            return MoveItem(itemType, quantity, InventoryLocation.Storefront, InventoryLocation.Trading);
+        }
+
+        /// <summary>
+        /// Get items in shop (storefront) only
+        /// </summary>
+        public Dictionary<ItemType, int> GetShopItems()
+        {
+            return GetStorefrontItems();
+        }
+
+        /// <summary>
+        /// Check if there's space for items
+        /// </summary>
+        public bool HasSpace(ItemType itemType, int quantity)
+        {
+            // Default to trading inventory for space check
+            return TradingCapacityRemaining >= quantity;
+        }
+
+        /// <summary>
+        /// Clear all items from both inventories
+        /// </summary>
+        public void ClearInventory()
+        {
+            foreach (var itemType in storefrontInventory.Keys.ToList())
+            {
+                int storefrontCount = storefrontInventory[itemType].Count;
+                int tradingCount = tradingInventory[itemType].Count;
+
+                storefrontInventory[itemType].Clear();
+                tradingInventory[itemType].Clear();
+
+                if (storefrontCount > 0)
+                    TriggerInventoryChangedEvent(itemType, -storefrontCount, InventoryLocation.Storefront);
+                if (tradingCount > 0)
+                    TriggerInventoryChangedEvent(itemType, -tradingCount, InventoryLocation.Trading);
+            }
+
+            Debug.Log("[InventorySystem] Inventory cleared");
+        }
+
+        /// <summary>
+        /// Get items by quality level
+        /// </summary>
+        public Dictionary<ItemType, int> GetItemsByQuality(ItemQuality quality)
+        {
+            var result = new Dictionary<ItemType, int>();
+
+            foreach (var inventory in new[] { storefrontInventory, tradingInventory })
+            {
+                foreach (var kvp in inventory)
+                {
+                    int count = kvp.Value.Count(item => item.quality == quality);
+                    if (count > 0)
+                    {
+                        result[kvp.Key] = result.GetValueOrDefault(kvp.Key, 0) + count;
+                    }
+                }
+            }
+
+            return result;
+        }
+
+        /// <summary>
+        /// Update item conditions (for decay simulation)
+        /// </summary>
+        public void UpdateItemConditions()
+        {
+            int currentDay = TimeManager.Instance?.CurrentDay ?? 1;
+            ProcessItemDecay(currentDay);
+        }
+
+        /// <summary>
+        /// Get all items of a specific type
+        /// </summary>
+        public List<InventoryItem> GetItemsOfType(ItemType itemType)
+        {
+            var result = new List<InventoryItem>();
+            result.AddRange(GetItems(itemType, InventoryLocation.Storefront));
+            result.AddRange(GetItems(itemType, InventoryLocation.Trading));
+            return result;
+        }
+
+        /// <summary>
+        /// Get item count with optional location filter (backward compatibility)
+        /// </summary>
+        public int GetItemCount(ItemType itemType, bool isInShop = false)
+        {
+            return isInShop
+                ? GetItemCount(itemType, InventoryLocation.Storefront)
+                : GetItemCount(itemType, InventoryLocation.Trading);
+        }
     }
 }

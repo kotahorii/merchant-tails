@@ -397,31 +397,17 @@ namespace MerchantTails.Market
         }
 
         /// <summary>
-        /// 価格履歴を取得する
-        /// </summary>
-        public float GetPriceHistory(ItemType itemType, int daysBack)
-        {
-            if (!priceHistory.ContainsKey(itemType) || priceHistory[itemType].Count <= daysBack)
-            {
-                return GetCurrentPrice(itemType);
-            }
-
-            var history = priceHistory[itemType];
-            return history[history.Count - 1 - daysBack];
-        }
-
-        /// <summary>
         /// 価格変動率を取得する
         /// </summary>
         public float GetPriceChangePercent(ItemType itemType)
         {
-            if (!priceHistory.ContainsKey(itemType) || priceHistory[itemType].Count < 2)
+            if (!priceHistories.ContainsKey(itemType) || priceHistories[itemType].Count < 2)
             {
                 return 0f;
             }
 
-            var history = priceHistory[itemType];
-            float previousPrice = history[history.Count - 2];
+            var history = priceHistories[itemType];
+            float previousPrice = history[history.Count - 2].price;
             float currentPrice = GetCurrentPrice(itemType);
 
             if (previousPrice <= 0)
@@ -636,6 +622,66 @@ namespace MerchantTails.Market
         {
             OnPriceChanged?.Invoke(itemType, oldPrice, newPrice);
             EventBus.Publish(new PriceChangedEvent(itemType, oldPrice, newPrice));
+        }
+
+        // Additional methods for test compatibility
+
+        /// <summary>
+        /// Get price trend analysis (for test compatibility)
+        /// </summary>
+        public string GetPriceTrend(ItemType itemType)
+        {
+            if (!priceHistories.ContainsKey(itemType) || priceHistories[itemType].Count < 5)
+            {
+                return "Stable";
+            }
+
+            var history = priceHistories[itemType];
+            var recentPrices = history.TakeLast(5).Select(h => h.price).ToList();
+
+            // Calculate trend - if recent average is higher than older average, it's upward
+            float recentAvg = recentPrices.TakeLast(3).Average();
+            float olderAvg = recentPrices.Take(2).Average();
+
+            float trendPercent = ((recentAvg - olderAvg) / olderAvg) * 100f;
+
+            if (trendPercent > 5f)
+                return "Upward";
+            else if (trendPercent < -5f)
+                return "Downward";
+            else
+                return "Stable";
+        }
+
+        /// <summary>
+        /// Get recommended trading action (for test compatibility)
+        /// </summary>
+        public string GetRecommendedAction(ItemType itemType)
+        {
+            if (!marketPrices.ContainsKey(itemType))
+                return "Hold";
+
+            var marketData = marketPrices[itemType];
+            float currentPrice = marketData.currentPrice;
+            float basePrice = marketData.basePrice;
+
+            // Simple recommendation based on price vs base price
+            float priceRatio = currentPrice / basePrice;
+
+            if (priceRatio < 0.8f)
+                return "Buy"; // Price is low compared to base
+            else if (priceRatio > 1.5f)
+                return "Sell"; // Price is high compared to base
+            else
+                return "Hold";
+        }
+
+        /// <summary>
+        /// Calculate profit from a trading scenario (for test compatibility)
+        /// </summary>
+        public float CalculateProfit(ItemType itemType, float buyPrice, float sellPrice, int quantity)
+        {
+            return (sellPrice - buyPrice) * quantity;
         }
 
         // Debug methods

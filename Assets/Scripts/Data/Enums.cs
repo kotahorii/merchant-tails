@@ -97,11 +97,17 @@ namespace MerchantTails.Data
         /// <summary>普通品 - 標準価格、標準需要</summary>
         Common,
 
+        /// <summary>標準品 - 標準価格、標準需要（テスト互換性）</summary>
+        Normal = Common,
+
         /// <summary>良品 - 高価格、高需要</summary>
         Good,
 
         /// <summary>優良品 - 最高価格、最高需要</summary>
         Excellent,
+
+        /// <summary>希少品 - 最高価格、最高需要（テスト互換性）</summary>
+        Rare = Excellent,
     }
 
     /// <summary>
