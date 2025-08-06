@@ -4,6 +4,33 @@ using UnityEngine;
 namespace MerchantTails.Data
 {
     /// <summary>
+    /// 取引記録
+    /// </summary>
+    [System.Serializable]
+    public class TransactionRecord
+    {
+        public TransactionType transactionType;
+        public ItemType itemType;
+        public int quantity;
+        public float unitPrice;
+        public float totalAmount;
+        public int profit;
+        public int day;
+        public Season season;
+        public DayPhase phase;
+        public System.DateTime timestamp;
+    }
+
+    /// <summary>
+    /// 取引タイプ
+    /// </summary>
+    public enum TransactionType
+    {
+        Purchase, // 購入
+        Sale, // 販売
+    }
+
+    /// <summary>
     /// プレイヤーの基本データを管理するScriptableObject
     /// セーブデータの基盤となるクラス
     /// </summary>
