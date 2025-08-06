@@ -493,13 +493,11 @@ namespace MerchantTails.Testing
                 );
 
                 // Test safe execution with exception
-                bool exceptionResult = ErrorHandler.SafeExecute(
-                    () =>
-                    {
-                        throw new System.Exception("Test exception");
-                    },
-                    "TestException"
-                );
+                Action exceptionAction = () =>
+                {
+                    throw new System.Exception("Test exception");
+                };
+                bool exceptionResult = ErrorHandler.SafeExecute(exceptionAction, "TestException");
                 safeExecutionHandledException = exceptionResult;
 
                 bool allRecoveryTestsPassed = healthCheckPassed && safeExecutionWorked && safeExecutionHandledException;
