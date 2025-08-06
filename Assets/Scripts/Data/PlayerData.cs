@@ -144,6 +144,63 @@ namespace MerchantTails.Data
         }
 
         /// <summary>
+        /// お金を追加する（テスト用）
+        /// </summary>
+        public void AddMoney(int amount)
+        {
+            ChangeMoney(amount);
+        }
+
+        /// <summary>
+        /// お金を設定する（テスト用）
+        /// </summary>
+        public void SetMoney(int amount)
+        {
+            currentMoney = Mathf.Max(0, amount);
+            OnMoneyChanged?.Invoke(currentMoney);
+        }
+
+        /// <summary>
+        /// ランクを更新する
+        /// </summary>
+        public void UpdateRank()
+        {
+            MerchantRank oldRank = currentRank;
+
+            if (currentMoney >= 10000)
+                currentRank = MerchantRank.Master;
+            else if (currentMoney >= 5000)
+                currentRank = MerchantRank.Veteran;
+            else if (currentMoney >= 1000)
+                currentRank = MerchantRank.Skilled;
+            else
+                currentRank = MerchantRank.Apprentice;
+
+            if (oldRank != currentRank)
+            {
+                OnRankChanged?.Invoke(currentRank);
+            }
+        }
+
+        /// <summary>
+        /// 取引を追加する
+        /// </summary>
+        public void AddTransaction(TransactionRecord transaction)
+        {
+            if (transactionHistory == null)
+                transactionHistory = new System.Collections.Generic.List<TransactionRecord>();
+
+            transactionHistory.Add(transaction);
+
+            // 利益を更新
+            if (transaction.transactionType == TransactionType.Sale)
+            {
+                totalProfit += transaction.profit;
+                OnProfitChanged?.Invoke(totalProfit);
+            }
+        }
+
+        /// <summary>
         /// 利益を記録し、ランクアップをチェックする
         /// </summary>
         /// <param name="profit">今回の利益</param>

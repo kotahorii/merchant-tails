@@ -112,7 +112,7 @@ namespace MerchantTails.Market
                 nativeSupplies[index] = marketData.supply;
                 nativeSeasonalModifiers[index] = 1.0f;
                 nativeEventModifiers[index] = 1.0f;
-                
+
                 // Record initial price
                 RecordPrice(itemType, marketData.currentPrice);
                 index++;
@@ -210,17 +210,25 @@ namespace MerchantTails.Market
         {
             // Job完了を待つ
             priceCalculationHandle.Complete();
-            
+
             // NativeArraysの解放
-            if (nativeBasePrices.IsCreated) nativeBasePrices.Dispose();
-            if (nativeCurrentPrices.IsCreated) nativeCurrentPrices.Dispose();
-            if (nativeVolatilities.IsCreated) nativeVolatilities.Dispose();
-            if (nativeDemands.IsCreated) nativeDemands.Dispose();
-            if (nativeSupplies.IsCreated) nativeSupplies.Dispose();
-            if (nativeSeasonalModifiers.IsCreated) nativeSeasonalModifiers.Dispose();
-            if (nativeEventModifiers.IsCreated) nativeEventModifiers.Dispose();
-            if (nativePriceChanges.IsCreated) nativePriceChanges.Dispose();
-            
+            if (nativeBasePrices.IsCreated)
+                nativeBasePrices.Dispose();
+            if (nativeCurrentPrices.IsCreated)
+                nativeCurrentPrices.Dispose();
+            if (nativeVolatilities.IsCreated)
+                nativeVolatilities.Dispose();
+            if (nativeDemands.IsCreated)
+                nativeDemands.Dispose();
+            if (nativeSupplies.IsCreated)
+                nativeSupplies.Dispose();
+            if (nativeSeasonalModifiers.IsCreated)
+                nativeSeasonalModifiers.Dispose();
+            if (nativeEventModifiers.IsCreated)
+                nativeEventModifiers.Dispose();
+            if (nativePriceChanges.IsCreated)
+                nativePriceChanges.Dispose();
+
             // Unsubscribe from events
             EventBus.Unsubscribe<PhaseChangedEvent>(OnPhaseChanged);
             EventBus.Unsubscribe<SeasonChangedEvent>(OnSeasonChanged);
@@ -251,21 +259,21 @@ namespace MerchantTails.Market
                 randomSeed = (uint)UnityEngine.Random.Range(0, int.MaxValue),
                 deltaTime = Time.deltaTime,
                 calculatedPrices = nativeCurrentPrices,
-                priceChanges = nativePriceChanges
+                priceChanges = nativePriceChanges,
             };
 
             // Jobのスケジューリング
             priceCalculationHandle = priceJob.Schedule(marketPrices.Count, 1);
-            
+
             // Jobの完了を待つ
             priceCalculationHandle.Complete();
-            
+
             // 結果をDictionaryに反映
             ApplyJobResults();
 
             Debug.Log("[MarketSystem] Prices updated using Job System");
         }
-        
+
         private void PrepareJobData()
         {
             int index = 0;
@@ -280,7 +288,7 @@ namespace MerchantTails.Market
                 index++;
             }
         }
-        
+
         private void ApplyJobResults()
         {
             int index = 0;
@@ -288,27 +296,27 @@ namespace MerchantTails.Market
             {
                 var itemType = kvp.Key;
                 var marketData = kvp.Value;
-                
+
                 float oldPrice = marketData.currentPrice;
                 float newPrice = nativeCurrentPrices[index];
-                
+
                 marketData.currentPrice = newPrice;
                 marketData.lastUpdateDay = GameManager.Instance.TimeManager.CurrentDay;
-                
+
                 // Record price history
                 RecordPrice(itemType, newPrice);
-                
+
                 // Publish price change event
                 if (Math.Abs(oldPrice - newPrice) > 0.01f)
                 {
                     OnPriceChanged?.Invoke(itemType, oldPrice, newPrice);
                     EventBus.Publish(new PriceChangedEvent(itemType, oldPrice, newPrice));
                 }
-                
+
                 index++;
             }
         }
-        
+
         private float CalculateGlobalMarketTrend()
         {
             // グローバル市場トレンドの計算（-1.0 ~ 1.0）
@@ -324,7 +332,7 @@ namespace MerchantTails.Market
             }
             return Mathf.Clamp(trend / priceHistories.Count, -1f, 1f);
         }
-        
+
         private float GetSeasonalModifier(ItemType itemType)
         {
             var currentSeason = GameManager.Instance.TimeManager.CurrentSeason;
@@ -334,7 +342,7 @@ namespace MerchantTails.Market
             }
             return 1.0f;
         }
-        
+
         private float GetEventModifier(ItemType itemType)
         {
             float modifier = 1.0f;
@@ -386,6 +394,40 @@ namespace MerchantTails.Market
         public float GetCurrentPrice(ItemType itemType)
         {
             return marketPrices.ContainsKey(itemType) ? marketPrices[itemType].currentPrice : 0f;
+        }
+
+        /// <summary>
+        /// 価格履歴を取得する
+        /// </summary>
+        public float GetPriceHistory(ItemType itemType, int daysBack)
+        {
+            if (!priceHistory.ContainsKey(itemType) || priceHistory[itemType].Count <= daysBack)
+            {
+                return GetCurrentPrice(itemType);
+            }
+
+            var history = priceHistory[itemType];
+            return history[history.Count - 1 - daysBack];
+        }
+
+        /// <summary>
+        /// 価格変動率を取得する
+        /// </summary>
+        public float GetPriceChangePercent(ItemType itemType)
+        {
+            if (!priceHistory.ContainsKey(itemType) || priceHistory[itemType].Count < 2)
+            {
+                return 0f;
+            }
+
+            var history = priceHistory[itemType];
+            float previousPrice = history[history.Count - 2];
+            float currentPrice = GetCurrentPrice(itemType);
+
+            if (previousPrice <= 0)
+                return 0f;
+
+            return ((currentPrice - previousPrice) / previousPrice) * 100f;
         }
 
         public float GetBasePrice(ItemType itemType)

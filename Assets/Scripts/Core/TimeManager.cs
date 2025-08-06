@@ -65,6 +65,19 @@ namespace MerchantTails.Core
 
         public float TimeSpeedMultiplier { get; set; } = 1f;
 
+        /// <summary>
+        /// 現在の日の進行度（0.0 = 日の始まり、1.0 = 日の終わり）
+        /// </summary>
+        public float DayProgress
+        {
+            get
+            {
+                float phaseProgress = (int)currentPhase * 0.25f; // Each phase is 25% of a day
+                float currentPhaseProgress = phaseTimer / phaseDuration * 0.25f;
+                return Mathf.Clamp01(phaseProgress + currentPhaseProgress);
+            }
+        }
+
         // Events
         public event Action<DayPhase> OnPhaseChanged;
         public event Action<Season> OnSeasonChanged;
@@ -293,6 +306,40 @@ namespace MerchantTails.Core
         public float GetPhaseProgress()
         {
             return phaseTimer / phaseDuration;
+        }
+
+        /// <summary>
+        /// 時間を進める（テスト用）
+        /// </summary>
+        /// <param name="hours">進める時間（時間単位）</param>
+        public void AdvanceTime(float hours)
+        {
+            float phasesToAdvance = hours / 6f; // 6 hours per phase
+            int fullPhases = Mathf.FloorToInt(phasesToAdvance);
+
+            for (int i = 0; i < fullPhases; i++)
+            {
+                AdvancePhase();
+            }
+
+            // Advance partial phase
+            float partialPhase = phasesToAdvance - fullPhases;
+            if (partialPhase > 0)
+            {
+                phaseTimer += partialPhase * phaseDuration;
+                if (phaseTimer >= phaseDuration)
+                {
+                    AdvancePhase();
+                }
+            }
+        }
+
+        /// <summary>
+        /// 次の日に進める
+        /// </summary>
+        public void AdvanceDay()
+        {
+            SkipToNextDay();
         }
 
         public string GetFormattedTime()
