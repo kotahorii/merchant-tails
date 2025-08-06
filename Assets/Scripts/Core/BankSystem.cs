@@ -68,6 +68,14 @@ namespace MerchantTails.Core
 
             InitializeTermDepositTypes();
         }
+        
+        /// <summary>
+        /// ServiceLocatorへの登録用メソッド
+        /// </summary>
+        public void RegisterAsInstance()
+        {
+            // 既にinstance = thisでセットされているため、追加の処理は不要
+        }
 
         private void OnDestroy()
         {
