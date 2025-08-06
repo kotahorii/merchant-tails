@@ -64,6 +64,11 @@ namespace MerchantTails.Data
         [SerializeField]
         private Season currentSeason = Season.Spring;
 
+        [Header("Transaction History")]
+        [SerializeField]
+        private System.Collections.Generic.List<TransactionRecord> transactionHistory =
+            new System.Collections.Generic.List<TransactionRecord>();
+
         // Properties for external access
         public string PlayerName
         {
