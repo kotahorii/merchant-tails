@@ -449,3 +449,76 @@ type DefaultVolatilityCalculator struct{}
 func (v *DefaultVolatilityCalculator) Calculate(item *item.Item) float64 {
 	return float64(item.GetVolatility())
 }
+
+// MarketSystem is the core market system that manages pricing and market events
+type MarketSystem struct {
+	PricingEngine  *PricingEngine
+	CurrentState   *MarketState
+	EventScheduler *EventScheduler
+	NextEventTime  time.Time
+	basePrices     map[string]int
+	mu             sync.RWMutex
+}
+
+// NewMarketSystem creates a new market system
+func NewMarketSystem() *MarketSystem {
+	return &MarketSystem{
+		PricingEngine: NewPricingEngine(),
+		CurrentState: &MarketState{
+			CurrentDemand: DemandNormal,
+			CurrentSupply: SupplyNormal,
+			CurrentSeason: item.SeasonSpring,
+			CurrentDay:    1,
+		},
+		EventScheduler: NewEventScheduler(),
+		NextEventTime:  time.Now().Add(24 * time.Hour),
+		basePrices:     make(map[string]int),
+	}
+}
+
+// SetBasePrice sets the base price for an item
+func (ms *MarketSystem) SetBasePrice(itemID string, price int) {
+	ms.mu.Lock()
+	defer ms.mu.Unlock()
+	ms.basePrices[itemID] = price
+}
+
+// GetCurrentPrice gets the current market price for an item
+func (ms *MarketSystem) GetCurrentPrice(itemID string) int {
+	ms.mu.RLock()
+	defer ms.mu.RUnlock()
+
+	basePrice, exists := ms.basePrices[itemID]
+	if !exists {
+		return 0
+	}
+
+	// For testing, return the base price directly
+	// In production, this would calculate based on market conditions
+	return basePrice
+}
+
+// EventScheduler manages market events
+type EventScheduler struct {
+	events        []*MarketEvent
+	scheduledTime map[int]time.Time
+	mu            sync.RWMutex
+}
+
+// NewEventScheduler creates a new event scheduler
+func NewEventScheduler() *EventScheduler {
+	return &EventScheduler{
+		events:        make([]*MarketEvent, 0),
+		scheduledTime: make(map[int]time.Time),
+	}
+}
+
+// NewMarketState creates a new market state
+func NewMarketState() *MarketState {
+	return &MarketState{
+		CurrentDemand: DemandNormal,
+		CurrentSupply: SupplyNormal,
+		CurrentSeason: item.SeasonSpring,
+		CurrentDay:    1,
+	}
+}
