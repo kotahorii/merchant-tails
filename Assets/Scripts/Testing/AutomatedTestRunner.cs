@@ -205,16 +205,16 @@ namespace MerchantTails.Tests
 
             // Test event system
             bool eventReceived = false;
-            System.Action<MerchantTails.Events.PriceChangedEvent> handler = (evt) => eventReceived = true;
+            System.Action<MerchantTails.Core.PriceChangedEvent> handler = (evt) => eventReceived = true;
 
-            MerchantTails.Core.EventBus.Subscribe<MerchantTails.Events.PriceChangedEvent>(handler);
+            MerchantTails.Core.EventBus.Subscribe<MerchantTails.Core.PriceChangedEvent>(handler);
 
-            var priceEvent = new MerchantTails.Events.PriceChangedEvent(MerchantTails.Data.ItemType.Potion, 100f, 110f);
+            var priceEvent = new MerchantTails.Core.PriceChangedEvent(MerchantTails.Data.ItemType.Potion, 100f, 110f);
             MerchantTails.Core.EventBus.Publish(priceEvent);
 
             yield return new WaitForSeconds(0.1f);
 
-            MerchantTails.Core.EventBus.Unsubscribe<MerchantTails.Events.PriceChangedEvent>(handler);
+            MerchantTails.Core.EventBus.Unsubscribe<MerchantTails.Core.PriceChangedEvent>(handler);
 
             Assert.IsTrue(eventReceived, "Event system not functioning - event not received");
 

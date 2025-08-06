@@ -1,7 +1,6 @@
 using System.Collections.Generic;
 using MerchantTails.Core;
 using MerchantTails.Data;
-using MerchantTails.Events;
 using MerchantTails.Inventory;
 using MerchantTails.Market;
 using UnityEngine;
@@ -131,7 +130,7 @@ namespace MerchantTails.Systems
             lastCalculatedAssets = totalAssets;
 
             // 資産変動イベントを発行
-            EventBus.Publish(new Events.AssetChangedEvent(totalAssets, GetAssetBreakdown()));
+            EventBus.Publish(new AssetChangedEvent(totalAssets, GetAssetBreakdown()));
 
             return totalAssets;
         }
@@ -324,7 +323,7 @@ namespace MerchantTails.Systems
                 breakdown = GetAssetBreakdown(),
             };
 
-            EventBus.Publish(new Events.DailyAssetReportEvent(report));
+            EventBus.Publish(new DailyAssetReportEvent(report));
         }
     }
 }
