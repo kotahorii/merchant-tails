@@ -103,14 +103,14 @@ namespace MerchantTails.UI
             LoadTransactionHistory();
         }
 
-        protected override void OnEnable()
+        protected virtual void OnEnable()
         {
             base.OnEnable();
             SubscribeToEvents();
             RefreshDisplay();
         }
 
-        protected override void OnDisable()
+        protected virtual void OnDisable()
         {
             base.OnDisable();
             UnsubscribeFromEvents();

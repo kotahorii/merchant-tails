@@ -1,4 +1,5 @@
 using MerchantTails.Core;
+using MerchantTails.Data;
 using UnityEngine;
 using UnityEngine.UI;
 

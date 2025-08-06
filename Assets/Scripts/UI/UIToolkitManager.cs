@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using MerchantTails.Core;
+using MerchantTails.Data;
 using UnityEngine;
 using UnityEngine.UIElements;
 
@@ -63,12 +64,12 @@ namespace MerchantTails.UI
         private Stack<UIToolkitPanel> uiStack = new Stack<UIToolkitPanel>();
         private Dictionary<UIType, UIToolkitPanel> uiPanels = new Dictionary<UIType, UIToolkitPanel>();
         private Dictionary<UIType, VisualTreeAsset> uiTemplates = new Dictionary<UIType, VisualTreeAsset>();
-        
+
         private VisualElement rootElement;
         private VisualElement modalRoot;
         private VisualElement overlayRoot;
         private VisualElement transitionOverlay;
-        
+
         private bool isTransitioning = false;
 
         private void Awake()
@@ -89,7 +90,7 @@ namespace MerchantTails.UI
         {
             // イベント登録
             EventBus.Subscribe<GameStateChangedEvent>(OnGameStateChanged);
-            
+
             // Unity 6の新しいUI Toolkit機能を活用
             ConfigureRuntimeTheme();
         }
@@ -97,7 +98,7 @@ namespace MerchantTails.UI
         private void OnDestroy()
         {
             EventBus.Unsubscribe<GameStateChangedEvent>(OnGameStateChanged);
-            
+
             // クリーンアップ
             foreach (var panel in uiPanels.Values)
             {
@@ -158,7 +159,7 @@ namespace MerchantTails.UI
             transitionOverlay.style.backgroundColor = new Color(0, 0, 0, 0);
             transitionOverlay.style.display = DisplayStyle.None;
             transitionOverlay.pickingMode = PickingMode.Ignore;
-            
+
             rootElement.Add(transitionOverlay);
         }
 
@@ -184,7 +185,7 @@ namespace MerchantTails.UI
             panelElement.style.width = Length.Percent(100);
             panelElement.style.height = Length.Percent(100);
             panelElement.style.display = DisplayStyle.None;
-            
+
             rootElement.Add(panelElement);
 
             var panel = new UIToolkitPanel(uiType, panelElement);
@@ -237,16 +238,22 @@ namespace MerchantTails.UI
         private async System.Threading.Tasks.Task TransitionOut()
         {
             transitionOverlay.style.display = DisplayStyle.Flex;
-            
+
             // Unity 6のUI Toolkitアニメーション
             transitionOverlay.style.opacity = 0;
-            transitionOverlay.style.transitionDuration = new List<TimeValue> { new TimeValue(transitionDuration, TimeUnit.Millisecond) };
-            transitionOverlay.style.transitionProperty = new List<StylePropertyName> { new StylePropertyName("opacity") };
-            
+            transitionOverlay.style.transitionDuration = new List<TimeValue>
+            {
+                new TimeValue(transitionDuration, TimeUnit.Millisecond),
+            };
+            transitionOverlay.style.transitionProperty = new List<StylePropertyName>
+            {
+                new StylePropertyName("opacity"),
+            };
+
             // 次のフレームで開始
             await System.Threading.Tasks.Task.Yield();
             transitionOverlay.style.opacity = 1;
-            
+
             // アニメーション完了を待つ
             await System.Threading.Tasks.Task.Delay((int)transitionDuration);
         }
@@ -254,14 +261,14 @@ namespace MerchantTails.UI
         private async System.Threading.Tasks.Task TransitionIn()
         {
             transitionOverlay.style.opacity = 1;
-            
+
             // 次のフレームで開始
             await System.Threading.Tasks.Task.Yield();
             transitionOverlay.style.opacity = 0;
-            
+
             // アニメーション完了を待つ
             await System.Threading.Tasks.Task.Delay((int)transitionDuration);
-            
+
             transitionOverlay.style.display = DisplayStyle.None;
         }
 
@@ -301,10 +308,10 @@ namespace MerchantTails.UI
                     modal.Element.RemoveFromHierarchy();
                     modalRoot.Add(modal.Element);
                 }
-                
+
                 modal.Show();
                 modal.SetModalCallback(onResult);
-                
+
                 // 背景をブロック
                 CreateModalBackdrop();
             }
@@ -319,7 +326,7 @@ namespace MerchantTails.UI
             backdrop.style.height = Length.Percent(100);
             backdrop.style.backgroundColor = new Color(0, 0, 0, 0.5f);
             backdrop.RegisterCallback<ClickEvent>(evt => evt.StopPropagation());
-            
+
             modalRoot?.Insert(0, backdrop);
         }
 
@@ -329,11 +336,11 @@ namespace MerchantTails.UI
             {
                 modal.Hide();
                 modal.TriggerModalCallback(result);
-                
+
                 // バックドロップを削除
                 var backdrop = modalRoot?.Q("modal-backdrop");
                 backdrop?.RemoveFromHierarchy();
-                
+
                 // 元のルートに戻す
                 modal.Element.RemoveFromHierarchy();
                 rootElement.Add(modal.Element);
@@ -346,13 +353,13 @@ namespace MerchantTails.UI
             {
                 var loadingElement = loadingTemplate.CloneTree();
                 loadingElement.name = "loading-overlay";
-                
+
                 var messageLabel = loadingElement.Q<Label>("loading-message");
                 if (messageLabel != null)
                 {
                     messageLabel.text = message;
                 }
-                
+
                 overlayRoot.Add(loadingElement);
             }
         }
@@ -372,7 +379,7 @@ namespace MerchantTails.UI
                 // スケーリング設定
                 panelSettings.scaleMode = PanelScaleMode.ScaleWithScreenSize;
                 panelSettings.referenceResolution = new Vector2(1920, 1080);
-                
+
                 // アンチエイリアシング
                 panelSettings.targetTexture = null; // 画面に直接描画
             }
@@ -409,47 +416,62 @@ namespace MerchantTails.UI
             }
         }
 
-        public void ShowNotification(string title, string message, float duration = 3f, NotificationType type = NotificationType.Info)
+        public void ShowNotification(
+            string title,
+            string message,
+            float duration = 3f,
+            NotificationType type = NotificationType.Info
+        )
         {
             // Unity 6のUI Toolkitでの通知実装
             var notification = new VisualElement();
             notification.AddToClassList("notification");
             notification.AddToClassList($"notification--{type.ToString().ToLower()}");
-            
+
             var titleLabel = new Label(title);
             titleLabel.AddToClassList("notification__title");
             notification.Add(titleLabel);
-            
+
             var messageLabel = new Label(message);
             messageLabel.AddToClassList("notification__message");
             notification.Add(messageLabel);
-            
+
             // アニメーション設定
             notification.style.opacity = 0;
             notification.style.translate = new Translate(0, -20);
             notification.style.transitionDuration = new List<TimeValue> { new TimeValue(300, TimeUnit.Millisecond) };
-            notification.style.transitionProperty = new List<StylePropertyName> { 
+            notification.style.transitionProperty = new List<StylePropertyName>
+            {
                 new StylePropertyName("opacity"),
-                new StylePropertyName("translate")
+                new StylePropertyName("translate"),
             };
-            
+
             overlayRoot?.Add(notification);
-            
+
             // 表示アニメーション
-            notification.schedule.Execute(() => {
-                notification.style.opacity = 1;
-                notification.style.translate = new Translate(0, 0);
-            }).StartingIn(10);
-            
+            notification
+                .schedule.Execute(() =>
+                {
+                    notification.style.opacity = 1;
+                    notification.style.translate = new Translate(0, 0);
+                })
+                .StartingIn(10);
+
             // 自動非表示
-            notification.schedule.Execute(() => {
-                notification.style.opacity = 0;
-                notification.style.translate = new Translate(0, -20);
-            }).StartingIn((long)(duration * 1000));
-            
-            notification.schedule.Execute(() => {
-                notification.RemoveFromHierarchy();
-            }).StartingIn((long)(duration * 1000 + 300));
+            notification
+                .schedule.Execute(() =>
+                {
+                    notification.style.opacity = 0;
+                    notification.style.translate = new Translate(0, -20);
+                })
+                .StartingIn((long)(duration * 1000));
+
+            notification
+                .schedule.Execute(() =>
+                {
+                    notification.RemoveFromHierarchy();
+                })
+                .StartingIn((long)(duration * 1000 + 300));
         }
 
         public enum NotificationType
@@ -457,7 +479,7 @@ namespace MerchantTails.UI
             Info,
             Success,
             Warning,
-            Error
+            Error,
         }
     }
 
@@ -469,7 +491,7 @@ namespace MerchantTails.UI
         private UIType uiType;
         private VisualElement element;
         private Action<bool> modalCallback;
-        
+
         public UIType UIType => uiType;
         public VisualElement Element => element;
         public bool IsVisible { get; private set; }
@@ -484,7 +506,7 @@ namespace MerchantTails.UI
         {
             // 共通の初期化処理
             SetupCommonElements();
-            
+
             // タイプ別の初期化
             OnInitialize();
         }
@@ -497,7 +519,7 @@ namespace MerchantTails.UI
             {
                 backButton.clicked += OnBackPressed;
             }
-            
+
             // 閉じるボタン
             var closeButton = element.Q<Button>("close-button");
             if (closeButton != null)
@@ -515,20 +537,21 @@ namespace MerchantTails.UI
         {
             element.style.display = DisplayStyle.Flex;
             IsVisible = true;
-            
+
             // Unity 6のアニメーション
             AnimateShow();
-            
+
             OnShow();
         }
 
         public void Hide()
         {
-            AnimateHide(() => {
+            AnimateHide(() =>
+            {
                 element.style.display = DisplayStyle.None;
                 IsVisible = false;
             });
-            
+
             OnHide();
         }
 
@@ -536,26 +559,35 @@ namespace MerchantTails.UI
         {
             element.style.opacity = 0;
             element.style.scale = new Scale(new Vector3(0.9f, 0.9f, 1f));
-            
-            element.schedule.Execute(() => {
-                element.style.opacity = 1;
-                element.style.scale = new Scale(Vector3.one);
-            }).StartingIn(10);
+
+            element
+                .schedule.Execute(() =>
+                {
+                    element.style.opacity = 1;
+                    element.style.scale = new Scale(Vector3.one);
+                })
+                .StartingIn(10);
         }
 
         private void AnimateHide(Action onComplete = null)
         {
             element.style.opacity = 1;
             element.style.scale = new Scale(Vector3.one);
-            
-            element.schedule.Execute(() => {
-                element.style.opacity = 0;
-                element.style.scale = new Scale(new Vector3(0.9f, 0.9f, 1f));
-            }).StartingIn(10);
-            
-            element.schedule.Execute(() => {
-                onComplete?.Invoke();
-            }).StartingIn(310);
+
+            element
+                .schedule.Execute(() =>
+                {
+                    element.style.opacity = 0;
+                    element.style.scale = new Scale(new Vector3(0.9f, 0.9f, 1f));
+                })
+                .StartingIn(10);
+
+            element
+                .schedule.Execute(() =>
+                {
+                    onComplete?.Invoke();
+                })
+                .StartingIn(310);
         }
 
         protected virtual void OnShow()
@@ -597,7 +629,7 @@ namespace MerchantTails.UI
             {
                 backButton.clicked -= OnBackPressed;
             }
-            
+
             var closeButton = element.Q<Button>("close-button");
             if (closeButton != null)
             {
