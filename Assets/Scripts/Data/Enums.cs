@@ -63,6 +63,9 @@ namespace MerchantTails.Data
     /// </summary>
     public enum ItemType
     {
+        /// <summary>なし - 特定のアイテムを指定しない場合</summary>
+        None,
+
         /// <summary>くだもの - 短期取引、腐敗リスク</summary>
         Fruit,
 

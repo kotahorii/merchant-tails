@@ -88,6 +88,9 @@ namespace MerchantTails.Inventory
             // Initialize storage for all item types
             foreach (ItemType itemType in Enum.GetValues(typeof(ItemType)))
             {
+                if (itemType == ItemType.None)
+                    continue;
+
                 storefrontInventory[itemType] = new List<InventoryItem>();
                 tradingInventory[itemType] = new List<InventoryItem>();
             }

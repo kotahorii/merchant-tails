@@ -245,9 +245,10 @@ namespace MerchantTails.Tutorial
             }
 
             // Navigate to target UI if needed
-            if (step.targetUI != UIType.None && UIManager.Instance != null)
+            if (step.targetUI != UIType.None)
             {
-                UIManager.Instance.ShowPanel(step.targetUI);
+                var uiManager = ServiceLocator.GetService<IUIManager>();
+                uiManager?.ShowPanel(step.targetUI);
             }
         }
 
@@ -266,9 +267,10 @@ namespace MerchantTails.Tutorial
             isWaitingForAction = false;
 
             // Hide tutorial UI
-            if (TutorialPanel.Instance != null)
+            var uiManager = ServiceLocator.GetService<IUIManager>();
+            if (uiManager != null)
             {
-                TutorialPanel.Instance.Hide();
+                uiManager.HideNotification();
             }
 
             // Notify step completed
