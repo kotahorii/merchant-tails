@@ -1,0 +1,175 @@
+syntax = "proto3";
+
+package merchanttails.config;
+
+option go_package = "github.com/yourusername/merchant-tails/game/internal/infrastructure/config/proto";
+
+// GameConfig contains all game configuration data
+message GameConfig {
+  GameSettings settings = 1;
+  repeated ItemDefinition items = 2;
+  repeated EventDefinition events = 3;
+  repeated AchievementDefinition achievements = 4;
+  MarketConfig market_config = 5;
+  DifficultySettings difficulty = 6;
+}
+
+// GameSettings contains general game settings
+message GameSettings {
+  string version = 1;
+  int32 days_per_season = 2;
+  int32 starting_gold = 3;
+  int32 max_inventory_slots = 4;
+  float autosave_interval = 5;
+  bool tutorial_enabled = 6;
+}
+
+// ItemDefinition defines an item type in the game
+message ItemDefinition {
+  string item_id = 1;
+  string name = 2;
+  string description = 3;
+  ItemCategory category = 4;
+  int32 base_price = 5;
+  int32 durability = 6; // -1 for infinite
+  float volatility = 7;
+  map<string, float> seasonal_modifiers = 8;
+  repeated string tags = 9;
+  ItemRarity rarity = 10;
+}
+
+// EventDefinition defines a game event
+message EventDefinition {
+  string event_id = 1;
+  string name = 2;
+  string description = 3;
+  EventTrigger trigger = 4;
+  int32 min_day = 5;
+  int32 max_day = 6;
+  float probability = 7;
+  int32 duration = 8;
+  repeated EventEffect effects = 9;
+  repeated string required_conditions = 10;
+}
+
+// AchievementDefinition defines an achievement
+message AchievementDefinition {
+  string achievement_id = 1;
+  string name = 2;
+  string description = 3;
+  AchievementCategory category = 4;
+  int32 points = 5;
+  repeated AchievementCriteria criteria = 6;
+  string icon_path = 7;
+  bool hidden = 8;
+}
+
+// MarketConfig contains market-specific configuration
+message MarketConfig {
+  float base_demand_modifier = 1;
+  float base_supply_modifier = 2;
+  float price_change_speed = 3;
+  int32 price_history_size = 4;
+  map<string, float> category_weights = 5;
+  repeated TradingHour trading_hours = 6;
+}
+
+// DifficultySettings contains difficulty-related settings
+message DifficultySettings {
+  string name = 1;
+  float price_volatility_modifier = 2;
+  float spoilage_rate_modifier = 3;
+  float demand_fluctuation = 4;
+  float starting_gold_modifier = 5;
+  float reputation_gain_modifier = 6;
+}
+
+// EventEffect represents an effect of an event
+message EventEffect {
+  EffectType type = 1;
+  string target = 2;
+  float value = 3;
+  int32 duration = 4;
+}
+
+// AchievementCriteria defines criteria for unlocking an achievement
+message AchievementCriteria {
+  CriteriaType type = 1;
+  string target = 2;
+  int32 required_value = 3;
+  ComparisonOperator operator = 4;
+}
+
+// TradingHour defines when trading is active
+message TradingHour {
+  int32 hour_start = 1;
+  int32 hour_end = 2;
+  float activity_modifier = 3;
+}
+
+// Enums
+
+enum ItemCategory {
+  CATEGORY_UNKNOWN = 0;
+  CATEGORY_FRUIT = 1;
+  CATEGORY_POTION = 2;
+  CATEGORY_WEAPON = 3;
+  CATEGORY_ACCESSORY = 4;
+  CATEGORY_MAGIC_BOOK = 5;
+  CATEGORY_GEM = 6;
+}
+
+enum ItemRarity {
+  RARITY_UNKNOWN = 0;
+  RARITY_COMMON = 1;
+  RARITY_UNCOMMON = 2;
+  RARITY_RARE = 3;
+  RARITY_EPIC = 4;
+  RARITY_LEGENDARY = 5;
+}
+
+enum EventTrigger {
+  TRIGGER_UNKNOWN = 0;
+  TRIGGER_SCHEDULED = 1;
+  TRIGGER_RANDOM = 2;
+  TRIGGER_CONDITIONAL = 3;
+  TRIGGER_PLAYER_ACTION = 4;
+}
+
+enum EffectType {
+  EFFECT_UNKNOWN = 0;
+  EFFECT_PRICE_MODIFIER = 1;
+  EFFECT_DEMAND_MODIFIER = 2;
+  EFFECT_SUPPLY_MODIFIER = 3;
+  EFFECT_REPUTATION_CHANGE = 4;
+  EFFECT_GOLD_CHANGE = 5;
+  EFFECT_SPOILAGE_RATE = 6;
+}
+
+enum AchievementCategory {
+  ACHIEVEMENT_UNKNOWN = 0;
+  ACHIEVEMENT_TRADING = 1;
+  ACHIEVEMENT_WEALTH = 2;
+  ACHIEVEMENT_REPUTATION = 3;
+  ACHIEVEMENT_EXPLORATION = 4;
+  ACHIEVEMENT_COLLECTION = 5;
+}
+
+enum CriteriaType {
+  CRITERIA_UNKNOWN = 0;
+  CRITERIA_GOLD_EARNED = 1;
+  CRITERIA_ITEMS_SOLD = 2;
+  CRITERIA_DAYS_PLAYED = 3;
+  CRITERIA_REPUTATION_LEVEL = 4;
+  CRITERIA_PROFIT_MARGIN = 5;
+  CRITERIA_COLLECTION_COMPLETE = 6;
+}
+
+enum ComparisonOperator {
+  OPERATOR_UNKNOWN = 0;
+  OPERATOR_EQUAL = 1;
+  OPERATOR_GREATER_THAN = 2;
+  OPERATOR_LESS_THAN = 3;
+  OPERATOR_GREATER_EQUAL = 4;
+  OPERATOR_LESS_EQUAL = 5;
+}

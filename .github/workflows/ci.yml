@@ -1,0 +1,198 @@
+name: CI
+
+on:
+  push:
+    branches: [main, develop]
+  pull_request:
+    branches: [main, develop]
+
+env:
+  GO_VERSION: "1.24"
+  GODOT_VERSION: "4.4.1"
+  PROTOC_VERSION: "25.1"
+
+jobs:
+  go-test:
+    name: Go Tests
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Go
+        uses: actions/setup-go@v5
+        with:
+          go-version: ${{ env.GO_VERSION }}
+
+      - name: Cache Go modules
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/go/pkg/mod
+            ~/.cache/go-build
+          key: ${{ runner.os }}-go-${{ hashFiles('**/go.sum') }}
+          restore-keys: |
+            ${{ runner.os }}-go-
+
+      - name: Install dependencies
+        run: |
+          cd game
+          go mod download
+
+      - name: Install tools
+        run: |
+          go install github.com/golangci/golangci-lint/cmd/golangci-lint@latest
+          go install google.golang.org/protobuf/cmd/protoc-gen-go@latest
+
+      - name: Run go fmt
+        run: |
+          cd game
+          test -z "$(go fmt ./...)"
+
+      - name: Run go vet
+        run: |
+          cd game
+          go vet ./...
+
+      - name: Run golangci-lint
+        run: |
+          cd game
+          golangci-lint run
+
+      - name: Run tests
+        run: |
+          cd game
+          go test -v -race -coverprofile=coverage.out -covermode=atomic ./...
+
+      - name: Upload coverage to Codecov
+        uses: codecov/codecov-action@v4
+        with:
+          token: ${{ secrets.CODECOV_TOKEN }}
+          file: ./game/coverage.out
+          flags: unittests
+          name: codecov-umbrella
+
+  godot-build:
+    name: Godot Build
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          lfs: true
+
+      - name: Setup Godot
+        uses: chickensoft-games/setup-godot@v2
+        with:
+          version: ${{ env.GODOT_VERSION }}
+          use-dotnet: false
+
+      - name: Set up Go for GDExtension
+        uses: actions/setup-go@v5
+        with:
+          go-version: ${{ env.GO_VERSION }}
+
+      - name: Install Protocol Buffers
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y protobuf-compiler
+          protoc --version
+
+      - name: Build GDExtension
+        run: |
+          if [ -f "Makefile" ]; then
+            make build-go
+          else
+            echo "Makefile not found, skipping GDExtension build"
+          fi
+
+      - name: Import Godot project
+        run: |
+          if [ -f "godot/project.godot" ]; then
+            godot --headless --quit --editor godot/project.godot
+          else
+            echo "Godot project not found, skipping import"
+          fi
+
+      - name: Run Godot tests
+        run: |
+          if [ -f "godot/project.godot" ]; then
+            godot --headless --quit-after 60 --path godot --test
+          else
+            echo "Godot project not found, skipping tests"
+          fi
+
+  benchmark:
+    name: Performance Benchmarks
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Go
+        uses: actions/setup-go@v5
+        with:
+          go-version: ${{ env.GO_VERSION }}
+
+      - name: Run benchmarks
+        run: |
+          cd game
+          go test -bench=. -benchmem ./... | tee benchmark.txt
+
+      - name: Store benchmark result
+        uses: benchmark-action/github-action-benchmark@v1
+        with:
+          tool: "go"
+          output-file-path: game/benchmark.txt
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          auto-push: false
+
+  security-scan:
+    name: Security Scan
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Run Trivy vulnerability scanner
+        uses: aquasecurity/trivy-action@master
+        with:
+          scan-type: "fs"
+          scan-ref: "."
+          format: "sarif"
+          output: "trivy-results.sarif"
+
+      - name: Upload Trivy results to GitHub Security tab
+        uses: github/codeql-action/upload-sarif@v3
+        with:
+          sarif_file: "trivy-results.sarif"
+
+  documentation:
+    name: Build Documentation
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Go
+        uses: actions/setup-go@v5
+        with:
+          go-version: ${{ env.GO_VERSION }}
+
+      - name: Generate Go documentation
+        run: |
+          go install golang.org/x/tools/cmd/godoc@latest
+          cd game
+          go doc ./...
+
+      - name: Check documentation completeness
+        run: |
+          cd game
+          if go doc ./... | grep -q "^func.*// "; then
+            echo "Warning: Found undocumented exported functions"
+          fi

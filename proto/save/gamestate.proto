@@ -1,0 +1,162 @@
+syntax = "proto3";
+
+package merchanttails.save;
+
+option go_package = "github.com/yourusername/merchant-tails/game/internal/infrastructure/persistence/proto";
+
+// GameState represents the complete saved game state
+message GameState {
+  PlayerData player = 1;
+  MarketData market = 2;
+  int32 current_day = 3;
+  Season current_season = 4;
+  int64 save_timestamp = 5;
+  string save_version = 6;
+}
+
+// PlayerData contains all player-specific information
+message PlayerData {
+  string id = 1;
+  string name = 2;
+  int32 gold = 3;
+  int32 reputation = 4;
+  PlayerRank rank = 5;
+  repeated OwnedItem inventory = 6;
+  ShopData shop = 7;
+  repeated Achievement achievements = 8;
+  Statistics stats = 9;
+}
+
+// MarketData contains market state information
+message MarketData {
+  map<string, PriceHistory> item_prices = 1;
+  repeated MarketEvent scheduled_events = 2;
+  DemandLevel current_demand = 3;
+  SupplyLevel current_supply = 4;
+}
+
+// OwnedItem represents an item in player's inventory
+message OwnedItem {
+  string item_id = 1;
+  int32 quantity = 2;
+  int32 durability = 3;
+  int64 acquired_timestamp = 4;
+  ItemLocation location = 5;
+}
+
+// ShopData represents the player's shop state
+message ShopData {
+  int32 level = 1;
+  int32 capacity = 2;
+  repeated ShopUpgrade upgrades = 3;
+  repeated DisplayItem display_items = 4;
+}
+
+// PriceHistory tracks historical prices for an item
+message PriceHistory {
+  repeated PriceRecord records = 1;
+  int32 current_price = 2;
+  float volatility = 3;
+}
+
+// PriceRecord represents a single price point in history
+message PriceRecord {
+  int32 price = 1;
+  int64 timestamp = 2;
+}
+
+// MarketEvent represents a scheduled or active market event
+message MarketEvent {
+  string event_id = 1;
+  EventType type = 2;
+  int32 start_day = 3;
+  int32 duration = 4;
+  map<string, float> price_modifiers = 5;
+  bool is_active = 6;
+}
+
+// Achievement represents an unlocked achievement
+message Achievement {
+  string achievement_id = 1;
+  int64 unlocked_timestamp = 2;
+  int32 progress = 3;
+}
+
+// Statistics tracks player performance metrics
+message Statistics {
+  int32 total_gold_earned = 1;
+  int32 total_gold_spent = 2;
+  int32 items_bought = 3;
+  int32 items_sold = 4;
+  int32 days_played = 5;
+  int32 best_daily_profit = 6;
+  int32 total_transactions = 7;
+}
+
+// ShopUpgrade represents an purchased shop upgrade
+message ShopUpgrade {
+  string upgrade_id = 1;
+  int32 level = 2;
+  int64 purchased_timestamp = 3;
+}
+
+// DisplayItem represents an item on display in the shop
+message DisplayItem {
+  string item_id = 1;
+  int32 quantity = 2;
+  int32 price = 3;
+  int32 position = 4;
+}
+
+// Enums
+
+enum Season {
+  SEASON_UNKNOWN = 0;
+  SEASON_SPRING = 1;
+  SEASON_SUMMER = 2;
+  SEASON_AUTUMN = 3;
+  SEASON_WINTER = 4;
+}
+
+enum PlayerRank {
+  RANK_UNKNOWN = 0;
+  RANK_APPRENTICE = 1;
+  RANK_JOURNEYMAN = 2;
+  RANK_VETERAN = 3;
+  RANK_MASTER = 4;
+}
+
+enum ItemLocation {
+  LOCATION_UNKNOWN = 0;
+  LOCATION_SHOP = 1;
+  LOCATION_WAREHOUSE = 2;
+  LOCATION_MARKET = 3;
+}
+
+enum EventType {
+  EVENT_UNKNOWN = 0;
+  EVENT_SEASONAL = 1;
+  EVENT_MARKET_CRASH = 2;
+  EVENT_MARKET_BOOM = 3;
+  EVENT_FESTIVAL = 4;
+  EVENT_DRAGON_ATTACK = 5;
+  EVENT_HARVEST = 6;
+}
+
+enum DemandLevel {
+  DEMAND_UNKNOWN = 0;
+  DEMAND_VERY_LOW = 1;
+  DEMAND_LOW = 2;
+  DEMAND_NORMAL = 3;
+  DEMAND_HIGH = 4;
+  DEMAND_VERY_HIGH = 5;
+}
+
+enum SupplyLevel {
+  SUPPLY_UNKNOWN = 0;
+  SUPPLY_VERY_LOW = 1;
+  SUPPLY_LOW = 2;
+  SUPPLY_NORMAL = 3;
+  SUPPLY_HIGH = 4;
+  SUPPLY_VERY_HIGH = 5;
+}
