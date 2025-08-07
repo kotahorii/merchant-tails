@@ -42,6 +42,7 @@ extern void go_gdextension_deinitialize(void* userdata, int32_t level);
 // No C wrapper functions needed for initialization
 */
 import "C"
+
 import (
 	"fmt"
 	"unsafe"

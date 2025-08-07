@@ -56,6 +56,7 @@ typedef struct {
 } GDExtensionClassMethodInfo;
 */
 import "C"
+
 import (
 	"fmt"
 	"sync"
@@ -154,7 +155,8 @@ func go_free_instance(classUserdata unsafe.Pointer, instance unsafe.Pointer) {
 //export go_method_call
 func go_method_call(methodUserdata unsafe.Pointer, instance unsafe.Pointer,
 	args unsafe.Pointer, argCount C.int64_t,
-	ret unsafe.Pointer, errorOut *C.int64_t) {
+	ret unsafe.Pointer, errorOut *C.int64_t,
+) {
 	callbackMutex.RLock()
 	methodFunc, exists := methodCallbacks[methodUserdata]
 	callbackMutex.RUnlock()
@@ -182,7 +184,8 @@ func go_method_call(methodUserdata unsafe.Pointer, instance unsafe.Pointer,
 // RegisterClass registers a new GDExtension class
 func (r *ClassRegistry) RegisterClass(name, parentClass string,
 	createFunc InstanceCreateFunc,
-	freeFunc InstanceFreeFunc) (*ClassInfo, error) {
+	freeFunc InstanceFreeFunc,
+) (*ClassInfo, error) {
 	r.mu.Lock()
 	defer r.mu.Unlock()
 
@@ -220,7 +223,8 @@ func (r *ClassRegistry) RegisterClass(name, parentClass string,
 
 // RegisterMethod registers a method for a class
 func (r *ClassRegistry) RegisterMethod(className, methodName string,
-	callFunc MethodCallFunc) (*MethodInfo, error) {
+	callFunc MethodCallFunc,
+) (*MethodInfo, error) {
 	r.mu.Lock()
 	defer r.mu.Unlock()
 

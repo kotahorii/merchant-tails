@@ -11,6 +11,7 @@ typedef int32_t (*GDExtensionEntryPoint)(void* get_proc_address, void* library, 
 extern int32_t merchant_game_library_init(void* get_proc_address, void* library, void* initialization);
 */
 import "C"
+
 import (
 	"fmt"
 	"unsafe"
