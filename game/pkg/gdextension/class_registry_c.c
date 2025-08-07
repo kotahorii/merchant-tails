@@ -14,5 +14,5 @@ void c_free_instance_wrapper(void* class_userdata, GDExtensionClassInstancePtr i
 void c_method_call_wrapper(void* method_userdata, GDExtensionClassInstancePtr instance,
                           const GDExtensionVariantPtr* args, int64_t arg_count,
                           GDExtensionVariantPtr ret, int64_t* error) {
-    go_method_call(method_userdata, instance, args, arg_count, ret, error);
+    go_method_call(method_userdata, instance, (void*)args, arg_count, ret, error);
 }

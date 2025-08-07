@@ -174,3 +174,27 @@ GitHub Actions workflow (`.github/workflows/ci.yml`):
 - Protocol Buffers compiler
 - golangci-lint for code quality
 - air for hot reload development
+
+## Critical Pre-Push Checklist
+
+**IMPORTANT: ALWAYS run these commands before pushing to GitHub:**
+
+```bash
+# 1. Run all tests
+cd game && go test ./...
+
+# 2. Run linter
+cd game && golangci-lint run
+
+# 3. Build the project
+make build-go
+
+# 4. Run all checks at once
+make check
+```
+
+**Rules:**
+- NEVER push if tests are failing
+- NEVER push if build errors exist
+- ALWAYS fix all issues before committing
+- If CI fails after push, fix immediately
