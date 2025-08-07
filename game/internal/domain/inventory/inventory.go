@@ -293,6 +293,71 @@ func (im *InventoryManager) getTotalShopItemsUnsafe() int {
 	return total
 }
 
+// GetShop returns the shop inventory
+func (im *InventoryManager) GetShop() *item.Inventory {
+	im.mu.RLock()
+	defer im.mu.RUnlock()
+	return im.ShopInventory
+}
+
+// GetWarehouse returns the warehouse inventory
+func (im *InventoryManager) GetWarehouse() *item.Inventory {
+	im.mu.RLock()
+	defer im.mu.RUnlock()
+	return im.WarehouseInventory
+}
+
+// IsEmpty checks if both shop and warehouse are empty
+func (im *InventoryManager) IsEmpty() bool {
+	im.mu.RLock()
+	defer im.mu.RUnlock()
+	return im.getTotalShopItemsUnsafe() == 0 && im.getTotalWarehouseItemsUnsafe() == 0
+}
+
+// Clear clears all inventory
+func (im *InventoryManager) Clear() {
+	im.mu.Lock()
+	defer im.mu.Unlock()
+
+	im.ShopInventory = item.NewInventory()
+	im.WarehouseInventory = item.NewInventory()
+	im.shopItems = make(map[string]*InventoryItem)
+	im.warehouseItems = make(map[string]*InventoryItem)
+	im.salesVelocity = make(map[string]float64)
+	im.salesHistory = make(map[string]*SalesHistory)
+	im.spoiledItems = []*SpoiledItem{}
+}
+
+// AddToWarehouseByID adds items directly to warehouse by ID
+func (im *InventoryManager) AddToWarehouseByID(itemID string, quantity int, price int) error {
+	im.mu.Lock()
+	defer im.mu.Unlock()
+
+	// Create new item
+	newItem := &item.Item{
+		ID:    itemID,
+		Name:  itemID, // TODO: Get proper name from item registry
+		Price: price,
+	}
+
+	// Add to warehouse inventory
+	err := im.WarehouseInventory.AddItem(newItem, quantity)
+	if err == nil {
+		if existing, exists := im.warehouseItems[itemID]; exists {
+			existing.Quantity += quantity
+		} else {
+			im.warehouseItems[itemID] = &InventoryItem{
+				Item:          newItem,
+				Quantity:      quantity,
+				PurchaseDate:  time.Now(),
+				PurchasePrice: price,
+				Location:      LocationWarehouse,
+			}
+		}
+	}
+	return err
+}
+
 // getTotalWarehouseItemsUnsafe returns total items without locking
 func (im *InventoryManager) getTotalWarehouseItemsUnsafe() int {
 	total := 0

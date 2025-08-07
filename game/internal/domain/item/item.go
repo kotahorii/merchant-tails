@@ -44,6 +44,7 @@ type Item struct {
 	Name       string
 	Category   Category
 	BasePrice  int
+	Price      int // Current price (can differ from BasePrice)
 	Durability int // Days until spoilage, -1 for infinite
 	CreatedAt  time.Time
 }
@@ -67,6 +68,7 @@ func NewItem(id, name string, category Category, basePrice int) (*Item, error) {
 		Name:       name,
 		Category:   category,
 		BasePrice:  basePrice,
+		Price:      basePrice, // Initialize current price to base price
 		Durability: durability,
 		CreatedAt:  time.Now(),
 	}, nil
@@ -198,6 +200,32 @@ func (inv *Inventory) GetQuantity(itemID string) int {
 		return item.Quantity
 	}
 	return 0
+}
+
+// GetItems returns all items in the inventory
+func (inv *Inventory) GetItems() []*InventoryItem {
+	inv.mu.RLock()
+	defer inv.mu.RUnlock()
+
+	items := make([]*InventoryItem, 0, len(inv.items))
+	for _, item := range inv.items {
+		items = append(items, &InventoryItem{
+			Item:     item.Item,
+			Quantity: item.Quantity,
+		})
+	}
+	return items
+}
+
+// HasItem checks if an item exists with sufficient quantity
+func (inv *Inventory) HasItem(itemID string, quantity int) bool {
+	inv.mu.RLock()
+	defer inv.mu.RUnlock()
+
+	if item, ok := inv.items[itemID]; ok {
+		return item.Quantity >= quantity
+	}
+	return false
 }
 
 // ItemMaster represents master data for an item type

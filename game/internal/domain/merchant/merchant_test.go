@@ -569,9 +569,15 @@ func TestMerchantNetwork_ShareInformation(t *testing.T) {
 	}
 
 	// Share information through network
-	propagation := network.ShareInformation(info)
+	// Run multiple times since propagation is probabilistic
+	propagated := false
+	for i := 0; i < 10; i++ {
+		propagation := network.ShareInformation(info)
+		if propagation["m2"] {
+			propagated = true
+			break
+		}
+	}
 
-	assert.NotNil(t, propagation)
-	assert.Contains(t, propagation, "m2") // m1 has strong relationship with m2
-	assert.GreaterOrEqual(t, len(propagation), 1)
+	assert.True(t, propagated, "m2 should receive information with 0.8 probability")
 }

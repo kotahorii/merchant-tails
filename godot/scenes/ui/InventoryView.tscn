@@ -1,0 +1,155 @@
+[gd_scene load_steps=3 format=3 uid="uid://d1234abc567def"]
+
+[ext_resource type="Script" path="res://scripts/ui/InventoryViewPanel.gd" id="1_inv"]
+[ext_resource type="Theme" path="res://themes/default_theme.tres" id="2_theme"]
+
+[node name="InventoryView" type="Control"]
+anchor_right = 1.0
+anchor_bottom = 1.0
+theme = ExtResource("2_theme")
+script = ExtResource("1_inv")
+
+[node name="Background" type="Panel" parent="."]
+anchor_right = 1.0
+anchor_bottom = 1.0
+
+[node name="Title" type="Label" parent="."]
+anchor_left = 0.5
+anchor_right = 0.5
+offset_left = -150.0
+offset_top = 20.0
+offset_right = 150.0
+offset_bottom = 60.0
+text = "Inventory Management"
+theme_override_font_sizes/font_size = 32
+horizontal_alignment = 1
+
+[node name="WarehousePanel" type="Panel" parent="."]
+anchor_left = 0.05
+anchor_top = 0.1
+anchor_right = 0.45
+anchor_bottom = 0.85
+
+[node name="WarehouseTitle" type="Label" parent="WarehousePanel"]
+anchor_left = 0.5
+anchor_right = 0.5
+offset_left = -60.0
+offset_top = 10.0
+offset_right = 60.0
+offset_bottom = 40.0
+text = "Warehouse"
+theme_override_font_sizes/font_size = 24
+horizontal_alignment = 1
+
+[node name="CapacityBar" type="ProgressBar" parent="WarehousePanel"]
+anchor_left = 0.1
+anchor_top = 0.12
+anchor_right = 0.9
+anchor_bottom = 0.15
+value = 50.0
+
+[node name="CapacityLabel" type="Label" parent="WarehousePanel"]
+anchor_left = 0.1
+anchor_top = 0.16
+anchor_right = 0.9
+anchor_bottom = 0.2
+text = "50/200"
+horizontal_alignment = 1
+
+[node name="ItemList" type="ScrollContainer" parent="WarehousePanel"]
+anchor_left = 0.05
+anchor_top = 0.22
+anchor_right = 0.95
+anchor_bottom = 0.95
+horizontal_scroll_mode = 0
+
+[node name="Items" type="VBoxContainer" parent="WarehousePanel/ItemList"]
+theme_override_constants/separation = 5
+
+[node name="TransferArea" type="Panel" parent="."]
+anchor_left = 0.46
+anchor_top = 0.3
+anchor_right = 0.54
+anchor_bottom = 0.7
+
+[node name="ToShopButton" type="Button" parent="TransferArea"]
+anchor_left = 0.5
+anchor_top = 0.3
+anchor_right = 0.5
+offset_left = -30.0
+offset_right = 30.0
+offset_bottom = 40.0
+text = "→"
+theme_override_font_sizes/font_size = 24
+
+[node name="ToWarehouseButton" type="Button" parent="TransferArea"]
+anchor_left = 0.5
+anchor_top = 0.6
+anchor_right = 0.5
+offset_left = -30.0
+offset_right = 30.0
+offset_bottom = 40.0
+text = "←"
+theme_override_font_sizes/font_size = 24
+
+[node name="ShopPanel" type="Panel" parent="."]
+anchor_left = 0.55
+anchor_top = 0.1
+anchor_right = 0.95
+anchor_bottom = 0.85
+
+[node name="ShopTitle" type="Label" parent="ShopPanel"]
+anchor_left = 0.5
+anchor_right = 0.5
+offset_left = -40.0
+offset_top = 10.0
+offset_right = 40.0
+offset_bottom = 40.0
+text = "Shop"
+theme_override_font_sizes/font_size = 24
+horizontal_alignment = 1
+
+[node name="CapacityBar" type="ProgressBar" parent="ShopPanel"]
+anchor_left = 0.1
+anchor_top = 0.12
+anchor_right = 0.9
+anchor_bottom = 0.15
+value = 30.0
+
+[node name="CapacityLabel" type="Label" parent="ShopPanel"]
+anchor_left = 0.1
+anchor_top = 0.16
+anchor_right = 0.9
+anchor_bottom = 0.2
+text = "15/50"
+horizontal_alignment = 1
+
+[node name="ItemList" type="ScrollContainer" parent="ShopPanel"]
+anchor_left = 0.05
+anchor_top = 0.22
+anchor_right = 0.95
+anchor_bottom = 0.95
+horizontal_scroll_mode = 0
+
+[node name="Items" type="VBoxContainer" parent="ShopPanel/ItemList"]
+theme_override_constants/separation = 5
+
+[node name="ActionButtons" type="HBoxContainer" parent="."]
+anchor_left = 0.3
+anchor_top = 0.9
+anchor_right = 0.7
+anchor_bottom = 0.96
+theme_override_constants/separation = 20
+alignment = 1
+
+[node name="SortButton" type="Button" parent="ActionButtons"]
+custom_minimum_size = Vector2(120, 40)
+text = "Sort Items"
+
+[node name="OptimizeButton" type="Button" parent="ActionButtons"]
+custom_minimum_size = Vector2(120, 40)
+text = "Auto-Arrange"
+
+[node name="BackButton" type="Button" parent="ActionButtons"]
+custom_minimum_size = Vector2(120, 40)
+text = "Back"

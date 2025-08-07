@@ -1,0 +1,102 @@
+[gd_scene load_steps=3 format=3 uid="uid://cxm4n5k2p8vhj"]
+
+[ext_resource type="Script" path="res://scripts/ui/MarketViewPanel.gd" id="1_market"]
+[ext_resource type="Theme" path="res://themes/default_theme.tres" id="2_theme"]
+
+[node name="MarketView" type="Control"]
+anchor_right = 1.0
+anchor_bottom = 1.0
+theme = ExtResource("2_theme")
+script = ExtResource("1_market")
+
+[node name="Background" type="Panel" parent="."]
+anchor_right = 1.0
+anchor_bottom = 1.0
+
+[node name="Title" type="Label" parent="."]
+anchor_left = 0.5
+anchor_right = 0.5
+offset_left = -100.0
+offset_top = 20.0
+offset_right = 100.0
+offset_bottom = 60.0
+text = "Market Prices"
+theme_override_font_sizes/font_size = 32
+horizontal_alignment = 1
+
+[node name="TabContainer" type="TabContainer" parent="."]
+anchor_left = 0.05
+anchor_top = 0.1
+anchor_right = 0.95
+anchor_bottom = 0.85
+
+[node name="Current Prices" type="Control" parent="TabContainer"]
+
+[node name="ItemList" type="ScrollContainer" parent="TabContainer/Current Prices"]
+anchor_right = 1.0
+anchor_bottom = 1.0
+horizontal_scroll_mode = 0
+
+[node name="PriceGrid" type="GridContainer" parent="TabContainer/Current Prices/ItemList"]
+columns = 6
+theme_override_constants/h_separation = 20
+theme_override_constants/v_separation = 10
+
+[node name="Price Trends" type="Control" parent="TabContainer"]
+
+[node name="ChartArea" type="Panel" parent="TabContainer/Price Trends"]
+anchor_left = 0.05
+anchor_top = 0.05
+anchor_right = 0.95
+anchor_bottom = 0.6
+
+[node name="ItemSelector" type="OptionButton" parent="TabContainer/Price Trends"]
+anchor_left = 0.05
+anchor_top = 0.65
+anchor_right = 0.3
+anchor_bottom = 0.7
+text = "Select Item"
+
+[node name="TimeRange" type="OptionButton" parent="TabContainer/Price Trends"]
+anchor_left = 0.35
+anchor_top = 0.65
+anchor_right = 0.6
+anchor_bottom = 0.7
+text = "7 Days"
+
+[node name="TrendInfo" type="RichTextLabel" parent="TabContainer/Price Trends"]
+anchor_left = 0.05
+anchor_top = 0.75
+anchor_right = 0.95
+anchor_bottom = 0.95
+bbcode_enabled = true
+text = "Select an item to view price trends"
+
+[node name="Market Events" type="Control" parent="TabContainer"]
+
+[node name="EventList" type="ScrollContainer" parent="TabContainer/Market Events"]
+anchor_right = 1.0
+anchor_bottom = 1.0
+
+[node name="Events" type="VBoxContainer" parent="TabContainer/Market Events/EventList"]
+theme_override_constants/separation = 10
+
+[node name="ActionButtons" type="HBoxContainer" parent="."]
+anchor_left = 0.3
+anchor_top = 0.9
+anchor_right = 0.7
+anchor_bottom = 0.96
+theme_override_constants/separation = 20
+alignment = 1
+
+[node name="RefreshButton" type="Button" parent="ActionButtons"]
+custom_minimum_size = Vector2(120, 40)
+text = "Refresh"
+
+[node name="BuyButton" type="Button" parent="ActionButtons"]
+custom_minimum_size = Vector2(120, 40)
+text = "Buy Items"
+
+[node name="BackButton" type="Button" parent="ActionButtons"]
+custom_minimum_size = Vector2(120, 40)
+text = "Back"

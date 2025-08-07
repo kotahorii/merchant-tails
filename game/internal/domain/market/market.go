@@ -148,7 +148,7 @@ type PriceRecord struct {
 
 // NewMarket creates a new market instance
 func NewMarket() *Market {
-	return &Market{
+	m := &Market{
 		PricingEngine: NewPricingEngine(),
 		State: &MarketState{
 			CurrentDemand: DemandNormal,
@@ -159,6 +159,37 @@ func NewMarket() *Market {
 		Prices:       make(map[string]*PriceHistory),
 		ActiveEvents: make([]*MarketEvent, 0),
 		items:        make(map[string]*item.Item),
+	}
+
+	// Initialize with items from registry
+	m.initializeMarketItems()
+
+	return m
+}
+
+// initializeMarketItems populates the market with items from the registry
+func (m *Market) initializeMarketItems() {
+	registry := item.GetItemRegistry()
+	allItems := registry.GetAllItems()
+
+	for _, master := range allItems {
+		marketItem := &item.Item{
+			ID:         master.ID,
+			Name:       master.Name,
+			Category:   master.Category,
+			BasePrice:  master.BasePrice,
+			Price:      master.BasePrice,
+			Durability: master.Durability,
+			CreatedAt:  time.Now(),
+		}
+		m.items[master.ID] = marketItem
+
+		// Initialize price history
+		m.Prices[master.ID] = &PriceHistory{
+			Records: []PriceRecord{
+				{Price: master.BasePrice, Timestamp: time.Now()},
+			},
+		}
 	}
 }
 
@@ -256,6 +287,63 @@ func (m *Market) GetRecommendedAction(itemID string) TradeAction {
 	}
 
 	return ActionHold
+}
+
+// GetPrice returns the current price for an item
+func (m *Market) GetPrice(itemID string) int {
+	m.mu.RLock()
+	defer m.mu.RUnlock()
+
+	// Check if item exists
+	itemObj, exists := m.items[itemID]
+	if !exists {
+		// Return a default price if item not found
+		return 10
+	}
+
+	// Calculate current price
+	if m.PricingEngine != nil && m.State != nil {
+		return m.PricingEngine.CalculatePrice(itemObj, m.State)
+	}
+
+	return itemObj.BasePrice
+}
+
+// Reset resets the market to initial state
+func (m *Market) Reset() {
+	m.mu.Lock()
+	defer m.mu.Unlock()
+
+	m.State = &MarketState{
+		CurrentDemand: DemandNormal,
+		CurrentSupply: SupplyNormal,
+		CurrentSeason: item.SeasonSpring,
+		CurrentDay:    1,
+	}
+	m.ActiveEvents = []*MarketEvent{}
+	m.Prices = make(map[string]*PriceHistory)
+}
+
+// Update updates the market state
+func (m *Market) Update() {
+	m.mu.Lock()
+	defer m.mu.Unlock()
+
+	// Update prices for all items
+	for itemID, itemObj := range m.items {
+		if m.PricingEngine != nil && m.State != nil {
+			newPrice := m.PricingEngine.CalculatePrice(itemObj, m.State)
+
+			// Update price history
+			if history, exists := m.Prices[itemID]; exists {
+				history.AddRecord(newPrice, time.Now())
+			} else {
+				m.Prices[itemID] = &PriceHistory{
+					Records: []PriceRecord{{Price: newPrice, Timestamp: time.Now()}},
+				}
+			}
+		}
+	}
 }
 
 // GetDemandModifier returns the price modifier for the current demand level
