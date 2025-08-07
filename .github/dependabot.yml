@@ -1,0 +1,60 @@
+# Dependabot configuration
+# See https://docs.github.com/github/administering-a-repository/configuration-options-for-dependency-updates
+
+version: 2
+updates:
+  # Go modules - game directory
+  - package-ecosystem: "gomod"
+    directory: "/game"
+    schedule:
+      interval: "weekly"
+      day: "monday"
+      time: "09:00"
+      timezone: "Asia/Tokyo"
+    open-pull-requests-limit: 5
+    labels:
+      - "dependencies"
+      - "go"
+    assignees:
+      - "kotahorii"
+    commit-message:
+      prefix: "deps"
+      prefix-development: "deps-dev"
+      include: "scope"
+    reviewers:
+      - "kotahorii"
+    groups:
+      golang-x:
+        patterns:
+          - "golang.org/x/*"
+      google:
+        patterns:
+          - "google.golang.org/*"
+      testing:
+        patterns:
+          - "*test*"
+          - "*mock*"
+
+  # GitHub Actions
+  - package-ecosystem: "github-actions"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+      day: "monday"
+      time: "09:00"
+      timezone: "Asia/Tokyo"
+    open-pull-requests-limit: 5
+    labels:
+      - "dependencies"
+      - "github-actions"
+    assignees:
+      - "kotahorii"
+    commit-message:
+      prefix: "ci"
+      include: "scope"
+    reviewers:
+      - "kotahorii"
+    groups:
+      actions:
+        patterns:
+          - "actions/*"
