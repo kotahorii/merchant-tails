@@ -35,7 +35,6 @@ formatters:
     - gofmt
     - gofumpt
     - goimports
-    - swaggo
 
 run:
   timeout: 5m
