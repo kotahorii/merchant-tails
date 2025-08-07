@@ -21,9 +21,6 @@ linters:
     - unparam
     - unused
     - whitespace
-    - funcorder
-    - embeddedstructfieldcheck
-    - noinlineerr
   exclusions:
     rules:
       - path: "_test.go"
