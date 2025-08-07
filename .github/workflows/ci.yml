@@ -239,17 +239,27 @@ jobs:
           cd game
           go test -bench=. -benchmem ./... | tee benchmark.txt
 
-      - name: Store benchmark result
-        uses: benchmark-action/github-action-benchmark@v1
-        if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+      - name: Upload benchmark results
+        uses: actions/upload-artifact@v4
+        if: always()
         with:
-          tool: "go"
-          output-file-path: game/benchmark.txt
-          github-token: ${{ secrets.GITHUB_TOKEN }}
-          auto-push: false
-          skip-fetch-gh-pages: true
-          comment-on-alert: false
-          save-data-file: false
+          name: benchmark-results
+          path: game/benchmark.txt
+          retention-days: 30
+
+      - name: Display benchmark summary
+        if: always()
+        run: |
+          echo "## Benchmark Results Summary"
+          if [ -f game/benchmark.txt ]; then
+            echo '```'
+            head -50 game/benchmark.txt
+            echo '```'
+            echo ""
+            echo "Full results available in workflow artifacts"
+          else
+            echo "No benchmark results found"
+          fi
 
   security-scan:
     name: Security Scan
