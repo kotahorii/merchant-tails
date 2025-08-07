@@ -206,11 +206,27 @@
   - [x] フェーズ変更通知システム
   - [x] カスタマイズ可能な時間配分
 
-### ECSシステム
-- [ ] Entity管理システムの実装
-- [ ] Component基本型の定義
-- [ ] System基本クラスの実装
-- [ ] World管理システムの構築
+### ECSシステム ✅ 実装完了 2025-08-07
+- [x] Entity管理システムの実装
+  - [x] ユニークID生成システム
+  - [x] コンポーネント管理（追加/削除/取得）
+  - [x] エンティティライフサイクル管理
+  - [x] スレッドセーフな実装
+- [x] Component基本型の定義
+  - [x] Transform, Render, Physics
+  - [x] Inventory, Merchant, Shop
+  - [x] Price, AI, Player, Item
+- [x] System基本クラスの実装
+  - [x] MovementSystem（移動処理）
+  - [x] PhysicsSystem（物理演算）
+  - [x] RenderSystem（描画処理）
+  - [x] InventorySystem（在庫管理）
+  - [x] AISystem（AI行動制御）
+- [x] World管理システムの構築
+  - [x] EntityManagerとSystemManager統合
+  - [x] リソース管理
+  - [x] WorldBuilderパターン
+  - [x] デフォルトワールド設定
 
 ### アイテムシステム ✅ 基本実装完了
 - [x] ItemMasterデータ構造の実装
