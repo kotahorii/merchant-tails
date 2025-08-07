@@ -1,0 +1,35 @@
+# CODEOWNERS file for automatic PR review assignment
+# See https://docs.github.com/en/repositories/managing-your-repositorys-settings-and-features/customizing-your-repository/about-code-owners
+
+# Default owner for everything in the repo
+* @kotahorii
+
+# Go code
+*.go @kotahorii
+go.mod @kotahorii
+go.sum @kotahorii
+/game/ @kotahorii
+
+# GitHub Actions workflows
+/.github/workflows/ @kotahorii
+
+# Configuration files
+/.github/dependabot.yml @kotahorii
+/Makefile @kotahorii
+*.yaml @kotahorii
+*.yml @kotahorii
+
+# Protocol Buffers
+*.proto @kotahorii
+/proto/ @kotahorii
+
+# Documentation
+*.md @kotahorii
+/docs/ @kotahorii
+
+# Godot project files
+/godot/ @kotahorii
+*.godot @kotahorii
+*.tscn @kotahorii
+*.tres @kotahorii
+*.gd @kotahorii

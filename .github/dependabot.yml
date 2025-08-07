@@ -21,8 +21,6 @@ updates:
       prefix: "deps"
       prefix-development: "deps-dev"
       include: "scope"
-    reviewers:
-      - "kotahorii"
     groups:
       golang-x:
         patterns:
@@ -52,8 +50,6 @@ updates:
     commit-message:
       prefix: "ci"
       include: "scope"
-    reviewers:
-      - "kotahorii"
     groups:
       actions:
         patterns:
