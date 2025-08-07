@@ -86,9 +86,19 @@ build: build-go build-godot ## Build everything
 build-go: ## Build Go GDExtension
 	@echo "$(GREEN)Building Go GDExtension...$(NC)"
 	@mkdir -p $(GODOT_DIR)/bin
-	cd $(GAME_DIR) && CGO_ENABLED=1 $(GOBUILD) -buildmode=c-shared \
-		-o ../$(GODOT_DIR)/bin/merchant_game.so \
-		./cmd/gdextension/main.go
+	@if [ "$$(uname)" = "Darwin" ]; then \
+		cd $(GAME_DIR) && CGO_ENABLED=1 $(GOBUILD) -buildmode=c-shared \
+			-o ../$(GODOT_DIR)/bin/merchant_game.dylib \
+			./cmd/gdextension/; \
+	elif [ "$$(uname)" = "Linux" ]; then \
+		cd $(GAME_DIR) && CGO_ENABLED=1 $(GOBUILD) -buildmode=c-shared \
+			-o ../$(GODOT_DIR)/bin/merchant_game.so \
+			./cmd/gdextension/; \
+	else \
+		cd $(GAME_DIR) && CGO_ENABLED=1 $(GOBUILD) -buildmode=c-shared \
+			-o ../$(GODOT_DIR)/bin/merchant_game.dll \
+			./cmd/gdextension/; \
+	fi
 
 .PHONY: build-godot
 build-godot: ## Build Godot project
