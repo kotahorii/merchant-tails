@@ -1,0 +1,13 @@
+version: v2
+plugins:
+  # Generate Go code with protoc-gen-go
+  - remote: buf.build/protocolbuffers/go
+    out: internal/gen
+    opt:
+      - paths=source_relative
+
+  # Generate Connect-Go code for RPC services
+  - remote: buf.build/connectrpc/go
+    out: internal/gen
+    opt:
+      - paths=source_relative

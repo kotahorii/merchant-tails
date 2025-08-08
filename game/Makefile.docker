@@ -1,0 +1,119 @@
+# Docker Makefile commands
+
+.PHONY: docker-build docker-run docker-stop docker-clean docker-logs docker-shell
+
+# Build Docker images
+docker-build:
+	docker-compose build
+
+docker-build-dev:
+	docker-compose -f docker-compose.dev.yml build
+
+# Run containers
+docker-up:
+	docker-compose up -d
+
+docker-up-dev:
+	docker-compose -f docker-compose.dev.yml up
+
+docker-up-dev-detached:
+	docker-compose -f docker-compose.dev.yml up -d
+
+# Stop containers
+docker-down:
+	docker-compose down
+
+docker-down-dev:
+	docker-compose -f docker-compose.dev.yml down
+
+# Stop and remove volumes
+docker-clean:
+	docker-compose down -v
+	docker-compose -f docker-compose.dev.yml down -v
+
+# View logs
+docker-logs:
+	docker-compose logs -f
+
+docker-logs-dev:
+	docker-compose -f docker-compose.dev.yml logs -f
+
+docker-logs-server:
+	docker-compose logs -f game-server
+
+docker-logs-server-dev:
+	docker-compose -f docker-compose.dev.yml logs -f game-server-dev
+
+# Shell access
+docker-shell:
+	docker-compose exec game-server /bin/sh
+
+docker-shell-dev:
+	docker-compose -f docker-compose.dev.yml exec game-server-dev /bin/sh
+
+docker-shell-postgres:
+	docker-compose exec postgres psql -U merchant -d merchant_tails
+
+docker-shell-postgres-dev:
+	docker-compose -f docker-compose.dev.yml exec postgres-dev psql -U merchant_dev -d merchant_tails_dev
+
+docker-shell-redis:
+	docker-compose exec redis redis-cli
+
+docker-shell-redis-dev:
+	docker-compose -f docker-compose.dev.yml exec redis-dev redis-cli
+
+# Database operations
+docker-db-migrate:
+	docker-compose exec game-server ./merchant-tails migrate up
+
+docker-db-migrate-dev:
+	docker-compose -f docker-compose.dev.yml exec game-server-dev go run ./cmd/migrate up
+
+docker-db-seed:
+	docker-compose exec game-server ./merchant-tails seed
+
+docker-db-seed-dev:
+	docker-compose -f docker-compose.dev.yml exec game-server-dev go run ./cmd/seed
+
+# Testing in Docker
+docker-test:
+	docker-compose -f docker-compose.dev.yml exec game-server-dev go test ./...
+
+docker-test-coverage:
+	docker-compose -f docker-compose.dev.yml exec game-server-dev go test -coverprofile=coverage.out ./...
+	docker-compose -f docker-compose.dev.yml exec game-server-dev go tool cover -html=coverage.out -o coverage.html
+
+# Monitoring
+docker-metrics:
+	@echo "Prometheus: http://localhost:9090"
+	@echo "Grafana: http://localhost:3000 (admin/admin)"
+	@echo "Jaeger: http://localhost:16686"
+
+# Docker system cleanup
+docker-prune:
+	docker system prune -af --volumes
+
+# Health checks
+docker-health:
+	@echo "Checking service health..."
+	@docker-compose ps
+	@echo "\nGame Server Health:"
+	@curl -s http://localhost:8080/health || echo "Game server not healthy"
+	@echo "\nPostgreSQL Health:"
+	@docker-compose exec postgres pg_isready || echo "PostgreSQL not healthy"
+	@echo "\nRedis Health:"
+	@docker-compose exec redis redis-cli ping || echo "Redis not healthy"
+
+# Production deployment
+docker-deploy-prod:
+	docker build -t merchant-tails:latest .
+	docker tag merchant-tails:latest registry.example.com/merchant-tails:latest
+	docker push registry.example.com/merchant-tails:latest
+
+# Development shortcuts
+dev: docker-up-dev
+stop-dev: docker-down-dev
+logs: docker-logs-dev
+shell: docker-shell-dev
+clean: docker-clean

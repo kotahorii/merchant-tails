@@ -1,0 +1,293 @@
+syntax = "proto3";
+
+package save;
+
+option go_package = "github.com/yourusername/merchant-tails/game/internal/gen/save";
+
+import "google/protobuf/timestamp.proto";
+
+// GameState represents the complete game state for saving
+message GameState {
+  string version = 1;
+  google.protobuf.Timestamp save_time = 2;
+  PlayerData player = 3;
+  MarketData market = 4;
+  InventoryData inventory = 5;
+  repeated MerchantData merchants = 6;
+  EventData events = 7;
+  ProgressData progress = 8;
+  BankingData banking = 9;
+  SummaryData summaries = 10;
+  SettingsData settings = 11;
+}
+
+// PlayerData contains all player-related state
+message PlayerData {
+  string id = 1;
+  string name = 2;
+  double gold = 3;
+  int32 reputation = 4;
+  string rank = 5;
+  int32 experience = 6;
+  int32 day_number = 7;
+  string current_season = 8;
+  int32 year = 9;
+  int32 shop_capacity = 10;
+  int32 warehouse_capacity = 11;
+  google.protobuf.Timestamp last_played = 12;
+  int32 total_play_time_seconds = 13;
+}
+
+// MarketData contains market state
+message MarketData {
+  repeated ItemPrice prices = 1;
+  repeated PriceHistory history = 2;
+  string current_trend = 3;
+  double volatility = 4;
+  repeated MarketEvent active_events = 5;
+  map<string, double> demand_levels = 6;
+  map<string, double> supply_levels = 7;
+}
+
+// ItemPrice represents the current price of an item
+message ItemPrice {
+  string item_id = 1;
+  string item_name = 2;
+  double base_price = 3;
+  double current_price = 4;
+  double previous_price = 5;
+  string category = 6;
+  google.protobuf.Timestamp last_updated = 7;
+}
+
+// PriceHistory represents historical price data
+message PriceHistory {
+  string item_id = 1;
+  repeated PricePoint history = 2;
+}
+
+// PricePoint is a single price data point
+message PricePoint {
+  google.protobuf.Timestamp time = 1;
+  double price = 2;
+  int32 volume = 3;
+}
+
+// MarketEvent represents an active market event
+message MarketEvent {
+  string event_id = 1;
+  string event_type = 2;
+  string name = 3;
+  double price_modifier = 4;
+  int32 duration_days = 5;
+  int32 days_remaining = 6;
+  repeated string affected_items = 7;
+}
+
+// InventoryData contains all inventory information
+message InventoryData {
+  repeated InventoryItem shop_items = 1;
+  repeated InventoryItem warehouse_items = 2;
+  int32 total_shop_items = 3;
+  int32 total_warehouse_items = 4;
+}
+
+// InventoryItem represents a single inventory item
+message InventoryItem {
+  string item_id = 1;
+  string item_name = 2;
+  string category = 3;
+  int32 quantity = 4;
+  double purchase_price = 5;
+  double current_value = 6;
+  int32 days_held = 7;
+  int32 durability = 8;
+  int32 max_durability = 9;
+  bool is_spoiled = 10;
+  google.protobuf.Timestamp purchase_date = 11;
+}
+
+// MerchantData represents an AI merchant's state
+message MerchantData {
+  string id = 1;
+  string name = 2;
+  string personality = 3;
+  double gold = 4;
+  int32 reputation = 5;
+  repeated InventoryItem inventory = 6;
+  string trading_strategy = 7;
+  double risk_tolerance = 8;
+  int32 successful_trades = 9;
+  int32 total_trades = 10;
+  double total_profit = 11;
+  repeated string known_information = 12;
+  map<string, double> item_preferences = 13;
+}
+
+// EventData contains event system state
+message EventData {
+  repeated ScheduledEvent scheduled_events = 1;
+  repeated CompletedEvent completed_events = 2;
+  string next_event_id = 3;
+  int32 next_event_days = 4;
+}
+
+// ScheduledEvent represents a scheduled future event
+message ScheduledEvent {
+  string event_id = 1;
+  string event_type = 2;
+  int32 trigger_day = 3;
+  map<string, string> parameters = 4;
+}
+
+// CompletedEvent represents a completed event
+message CompletedEvent {
+  string event_id = 1;
+  google.protobuf.Timestamp completed_time = 2;
+  bool was_successful = 3;
+  double impact = 4;
+}
+
+// ProgressData contains player progression state
+message ProgressData {
+  repeated Achievement achievements = 1;
+  repeated UnlockedFeature unlocked_features = 2;
+  map<string, int32> statistics = 3;
+  repeated QuestProgress quests = 4;
+  int32 total_achievement_points = 5;
+}
+
+// Achievement represents an earned achievement
+message Achievement {
+  string id = 1;
+  string name = 2;
+  string description = 3;
+  int32 points = 4;
+  google.protobuf.Timestamp earned_time = 5;
+  double progress = 6;
+  bool is_complete = 7;
+}
+
+// UnlockedFeature represents an unlocked game feature
+message UnlockedFeature {
+  string feature_id = 1;
+  string feature_name = 2;
+  google.protobuf.Timestamp unlock_time = 3;
+  string unlock_reason = 4;
+}
+
+// QuestProgress represents progress on a quest
+message QuestProgress {
+  string quest_id = 1;
+  string quest_name = 2;
+  int32 current_step = 3;
+  int32 total_steps = 4;
+  map<string, string> quest_data = 5;
+  bool is_complete = 6;
+}
+
+// BankingData contains all banking system state
+message BankingData {
+  repeated BankAccount accounts = 1;
+  repeated Investment investments = 2;
+  repeated Loan loans = 3;
+  repeated Transaction transactions = 4;
+  double total_interest_earned = 5;
+  double total_fees_paid = 6;
+}
+
+// BankAccount represents a bank account
+message BankAccount {
+  string account_id = 1;
+  string account_type = 2;
+  double balance = 3;
+  double interest_rate = 4;
+  google.protobuf.Timestamp opened_date = 5;
+  google.protobuf.Timestamp last_interest_date = 6;
+  bool is_active = 7;
+}
+
+// Investment represents an investment
+message Investment {
+  string investment_id = 1;
+  string account_id = 2;
+  string option_id = 3;
+  double principal = 4;
+  double current_value = 5;
+  google.protobuf.Timestamp start_date = 6;
+  google.protobuf.Timestamp maturity_date = 7;
+  string status = 8;
+  double actual_return = 9;
+}
+
+// Loan represents a loan
+message Loan {
+  string loan_id = 1;
+  string account_id = 2;
+  double original_amount = 3;
+  double current_amount = 4;
+  double interest_rate = 5;
+  int32 term_days = 6;
+  double amount_repaid = 7;
+  google.protobuf.Timestamp due_date = 8;
+  bool is_active = 9;
+}
+
+// Transaction represents a banking transaction
+message Transaction {
+  string transaction_id = 1;
+  string account_id = 2;
+  string transaction_type = 3;
+  double amount = 4;
+  double balance_after = 5;
+  string description = 6;
+  google.protobuf.Timestamp timestamp = 7;
+  double fee = 8;
+}
+
+// SummaryData contains daily and weekly summaries
+message SummaryData {
+  repeated DailySummary daily_summaries = 1;
+  repeated WeeklySummary weekly_summaries = 2;
+  DailySummary current_day = 3;
+}
+
+// DailySummary represents a day's summary
+message DailySummary {
+  int32 day_number = 1;
+  string season = 2;
+  double starting_gold = 3;
+  double ending_gold = 4;
+  double profit = 5;
+  double profit_margin = 6;
+  int32 items_bought = 7;
+  int32 items_sold = 8;
+  int32 customers_served = 9;
+  int32 reputation_change = 10;
+  repeated string events_occurred = 11;
+  repeated string achievements_earned = 12;
+  google.protobuf.Timestamp date = 13;
+}
+
+// WeeklySummary represents a week's summary
+message WeeklySummary {
+  int32 week_number = 1;
+  double total_profit = 2;
+  double average_daily_profit = 3;
+  int32 best_day_number = 4;
+  int32 worst_day_number = 5;
+  google.protobuf.Timestamp start_date = 6;
+  google.protobuf.Timestamp end_date = 7;
+}
+
+// SettingsData contains game settings
+message SettingsData {
+  double game_speed = 1;
+  bool auto_save = 2;
+  int32 auto_save_interval_minutes = 3;
+  double music_volume = 4;
+  double sfx_volume = 5;
+  string language = 6;
+  bool tutorial_completed = 7;
+  map<string, string> custom_settings = 8;
+}

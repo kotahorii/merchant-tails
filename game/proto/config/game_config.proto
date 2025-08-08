@@ -1,0 +1,261 @@
+syntax = "proto3";
+
+package config;
+
+option go_package = "github.com/yourusername/merchant-tails/game/internal/gen/config";
+
+// GameConfig contains all game configuration data
+message GameConfig {
+  string version = 1;
+  EconomyConfig economy = 2;
+  ItemDatabase items = 3;
+  EventConfig events = 4;
+  ProgressionConfig progression = 5;
+  DifficultyConfig difficulty = 6;
+}
+
+// EconomyConfig contains economic system parameters
+message EconomyConfig {
+  double base_inflation_rate = 1;
+  double max_price_volatility = 2;
+  double seasonal_price_modifier = 3;
+  double event_price_modifier = 4;
+  double supply_demand_sensitivity = 5;
+  double merchant_influence_factor = 6;
+  int32 price_history_days = 7;
+
+  map<string, SeasonalModifier> seasonal_modifiers = 8;
+  map<string, double> category_volatility = 9;
+}
+
+// SeasonalModifier defines price modifiers for a season
+message SeasonalModifier {
+  string season_name = 1;
+  map<string, double> item_modifiers = 2;
+  double general_modifier = 3;
+}
+
+// ItemDatabase contains all item definitions
+message ItemDatabase {
+  repeated ItemDefinition items = 1;
+  repeated ItemCategory categories = 2;
+}
+
+// ItemDefinition defines a single item type
+message ItemDefinition {
+  string id = 1;
+  string name = 2;
+  string description = 3;
+  string category = 4;
+  double base_price = 5;
+  double price_volatility = 6;
+  int32 max_stack_size = 7;
+
+  // Item properties
+  bool is_perishable = 8;
+  int32 spoilage_days = 9;
+  int32 durability = 10;
+  double weight = 11;
+
+  // Rarity and value
+  string rarity = 12;  // Common, Uncommon, Rare, Epic, Legendary
+  double value_multiplier = 13;
+
+  // Requirements
+  string required_rank = 14;
+  repeated string required_features = 15;
+
+  // Tags for special behavior
+  repeated string tags = 16;
+}
+
+// ItemCategory defines an item category
+message ItemCategory {
+  string id = 1;
+  string name = 2;
+  string description = 3;
+  double base_volatility = 4;
+  double spoilage_rate = 5;
+  repeated string default_tags = 6;
+}
+
+// EventConfig contains event system configuration
+message EventConfig {
+  repeated EventDefinition events = 1;
+  repeated EventChain event_chains = 2;
+  EventSchedule schedule = 3;
+}
+
+// EventDefinition defines a single event type
+message EventDefinition {
+  string id = 1;
+  string name = 2;
+  string description = 3;
+  string event_type = 4;
+
+  // Trigger conditions
+  EventTrigger trigger = 5;
+
+  // Effects
+  repeated EventEffect effects = 6;
+
+  // Requirements
+  int32 min_day = 7;
+  string required_rank = 8;
+  repeated string required_achievements = 9;
+
+  // Probability and frequency
+  double base_probability = 10;
+  int32 cooldown_days = 11;
+  bool is_repeatable = 12;
+
+  // Duration
+  int32 duration_days = 13;
+}
+
+// EventTrigger defines when an event can trigger
+message EventTrigger {
+  string trigger_type = 1;  // scheduled, random, condition
+  int32 day = 2;
+  string season = 3;
+  repeated string conditions = 4;
+  double probability = 5;
+}
+
+// EventEffect defines an effect of an event
+message EventEffect {
+  string effect_type = 1;  // price_change, reputation, gold, item_spawn
+  string target = 2;       // item_id, category, or "all"
+  double value = 3;
+  int32 duration = 4;
+  string description = 5;
+}
+
+// EventChain defines a sequence of related events
+message EventChain {
+  string chain_id = 1;
+  string name = 2;
+  repeated string event_ids = 3;
+  bool sequential = 4;
+  int32 min_days_between = 5;
+}
+
+// EventSchedule defines the event scheduling rules
+message EventSchedule {
+  repeated string daily_events = 1;
+  repeated string weekly_events = 2;
+  repeated string seasonal_events = 3;
+  repeated string special_events = 4;
+}
+
+// ProgressionConfig contains progression system parameters
+message ProgressionConfig {
+  repeated RankDefinition ranks = 1;
+  repeated AchievementDefinition achievements = 2;
+  repeated FeatureDefinition features = 3;
+  ExperienceConfig experience = 4;
+}
+
+// RankDefinition defines a merchant rank
+message RankDefinition {
+  string id = 1;
+  string name = 2;
+  string description = 3;
+  int32 required_experience = 4;
+  double required_gold = 5;
+  int32 required_reputation = 6;
+
+  // Rank benefits
+  int32 shop_capacity = 7;
+  int32 warehouse_capacity = 8;
+  double price_discount = 9;
+  double reputation_multiplier = 10;
+
+  // Unlocked features
+  repeated string unlocked_features = 11;
+  repeated string unlocked_items = 12;
+}
+
+// AchievementDefinition defines an achievement
+message AchievementDefinition {
+  string id = 1;
+  string name = 2;
+  string description = 3;
+  string category = 4;
+  int32 points = 5;
+
+  // Completion criteria
+  AchievementCriteria criteria = 6;
+
+  // Rewards
+  repeated AchievementReward rewards = 7;
+
+  // Display
+  string icon = 8;
+  bool hidden = 9;
+}
+
+// AchievementCriteria defines how to complete an achievement
+message AchievementCriteria {
+  string criteria_type = 1;  // count, threshold, event
+  string target = 2;
+  double value = 3;
+  repeated string conditions = 4;
+}
+
+// AchievementReward defines a reward for completing an achievement
+message AchievementReward {
+  string reward_type = 1;  // gold, experience, item, feature
+  string reward_id = 2;
+  double value = 3;
+}
+
+// FeatureDefinition defines an unlockable feature
+message FeatureDefinition {
+  string id = 1;
+  string name = 2;
+  string description = 3;
+  string feature_type = 4;
+
+  // Unlock requirements
+  string required_rank = 5;
+  repeated string required_achievements = 6;
+  double required_gold = 7;
+
+  // Feature data
+  map<string, string> parameters = 8;
+}
+
+// ExperienceConfig contains experience system parameters
+message ExperienceConfig {
+  double base_experience_rate = 1;
+  map<string, double> action_experience = 2;
+  double level_scaling_factor = 3;
+  int32 max_daily_experience = 4;
+}
+
+// DifficultyConfig contains difficulty settings
+message DifficultyConfig {
+  string difficulty_level = 1;  // Easy, Normal, Hard, Expert
+
+  // Economic modifiers
+  double starting_gold = 2;
+  double price_volatility_modifier = 3;
+  double profit_margin_modifier = 4;
+  double merchant_ai_intelligence = 5;
+
+  // Progression modifiers
+  double experience_rate_modifier = 6;
+  double reputation_gain_modifier = 7;
+  double achievement_point_modifier = 8;
+
+  // Event modifiers
+  double event_frequency_modifier = 9;
+  double negative_event_probability = 10;
+  double event_impact_modifier = 11;
+
+  // Resource modifiers
+  int32 starting_shop_capacity = 12;
+  int32 starting_warehouse_capacity = 13;
+  double spoilage_rate_modifier = 14;
+}

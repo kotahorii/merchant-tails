@@ -7,7 +7,7 @@ import (
 	"sync"
 	"time"
 
-	"github.com/yourusername/merchant-tails/game/internal/domain/ai"
+	"github.com/yourusername/merchant-tails/game/internal/domain/calendar"
 	"github.com/yourusername/merchant-tails/game/internal/domain/event"
 	"github.com/yourusername/merchant-tails/game/internal/domain/gameloop"
 	"github.com/yourusername/merchant-tails/game/internal/domain/gamestate"
@@ -24,16 +24,16 @@ type GameManager struct {
 	// Core systems
 	gameState   *gamestate.GameState
 	gameLoop    gameloop.GameLoop
-	timeManager *timemanager.TimeManager
+	timeManager timemanager.TimeManager
 	eventBus    *event.EventBus
 	eventBridge *EventBridge
 
 	// Game systems
-	market      *market.Market
-	inventory   *inventory.InventoryManager
-	trading     *trading.TradingSystem
-	progression *progression.ProgressionManager
-	aiSystem    *ai.AIMerchantSystem
+	market        *market.Market
+	inventory     *inventory.InventoryManager
+	trading       *trading.TradingSystem
+	progression   *progression.ProgressionManager
+	eventCalendar *calendar.EventCalendar
 
 	// Infrastructure
 	saveManager *persistence.SaveManager
@@ -51,8 +51,7 @@ func NewGameManager() *GameManager {
 	ctx, cancel := context.WithCancel(context.Background())
 
 	gm := &GameManager{
-		gameState:   gamestate.NewGameState(),
-		timeManager: timemanager.NewTimeManager(),
+		gameState:   gamestate.NewGameState(nil), // Use default config
 		eventBus:    event.GetGlobalEventBus(),
 		eventBridge: NewEventBridge(),
 		ctx:         ctx,
@@ -78,13 +77,25 @@ func (gm *GameManager) initializeSystems() {
 	gm.inventory = invManager
 
 	// Create trading system
-	gm.trading = trading.NewTradingSystem(gm.market)
+	tradingSystem, err := trading.NewTradingSystem(gm.inventory, nil)
+	if err != nil {
+		panic(err) // Should not happen with valid parameters
+	}
+	gm.trading = tradingSystem
 
 	// Create progression manager
 	gm.progression = progression.NewProgressionManager()
 
-	// Create AI system
-	gm.aiSystem = ai.NewAISystem()
+	// Create event calendar
+	gm.eventCalendar = calendar.NewEventCalendar()
+
+	// Register calendar callback to publish events
+	gm.eventCalendar.RegisterCallback(func(calEvent *calendar.CalendarEvent, status string) {
+		eventName := fmt.Sprintf("calendar.event.%s", status)
+		gm.eventBus.PublishAsync(event.NewBaseEvent(eventName))
+	})
+
+	// AI system removed - single player only
 
 	// Create save manager
 	saveManager, err := persistence.NewSaveManager()
@@ -95,7 +106,20 @@ func (gm *GameManager) initializeSystems() {
 	gm.saveManager = saveManager
 
 	// Create game loop
-	gm.gameLoop = gameloop.NewStandardGameLoop(60) // 60 FPS
+	gm.gameLoop = gameloop.NewStandardGameLoop(&gameloop.Config{
+		TargetFPS: 60,
+	})
+
+	// Create time manager
+	gm.timeManager = timemanager.NewStandardTimeManager(gm.gameLoop, 5*time.Minute)
+
+	// Register update callback
+	gm.gameLoop.RegisterUpdateCallback(func(deltaTime time.Duration) error {
+		if !gm.isPaused {
+			gm.update(deltaTime.Seconds())
+		}
+		return nil
+	})
 
 	// Setup event listeners
 	gm.setupEventListeners()
@@ -104,18 +128,21 @@ func (gm *GameManager) initializeSystems() {
 // setupEventListeners sets up event handlers
 func (gm *GameManager) setupEventListeners() {
 	// Listen for time events
-	gm.eventBus.Subscribe(event.TimeAdvanced, func(e event.Event) {
+	gm.eventBus.Subscribe("time.advanced", func(e event.Event) error {
 		gm.handleTimeAdvanced(e)
+		return nil
 	})
 
 	// Listen for trade events
-	gm.eventBus.Subscribe(event.TradeCompleted, func(e event.Event) {
+	gm.eventBus.Subscribe(event.EventNameTransactionComplete, func(e event.Event) error {
 		gm.handleTradeCompleted(e)
+		return nil
 	})
 
 	// Listen for market events
-	gm.eventBus.Subscribe(event.MarketPriceChanged, func(e event.Event) {
+	gm.eventBus.Subscribe(event.EventNamePriceUpdated, func(e event.Event) error {
 		gm.handleMarketPriceChanged(e)
+		return nil
 	})
 }
 
@@ -129,8 +156,8 @@ func (gm *GameManager) StartNewGame(playerName string) error {
 	}
 
 	// Reset game state
-	gm.gameState = gamestate.NewGameState()
-	gm.gameState.SetPlayerName(playerName)
+	gm.gameState = gamestate.NewGameState(nil)
+	// TODO: Add player name support to GameState
 	gm.gameState.SetGold(1000) // Starting gold
 	gm.gameState.SetRank(gamestate.RankApprentice)
 
@@ -149,68 +176,40 @@ func (gm *GameManager) StartNewGame(playerName string) error {
 	go gm.runGameLoop()
 
 	// Publish game started event
-	gm.eventBus.Publish(event.Event{
-		Type:      "GameStarted",
-		Timestamp: time.Now(),
-		Data: map[string]interface{}{
-			"playerName": playerName,
-		},
-	})
+	gm.eventBus.PublishAsync(event.NewBaseEvent("GameStarted"))
 
 	return nil
 }
 
 // runGameLoop runs the main game loop
 func (gm *GameManager) runGameLoop() {
-	gm.gameLoop.Start(gm.ctx, func(deltaTime float64) {
-		if !gm.isPaused {
-			gm.update(deltaTime)
-		}
-	})
+	err := gm.gameLoop.Start(gm.ctx)
+	if err != nil {
+		// Log error but continue
+		fmt.Printf("Game loop error: %v\n", err)
+	}
 }
 
 // update updates all game systems
 func (gm *GameManager) update(deltaTime float64) {
 	// Update time
-	gm.timeManager.Update(deltaTime)
+	duration := time.Duration(deltaTime * float64(time.Second))
+	gm.timeManager.Update(duration)
 
 	// Update market
 	if gm.market != nil {
 		gm.market.Update()
 	}
 
-	// Update AI system
-	if gm.aiSystem != nil {
-		gm.aiSystem.Update(gm.ctx, &ai.MarketData{
-			Items: gm.getMarketItems(),
-		})
-	}
+	// AI system removed - single player only
 
 	// Check for game events
 	gm.checkGameEvents()
 }
 
-// initializeAIMerchants sets up AI merchants
+// initializeAIMerchants removed - single player only
 func (gm *GameManager) initializeAIMerchants() {
-	// Create various AI merchants with different personalities
-	personalities := []ai.MerchantPersonality{
-		ai.NewAggressivePersonality(),
-		ai.NewConservativePersonality(),
-		ai.NewBalancedPersonality(),
-		ai.NewOpportunisticPersonality(),
-	}
-
-	names := []string{"Marcus", "Elena", "Thorin", "Luna"}
-
-	for i, personality := range personalities {
-		merchant := ai.NewAIMerchant(
-			fmt.Sprintf("merchant_%d", i),
-			names[i],
-			1500, // Starting gold
-			personality,
-		)
-		gm.aiSystem.AddMerchant(merchant)
-	}
+	// AI merchants removed for single player focus
 }
 
 // GetGameState returns the current game state as JSON
@@ -224,9 +223,7 @@ func (gm *GameManager) GetGameState() (string, error) {
 		"gold":       gm.gameState.GetGold(),
 		"rank":       gm.gameState.GetRank(),
 		"reputation": gm.gameState.GetReputation(),
-		"day":        gm.timeManager.GetCurrentDay(),
-		"season":     gm.timeManager.GetCurrentSeason(),
-		"timeOfDay":  gm.timeManager.GetTimeOfDay(),
+		"time":       gm.timeManager.GetCurrentTime(),
 	}
 
 	jsonData, err := json.Marshal(state)
@@ -243,10 +240,7 @@ func (gm *GameManager) PauseGame() {
 	defer gm.mu.Unlock()
 
 	gm.isPaused = true
-	gm.eventBus.Publish(event.Event{
-		Type:      "GamePaused",
-		Timestamp: time.Now(),
-	})
+	gm.eventBus.PublishAsync(event.NewBaseEvent("GamePaused"))
 }
 
 // ResumeGame resumes the game
@@ -255,10 +249,7 @@ func (gm *GameManager) ResumeGame() {
 	defer gm.mu.Unlock()
 
 	gm.isPaused = false
-	gm.eventBus.Publish(event.Event{
-		Type:      "GameResumed",
-		Timestamp: time.Now(),
-	})
+	gm.eventBus.PublishAsync(event.NewBaseEvent("GameResumed"))
 }
 
 // SaveGame saves the current game state
@@ -284,13 +275,7 @@ func (gm *GameManager) SaveGame(slot int) error {
 	}
 
 	// Publish save event
-	gm.eventBus.Publish(event.Event{
-		Type:      "GameSaved",
-		Timestamp: time.Now(),
-		Data: map[string]interface{}{
-			"slot": slot,
-		},
-	})
+	gm.eventBus.PublishAsync(event.NewBaseEvent("GameSaved"))
 
 	return nil
 }
@@ -311,44 +296,34 @@ func (gm *GameManager) LoadGame(slot int) error {
 	}
 
 	// Restore game state
-	gm.gameState = gamestate.NewGameState()
-	gm.gameState.SetPlayerName(saveData.Player.Name)
-	gm.gameState.SetGold(int(saveData.Player.Gold))
-	gm.gameState.SetReputation(int(saveData.Player.Reputation))
+	gm.gameState = gamestate.NewGameState(nil)
+	// TODO: Add player name support to GameState
+	gm.gameState.SetGold(int(saveData["gold"].(float64)))
+	gm.gameState.SetReputation(saveData["reputation"].(float64))
 
 	// Convert and set rank
-	switch saveData.Player.Rank {
-	case 1: // RANK_APPRENTICE
-		gm.gameState.SetRank(gamestate.RankApprentice)
-	case 2: // RANK_JOURNEYMAN
-		gm.gameState.SetRank(gamestate.RankJourneyman)
-	case 3: // RANK_VETERAN
-		gm.gameState.SetRank(gamestate.RankVeteran)
-	case 4: // RANK_MASTER
-		gm.gameState.SetRank(gamestate.RankMaster)
+	if rank, ok := saveData["rank"].(float64); ok {
+		switch int(rank) {
+		case 1: // RANK_APPRENTICE
+			gm.gameState.SetRank(gamestate.RankApprentice)
+		case 2: // RANK_JOURNEYMAN
+			gm.gameState.SetRank(gamestate.RankJourneyman)
+		case 3: // RANK_EXPERT
+			gm.gameState.SetRank(gamestate.RankExpert)
+		case 4: // RANK_MASTER
+			gm.gameState.SetRank(gamestate.RankMaster)
+		}
 	}
 
 	// Restore inventory
 	gm.inventory.Clear()
-	for _, ownedItem := range saveData.Player.Inventory {
-		if ownedItem.Location == 1 { // LOCATION_SHOP
-			// TODO: Add to shop
-		} else if ownedItem.Location == 2 { // LOCATION_WAREHOUSE
-			gm.inventory.AddToWarehouse(ownedItem.ItemId, int(ownedItem.Quantity), 0)
-		}
-	}
+	// TODO: Implement inventory restoration from save data
 
 	// Restore progression
 	// TODO: Restore achievements and stats
 
 	// Publish load event
-	gm.eventBus.Publish(event.Event{
-		Type:      "GameLoaded",
-		Timestamp: time.Now(),
-		Data: map[string]interface{}{
-			"slot": slot,
-		},
-	})
+	gm.eventBus.PublishAsync(event.NewBaseEvent("GameLoaded"))
 
 	return nil
 }
@@ -378,16 +353,20 @@ func (gm *GameManager) handleTimeAdvanced(e event.Event) {
 	if gm.market != nil {
 		gm.market.UpdatePrices()
 	}
+
+	// Update event calendar
+	if gm.eventCalendar != nil {
+		gm.eventCalendar.UpdateDate(time.Now())
+	}
 }
 
 // handleTradeCompleted handles trade completion events
 func (gm *GameManager) handleTradeCompleted(e event.Event) {
-	if data, ok := e.Data.(map[string]interface{}); ok {
-		buyPrice := data["buyPrice"].(int)
-		sellPrice := data["sellPrice"].(int)
-
-		// Update progression
-		result := gm.progression.HandleTradeCompletion(buyPrice, sellPrice)
+	// TODO: Extract trade data from event
+	// For now, just log that trade was completed
+	if gm.progression != nil {
+		// Update progression with dummy values for now
+		result := gm.progression.HandleTradeCompletion(0, 0)
 
 		// Update game state
 		if result.RankUp {
@@ -402,16 +381,9 @@ func (gm *GameManager) handleMarketPriceChanged(e event.Event) {
 	// This would be sent to Godot
 }
 
-// getMarketItems returns current market items
-func (gm *GameManager) getMarketItems() []ai.ItemData {
-	items := []ai.ItemData{}
-
-	if gm.market != nil {
-		// Convert market items to AI item data
-		// TODO: Implement proper conversion
-	}
-
-	return items
+// getMarketItems removed - AI system no longer needed
+func (gm *GameManager) getMarketItems() []interface{} {
+	return []interface{}{}
 }
 
 // GetMarketData returns current market data
@@ -453,9 +425,9 @@ func (gm *GameManager) GetInventoryData() map[string]interface{} {
 		shop := gm.inventory.GetShop()
 		for _, item := range shop.GetItems() {
 			shopItems = append(shopItems, map[string]interface{}{
-				"id":       item.ID,
+				"id":       item.Item.ID,
 				"quantity": item.Quantity,
-				"price":    item.Price,
+				"price":    item.Item.BasePrice,
 			})
 		}
 
@@ -463,9 +435,9 @@ func (gm *GameManager) GetInventoryData() map[string]interface{} {
 		warehouse := gm.inventory.GetWarehouse()
 		for _, item := range warehouse.GetItems() {
 			warehouseItems = append(warehouseItems, map[string]interface{}{
-				"id":       item.ID,
+				"id":       item.Item.ID,
 				"quantity": item.Quantity,
-				"price":    item.Price,
+				"price":    item.Item.BasePrice,
 			})
 		}
 	}
@@ -500,7 +472,7 @@ func (gm *GameManager) BuyItem(itemID string, quantity int, price float64) map[s
 
 	// Add to inventory
 	if gm.inventory != nil {
-		gm.inventory.AddToWarehouse(itemID, quantity, int(price))
+		gm.inventory.AddToWarehouseByID(itemID, quantity, int(price))
 	}
 
 	// Track with progression
@@ -565,24 +537,12 @@ func (gm *GameManager) checkGameEvents() {
 
 // triggerVictory triggers a victory condition
 func (gm *GameManager) triggerVictory(victoryType string) {
-	gm.eventBus.Publish(event.Event{
-		Type:      "GameVictory",
-		Timestamp: time.Now(),
-		Data: map[string]interface{}{
-			"type": victoryType,
-		},
-	})
+	gm.eventBus.PublishAsync(event.NewBaseEvent("GameVictory"))
 }
 
 // triggerDefeat triggers a defeat condition
 func (gm *GameManager) triggerDefeat(defeatType string) {
-	gm.eventBus.Publish(event.Event{
-		Type:      "GameDefeat",
-		Timestamp: time.Now(),
-		Data: map[string]interface{}{
-			"type": defeatType,
-		},
-	})
+	gm.eventBus.PublishAsync(event.NewBaseEvent("GameDefeat"))
 }
 
 // GetQueuedEvents returns all queued events for Godot
@@ -595,6 +555,93 @@ func (gm *GameManager) GetQueuedEvents() (string, error) {
 	jsonData, err := json.Marshal(events)
 	if err != nil {
 		return "[]", err
+	}
+
+	return string(jsonData), nil
+}
+
+// GetUpcomingEvents returns upcoming calendar events
+func (gm *GameManager) GetUpcomingEvents(days int) (string, error) {
+	gm.mu.RLock()
+	defer gm.mu.RUnlock()
+
+	if gm.eventCalendar == nil {
+		return "[]", nil
+	}
+
+	events := gm.eventCalendar.GetUpcomingEvents(days)
+
+	// Convert to simpler format for Godot
+	simpleEvents := make([]map[string]interface{}, 0, len(events))
+	for _, event := range events {
+		simpleEvents = append(simpleEvents, map[string]interface{}{
+			"id":          event.ID,
+			"name":        event.Name,
+			"description": event.Description,
+			"type":        int(event.Type),
+			"priority":    int(event.Priority),
+			"startDate":   event.StartDate.Format(time.RFC3339),
+			"endDate":     event.EndDate.Format(time.RFC3339),
+			"effects":     event.Effects,
+			"rewards":     event.Rewards,
+		})
+	}
+
+	jsonData, err := json.Marshal(simpleEvents)
+	if err != nil {
+		return "[]", err
+	}
+
+	return string(jsonData), nil
+}
+
+// GetActiveEvents returns currently active calendar events
+func (gm *GameManager) GetActiveEvents() (string, error) {
+	gm.mu.RLock()
+	defer gm.mu.RUnlock()
+
+	if gm.eventCalendar == nil {
+		return "[]", nil
+	}
+
+	events := gm.eventCalendar.GetActiveEvents()
+
+	// Convert to simpler format for Godot
+	simpleEvents := make([]map[string]interface{}, 0, len(events))
+	for _, event := range events {
+		simpleEvents = append(simpleEvents, map[string]interface{}{
+			"id":          event.ID,
+			"name":        event.Name,
+			"description": event.Description,
+			"type":        int(event.Type),
+			"priority":    int(event.Priority),
+			"effects":     event.Effects,
+			"rewards":     event.Rewards,
+		})
+	}
+
+	jsonData, err := json.Marshal(simpleEvents)
+	if err != nil {
+		return "[]", err
+	}
+
+	return string(jsonData), nil
+}
+
+// GetEventEffects returns the combined effects of all active events
+func (gm *GameManager) GetEventEffects() (string, error) {
+	gm.mu.RLock()
+	defer gm.mu.RUnlock()
+
+	if gm.eventCalendar == nil {
+		return "{}", nil
+	}
+
+	effects := gm.eventCalendar.GetEventEffects()
+
+	jsonData, err := json.Marshal(effects)
+	if err != nil {
+		return "{}", err
 	}
 
 	return string(jsonData), nil
@@ -614,7 +661,5 @@ func (gm *GameManager) Cleanup() {
 	gm.cancel()
 
 	// Clean up systems
-	if gm.aiSystem != nil {
-		// AI system cleanup
-	}
+	// AI system removed - single player only
 }

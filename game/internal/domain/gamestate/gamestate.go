@@ -207,6 +207,19 @@ func (gs *GameState) GetGold() int {
 	return gs.gold
 }
 
+// SetGold sets the gold amount directly
+func (gs *GameState) SetGold(amount int) {
+	gs.mu.Lock()
+	defer gs.mu.Unlock()
+	oldGold := gs.gold
+	gs.gold = amount
+
+	// Notify callbacks
+	for _, callback := range gs.goldChangeCallbacks {
+		callback(amount - oldGold)
+	}
+}
+
 // AddGold adds gold to the player's inventory
 func (gs *GameState) AddGold(amount int) error {
 	if amount < 0 {
@@ -254,6 +267,24 @@ func (gs *GameState) GetPlayerRank() PlayerRank {
 	gs.mu.RLock()
 	defer gs.mu.RUnlock()
 	return gs.playerRank
+}
+
+// GetRank is an alias for GetPlayerRank
+func (gs *GameState) GetRank() PlayerRank {
+	return gs.GetPlayerRank()
+}
+
+// SetRank sets the player rank directly
+func (gs *GameState) SetRank(rank PlayerRank) {
+	gs.mu.Lock()
+	defer gs.mu.Unlock()
+	oldRank := gs.playerRank
+	gs.playerRank = rank
+
+	// Notify callbacks
+	for _, callback := range gs.rankChangeCallbacks {
+		callback(oldRank, gs.playerRank)
+	}
 }
 
 // PromoteRank promotes the player to the next rank

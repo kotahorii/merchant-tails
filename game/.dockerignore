@@ -1,0 +1,63 @@
+# Git files
+.git
+.gitignore
+
+# Go build artifacts
+*.exe
+*.exe~
+*.dll
+*.so
+*.dylib
+*.test
+*.out
+coverage.html
+coverage.out
+
+# Go workspace
+go.work
+go.work.sum
+
+# Vendor directory
+vendor/
+
+# IDE files
+.idea/
+.vscode/
+*.swp
+*.swo
+*~
+.DS_Store
+
+# Environment files
+.env
+.env.local
+.env.*.local
+
+# Docker files (for build context)
+Dockerfile*
+docker-compose*.yml
+
+# Documentation
+*.md
+docs/
+
+# Test data
+testdata/
+test/
+
+# Temporary files
+tmp/
+temp/
+*.tmp
+*.log
+
+# Build directories
+build/
+dist/
+bin/
+
+# Node modules (if any frontend exists)
+node_modules/
+
+# Generated files that will be regenerated
+internal/gen/

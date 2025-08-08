@@ -85,8 +85,9 @@ func (eb *EventBridge) setupEventSubscriptions() {
 
 // subscribeToEvent subscribes to a specific event type
 func (eb *EventBridge) subscribeToEvent(eventType string) {
-	eb.eventBus.Subscribe(eventType, func(e event.Event) {
+	eb.eventBus.Subscribe(eventType, func(e event.Event) error {
 		eb.handleEvent(e)
+		return nil
 	})
 }
 
@@ -95,17 +96,23 @@ func (eb *EventBridge) handleEvent(e event.Event) {
 	eb.mu.Lock()
 	defer eb.mu.Unlock()
 
+	// Create a simple data representation
+	data := map[string]interface{}{
+		"eventName": e.EventName(),
+		"timestamp": e.OccurredAt(),
+	}
+
 	// Convert event data to JSON
-	jsonData, err := json.Marshal(e.Data)
+	jsonData, err := json.Marshal(data)
 	if err != nil {
 		jsonData = []byte("{}")
 	}
 
 	// Queue the event
 	queuedEvent := QueuedEvent{
-		Name:      e.Type,
+		Name:      e.EventName(),
 		Data:      string(jsonData),
-		Timestamp: e.Timestamp,
+		Timestamp: time.Unix(e.OccurredAt(), 0),
 	}
 	eb.eventQueue = append(eb.eventQueue, queuedEvent)
 

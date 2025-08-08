@@ -105,17 +105,25 @@ jobs:
           cd game
           go mod download
 
-      - name: Cache protoc-gen-go
-        id: cache-protoc-gen-go
+      - name: Cache Buf CLI
+        id: cache-buf
         uses: actions/cache@v4
         with:
-          path: ~/go/bin/protoc-gen-go
-          key: ${{ runner.os }}-protoc-gen-go-latest
+          path: ~/bin/buf
+          key: ${{ runner.os }}-buf-latest
 
-      - name: Install protoc-gen-go
-        if: steps.cache-protoc-gen-go.outputs.cache-hit != 'true'
+      - name: Install Buf CLI
+        if: steps.cache-buf.outputs.cache-hit != 'true'
         run: |
-          go install google.golang.org/protobuf/cmd/protoc-gen-go@latest
+          mkdir -p ~/bin
+          curl -sSL "https://github.com/bufbuild/buf/releases/latest/download/buf-$(uname -s)-$(uname -m)" -o ~/bin/buf
+          chmod +x ~/bin/buf
+          echo "$HOME/bin" >> $GITHUB_PATH
+
+      - name: Generate Protocol Buffers
+        run: |
+          cd game
+          ~/bin/buf generate
 
       - name: Run tests
         run: |
@@ -287,6 +295,46 @@ jobs:
         if: always()
         with:
           sarif_file: "trivy-results.sarif"
+
+  docker-build:
+    name: Docker Build and Test
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+      
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+      
+      - name: Cache Docker layers
+        uses: actions/cache@v4
+        with:
+          path: /tmp/.buildx-cache
+          key: ${{ runner.os }}-buildx-${{ github.sha }}
+          restore-keys: |
+            ${{ runner.os }}-buildx-
+      
+      - name: Build Docker image
+        uses: docker/build-push-action@v5
+        with:
+          context: ./game
+          file: ./game/Dockerfile
+          push: false
+          tags: merchant-tails:test
+          cache-from: type=local,src=/tmp/.buildx-cache
+          cache-to: type=local,dest=/tmp/.buildx-cache-new,mode=max
+      
+      - name: Test Docker Compose
+        run: |
+          cd game
+          docker compose -f docker-compose.dev.yml config
+          docker compose -f docker-compose.yml config
+      
+      - name: Move cache
+        run: |
+          rm -rf /tmp/.buildx-cache
+          mv /tmp/.buildx-cache-new /tmp/.buildx-cache
 
   documentation:
     name: Build Documentation

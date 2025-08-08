@@ -1,0 +1,24 @@
+global:
+  scrape_interval: 15s
+  evaluation_interval: 15s
+
+scrape_configs:
+  - job_name: 'merchant-tails'
+    static_configs:
+      - targets: ['game-server:8080']
+        labels:
+          service: 'game-server'
+          environment: 'production'
+    metrics_path: '/metrics'
+    
+  - job_name: 'postgres'
+    static_configs:
+      - targets: ['postgres:5432']
+        labels:
+          service: 'postgres'
+          
+  - job_name: 'redis'
+    static_configs:
+      - targets: ['redis:6379']
+        labels:
+          service: 'redis'

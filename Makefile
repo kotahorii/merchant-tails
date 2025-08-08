@@ -92,10 +92,19 @@ build-godot:
 build-all: build-go build-godot
 	@echo "$(GREEN)✓ Full build complete$(NC)"
 
-# Run all tests
+# Run unit tests
 test:
-	@echo "$(GREEN)Running tests...$(NC)"
+	@echo "$(GREEN)Running unit tests...$(NC)"
 	cd $(GAME_DIR) && $(GO) test $(GOFLAGS) ./...
+
+# Run integration tests
+test-integration:
+	@echo "$(GREEN)Running integration tests...$(NC)"
+	cd $(GAME_DIR) && $(GO) test -tags=integration $(GOFLAGS) ./tests/integration
+
+# Run all tests
+test-all: test test-integration
+	@echo "$(GREEN)✓ All tests complete$(NC)"
 
 # Run tests in watch mode
 test-watch:

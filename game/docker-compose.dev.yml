@@ -1,0 +1,111 @@
+version: '3.8'
+
+services:
+  # Development game server with hot reload
+  game-server-dev:
+    build:
+      context: .
+      dockerfile: Dockerfile.dev
+    container_name: merchant-tails-dev
+    ports:
+      - "8080:8080"      # HTTP/Connect-RPC port
+      - "50051:50051"    # gRPC port
+      - "2345:2345"      # Delve debugger port
+    environment:
+      - ENV=development
+      - LOG_LEVEL=debug
+      - SAVE_DIR=/data/saves
+      - AUTO_SAVE_ENABLED=true
+      - AUTO_SAVE_INTERVAL=300
+      - CGO_ENABLED=0
+      - GOOS=linux
+      - GOARCH=amd64
+    volumes:
+      - .:/app  # Mount entire project for hot reload
+      - game-data-dev:/data
+      - go-pkg:/go/pkg  # Cache Go packages
+      - go-cache:/root/.cache/go-build  # Cache Go build
+    networks:
+      - merchant-network-dev
+    command: air -c .air.toml
+    stdin_open: true
+    tty: true
+
+  # PostgreSQL for development
+  postgres-dev:
+    image: postgres:16-alpine
+    container_name: merchant-tails-postgres-dev
+    environment:
+      - POSTGRES_USER=merchant_dev
+      - POSTGRES_PASSWORD=dev_password
+      - POSTGRES_DB=merchant_tails_dev
+      - POSTGRES_HOST_AUTH_METHOD=trust  # Allow connections without password in dev
+    ports:
+      - "5433:5432"  # Different port to avoid conflicts
+    volumes:
+      - postgres-data-dev:/var/lib/postgresql/data
+    networks:
+      - merchant-network-dev
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U merchant_dev -d merchant_tails_dev"]
+      interval: 5s
+      timeout: 3s
+      retries: 5
+
+  # Redis for development
+  redis-dev:
+    image: redis:7-alpine
+    container_name: merchant-tails-redis-dev
+    command: redis-server --appendonly yes
+    ports:
+      - "6380:6379"  # Different port to avoid conflicts
+    volumes:
+      - redis-data-dev:/data
+    networks:
+      - merchant-network-dev
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 3s
+      retries: 5
+
+  # Adminer for database management
+  adminer:
+    image: adminer:latest
+    container_name: merchant-tails-adminer
+    ports:
+      - "8081:8080"
+    networks:
+      - merchant-network-dev
+    environment:
+      - ADMINER_DEFAULT_SERVER=postgres-dev
+      - ADMINER_DESIGN=pepa-linha
+
+  # Redis Commander for Redis management
+  redis-commander:
+    image: rediscommander/redis-commander:latest
+    container_name: merchant-tails-redis-commander
+    environment:
+      - REDIS_HOSTS=local:redis-dev:6379
+    ports:
+      - "8082:8081"
+    networks:
+      - merchant-network-dev
+    depends_on:
+      - redis-dev
+
+networks:
+  merchant-network-dev:
+    driver: bridge
+
+volumes:
+  game-data-dev:
+    driver: local
+  postgres-data-dev:
+    driver: local
+  redis-data-dev:
+    driver: local
+  go-pkg:
+    driver: local
+  go-cache:
+    driver: local

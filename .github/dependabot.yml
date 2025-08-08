@@ -33,6 +33,25 @@ updates:
           - "*test*"
           - "*mock*"
 
+  # Docker
+  - package-ecosystem: "docker"
+    directory: "/game"
+    schedule:
+      interval: "weekly"
+      day: "tuesday"
+      time: "09:00"
+      timezone: "Asia/Tokyo"
+    open-pull-requests-limit: 5
+    labels:
+      - "dependencies"
+      - "docker"
+    assignees:
+      - "kotahorii"
+    commit-message:
+      prefix: "deps"
+      prefix-development: "deps-dev"
+      include: "scope"
+
   # GitHub Actions
   - package-ecosystem: "github-actions"
     directory: "/"
