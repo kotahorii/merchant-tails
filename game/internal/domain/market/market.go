@@ -233,6 +233,24 @@ func (m *Market) UpdatePrices() {
 	}
 }
 
+// UpdatePrice updates the price for a single item
+func (m *Market) UpdatePrice(itemID string) {
+	m.mu.Lock()
+	defer m.mu.Unlock()
+
+	item, exists := m.items[itemID]
+	if !exists {
+		return
+	}
+
+	newPrice := m.PricingEngine.CalculatePrice(item, m.State)
+	history := m.Prices[itemID]
+
+	// Add to history
+	history.AddRecord(newPrice, time.Now())
+	history.updateTrend()
+}
+
 // GetPriceHistory returns the price history for an item
 func (m *Market) GetPriceHistory(itemID string) *PriceHistory {
 	m.mu.RLock()
@@ -287,6 +305,18 @@ func (m *Market) GetRecommendedAction(itemID string) TradeAction {
 	}
 
 	return ActionHold
+}
+
+// GetAllItems returns all items in the market
+func (m *Market) GetAllItems() []*item.Item {
+	m.mu.RLock()
+	defer m.mu.RUnlock()
+
+	items := make([]*item.Item, 0, len(m.items))
+	for _, item := range m.items {
+		items = append(items, item)
+	}
+	return items
 }
 
 // GetPrice returns the current price for an item

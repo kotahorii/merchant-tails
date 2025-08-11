@@ -1,0 +1,202 @@
+{
+  "dashboard": {
+    "id": null,
+    "uid": "merchant-tails",
+    "title": "Merchant Tails Game Metrics",
+    "tags": ["game", "monitoring"],
+    "timezone": "browser",
+    "schemaVersion": 16,
+    "version": 0,
+    "refresh": "5s",
+    "panels": [
+      {
+        "id": 1,
+        "gridPos": {"h": 8, "w": 12, "x": 0, "y": 0},
+        "type": "graph",
+        "title": "Player Gold Over Time",
+        "targets": [
+          {
+            "expr": "merchant_game_player_gold",
+            "legendFormat": "Gold",
+            "refId": "A"
+          }
+        ],
+        "yaxes": [
+          {"format": "short", "show": true},
+          {"format": "short", "show": false}
+        ]
+      },
+      {
+        "id": 2,
+        "gridPos": {"h": 8, "w": 12, "x": 12, "y": 0},
+        "type": "graph",
+        "title": "Transaction Success Rate",
+        "targets": [
+          {
+            "expr": "rate(merchant_game_successful_trades_total[5m])",
+            "legendFormat": "Success Rate",
+            "refId": "A"
+          },
+          {
+            "expr": "rate(merchant_game_failed_trades_total[5m])",
+            "legendFormat": "Failure Rate",
+            "refId": "B"
+          }
+        ]
+      },
+      {
+        "id": 3,
+        "gridPos": {"h": 8, "w": 12, "x": 0, "y": 8},
+        "type": "graph",
+        "title": "Market Prices by Item",
+        "targets": [
+          {
+            "expr": "merchant_game_market_prices",
+            "legendFormat": "{{item}}",
+            "refId": "A"
+          }
+        ]
+      },
+      {
+        "id": 4,
+        "gridPos": {"h": 8, "w": 12, "x": 12, "y": 8},
+        "type": "graph",
+        "title": "Frame Time Distribution",
+        "targets": [
+          {
+            "expr": "histogram_quantile(0.99, rate(merchant_game_frame_time_seconds_bucket[5m]))",
+            "legendFormat": "99th percentile",
+            "refId": "A"
+          },
+          {
+            "expr": "histogram_quantile(0.95, rate(merchant_game_frame_time_seconds_bucket[5m]))",
+            "legendFormat": "95th percentile",
+            "refId": "B"
+          },
+          {
+            "expr": "histogram_quantile(0.50, rate(merchant_game_frame_time_seconds_bucket[5m]))",
+            "legendFormat": "Median",
+            "refId": "C"
+          }
+        ],
+        "yaxes": [
+          {"format": "s", "show": true},
+          {"format": "s", "show": false}
+        ]
+      },
+      {
+        "id": 5,
+        "gridPos": {"h": 8, "w": 8, "x": 0, "y": 16},
+        "type": "stat",
+        "title": "Current Inventory Value",
+        "targets": [
+          {
+            "expr": "merchant_game_inventory_value",
+            "refId": "A"
+          }
+        ],
+        "options": {
+          "reduceOptions": {
+            "values": false,
+            "calcs": ["lastNotNull"]
+          }
+        }
+      },
+      {
+        "id": 6,
+        "gridPos": {"h": 8, "w": 8, "x": 8, "y": 16},
+        "type": "stat",
+        "title": "Total Revenue",
+        "targets": [
+          {
+            "expr": "merchant_game_revenue_total",
+            "refId": "A"
+          }
+        ],
+        "options": {
+          "reduceOptions": {
+            "values": false,
+            "calcs": ["lastNotNull"]
+          }
+        }
+      },
+      {
+        "id": 7,
+        "gridPos": {"h": 8, "w": 8, "x": 16, "y": 16},
+        "type": "stat",
+        "title": "Player Level",
+        "targets": [
+          {
+            "expr": "merchant_game_player_level",
+            "refId": "A"
+          }
+        ],
+        "options": {
+          "reduceOptions": {
+            "values": false,
+            "calcs": ["lastNotNull"]
+          }
+        }
+      },
+      {
+        "id": 8,
+        "gridPos": {"h": 8, "w": 12, "x": 0, "y": 24},
+        "type": "graph",
+        "title": "Memory Usage",
+        "targets": [
+          {
+            "expr": "merchant_game_memory_usage_bytes",
+            "legendFormat": "Memory",
+            "refId": "A"
+          }
+        ],
+        "yaxes": [
+          {"format": "bytes", "show": true},
+          {"format": "bytes", "show": false}
+        ]
+      },
+      {
+        "id": 9,
+        "gridPos": {"h": 8, "w": 12, "x": 12, "y": 24},
+        "type": "graph",
+        "title": "Active Quests & Achievements",
+        "targets": [
+          {
+            "expr": "merchant_game_active_quests",
+            "legendFormat": "Active Quests",
+            "refId": "A"
+          },
+          {
+            "expr": "merchant_game_achievements_unlocked_total",
+            "legendFormat": "Achievements Unlocked",
+            "refId": "B"
+          }
+        ]
+      },
+      {
+        "id": 10,
+        "gridPos": {"h": 8, "w": 24, "x": 0, "y": 32},
+        "type": "graph",
+        "title": "Job Processing Performance",
+        "targets": [
+          {
+            "expr": "rate(merchant_game_jobs_completed_total[5m])",
+            "legendFormat": "Completed/sec",
+            "refId": "A"
+          },
+          {
+            "expr": "rate(merchant_game_jobs_failed_total[5m])",
+            "legendFormat": "Failed/sec",
+            "refId": "B"
+          },
+          {
+            "expr": "merchant_game_jobs_queued",
+            "legendFormat": "Queued",
+            "refId": "C"
+          }
+        ]
+      }
+    ]
+  },
+  "overwrite": true
+}

@@ -186,11 +186,11 @@ func (pm *PlayerMerchant) GetInventoryValue(prices map[string]int) int {
 	defer pm.mu.RUnlock()
 
 	totalValue := 0
-	items := pm.Inventory.GetItems()
+	items := pm.Inventory.GetAll()
 
-	for _, inventoryItem := range items {
-		if price, exists := prices[inventoryItem.Item.ID]; exists {
-			totalValue += price * inventoryItem.Quantity
+	for itemID, quantity := range items {
+		if price, exists := prices[itemID]; exists {
+			totalValue += price * quantity
 		}
 	}
 

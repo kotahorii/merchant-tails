@@ -1,24 +1,39 @@
 global:
   scrape_interval: 15s
   evaluation_interval: 15s
+  external_labels:
+    monitor: 'merchant-tails'
 
+# Alertmanager configuration (optional)
+alerting:
+  alertmanagers:
+    - static_configs:
+        - targets: []
+
+# Load rules once and periodically evaluate them
+rule_files:
+  - "alerts.yml"
+
+# Scrape configurations
 scrape_configs:
-  - job_name: 'merchant-tails'
+  # Game metrics
+  - job_name: 'merchant-tails-game'
     static_configs:
-      - targets: ['game-server:8080']
-        labels:
-          service: 'game-server'
-          environment: 'production'
+      - targets: ['host.docker.internal:8080']  # Game metrics endpoint
     metrics_path: '/metrics'
-    
-  - job_name: 'postgres'
+    scrape_interval: 5s
+
+  # Prometheus self-monitoring
+  - job_name: 'prometheus'
     static_configs:
-      - targets: ['postgres:5432']
-        labels:
-          service: 'postgres'
-          
-  - job_name: 'redis'
+      - targets: ['localhost:9090']
+
+  # Node exporter for system metrics
+  - job_name: 'node'
     static_configs:
-      - targets: ['redis:6379']
-        labels:
-          service: 'redis'
+      - targets: ['node-exporter:9100']
+
+  # Grafana metrics (optional)
+  - job_name: 'grafana'
+    static_configs:
+      - targets: ['grafana:3000']

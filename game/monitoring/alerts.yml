@@ -1,0 +1,87 @@
+groups:
+  - name: merchant_tails_alerts
+    interval: 30s
+    rules:
+      # Performance alerts
+      - alert: HighFrameTime
+        expr: histogram_quantile(0.95, rate(merchant_game_frame_time_seconds_bucket[5m])) > 0.033
+        for: 2m
+        labels:
+          severity: warning
+        annotations:
+          summary: "High frame time detected"
+          description: "95th percentile frame time is {{ $value }}s (threshold: 33ms for 30 FPS)"
+
+      - alert: ExcessiveMemoryUsage
+        expr: merchant_game_memory_usage_bytes > 2147483648  # 2GB
+        for: 5m
+        labels:
+          severity: warning
+        annotations:
+          summary: "Excessive memory usage"
+          description: "Memory usage is {{ $value | humanize1024 }}B"
+
+      - alert: HighGCPause
+        expr: histogram_quantile(0.99, rate(merchant_game_gc_pause_seconds_bucket[5m])) > 0.01
+        for: 2m
+        labels:
+          severity: warning
+        annotations:
+          summary: "High GC pause time"
+          description: "99th percentile GC pause is {{ $value }}s"
+
+      # Business logic alerts
+      - alert: HighTransactionFailureRate
+        expr: rate(merchant_game_failed_trades_total[5m]) / rate(merchant_game_transactions_total[5m]) > 0.1
+        for: 5m
+        labels:
+          severity: warning
+        annotations:
+          summary: "High transaction failure rate"
+          description: "Failure rate is {{ $value | humanizePercentage }}"
+
+      - alert: LowInventoryTurnover
+        expr: merchant_game_inventory_value / merchant_game_revenue_total < 0.5
+        for: 30m
+        labels:
+          severity: info
+        annotations:
+          summary: "Low inventory turnover"
+          description: "Inventory turnover ratio is {{ $value }}"
+
+      # System health alerts
+      - alert: GameServerDown
+        expr: up{job="merchant-tails-game"} == 0
+        for: 1m
+        labels:
+          severity: critical
+        annotations:
+          summary: "Game server is down"
+          description: "Game metrics endpoint is not responding"
+
+      - alert: HighJobQueueDepth
+        expr: merchant_game_jobs_queued > 1000
+        for: 5m
+        labels:
+          severity: warning
+        annotations:
+          summary: "High job queue depth"
+          description: "{{ $value }} jobs are queued"
+
+      - alert: LowWorkerPoolUtilization
+        expr: merchant_game_worker_pool_utilization < 0.1
+        for: 10m
+        labels:
+          severity: info
+        annotations:
+          summary: "Low worker pool utilization"
+          description: "Worker pool utilization is {{ $value | humanizePercentage }}"
+
+      - alert: HighSaveOperationFailures
+        expr: rate(merchant_game_save_errors_total[5m]) > 0.01
+        for: 2m
+        labels:
+          severity: critical
+        annotations:
+          summary: "High save operation failure rate"
+          description: "Save failures per second: {{ $value }}"

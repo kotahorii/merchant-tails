@@ -45,6 +45,29 @@ const (
 	CategoryAdvanced SettingsCategory = "advanced"
 )
 
+// Setting keys
+const (
+	SettingGameSpeed         = "game_speed"
+	SettingMusicVolume       = "music_volume"
+	SettingSFXVolume         = "sfx_volume"
+	SettingDifficulty        = "difficulty"
+	SettingAutoSave          = "auto_save"
+	SettingAutoSaveInt       = "auto_save_interval"
+	SettingLanguage          = "language"
+	SettingFullscreen        = "fullscreen"
+	SettingVSync             = "vsync"
+	SettingTargetFPS         = "target_fps"
+	SettingShadowQuality     = "shadow_quality"
+	SettingTextureQuality    = "texture_quality"
+	SettingEffectsQuality    = "effects_quality"
+	SettingMasterVolume      = "master_volume"
+	SettingUIVolume          = "ui_volume"
+	SettingAmbientVolume     = "ambient_volume"
+	SettingShowFPS           = "show_fps"
+	SettingShowNotifications = "show_notifications"
+	SettingShowTutorialHints = "show_tutorial_hints"
+)
+
 // Errors
 var (
 	ErrInvalidSetting     = errors.New("invalid setting value")
@@ -422,12 +445,12 @@ func (sm *SettingsManager) SaveSettings() error {
 
 	// Ensure directory exists
 	dir := filepath.Dir(sm.settingsPath)
-	if err := os.MkdirAll(dir, 0755); err != nil {
+	if err := os.MkdirAll(dir, 0o750); err != nil {
 		return fmt.Errorf("failed to create settings directory: %w", err)
 	}
 
 	// Write to file
-	if err := os.WriteFile(sm.settingsPath, data, 0644); err != nil {
+	if err := os.WriteFile(sm.settingsPath, data, 0o600); err != nil {
 		return fmt.Errorf("failed to write settings file: %w", err)
 	}
 
@@ -441,49 +464,49 @@ func (sm *SettingsManager) GetSetting(key string) (interface{}, error) {
 
 	switch key {
 	// Game settings
-	case "game_speed":
+	case SettingGameSpeed:
 		return sm.settings.GameSpeed, nil
-	case "difficulty":
+	case SettingDifficulty:
 		return sm.settings.Difficulty, nil
-	case "auto_save":
+	case SettingAutoSave:
 		return sm.settings.AutoSave, nil
-	case "auto_save_interval":
+	case SettingAutoSaveInt:
 		return sm.settings.AutoSaveInterval, nil
-	case "language":
+	case SettingLanguage:
 		return sm.settings.Language, nil
 
 	// Graphics settings
-	case "fullscreen":
+	case SettingFullscreen:
 		return sm.settings.Fullscreen, nil
-	case "vsync":
+	case SettingVSync:
 		return sm.settings.VSync, nil
-	case "target_fps":
+	case SettingTargetFPS:
 		return sm.settings.TargetFPS, nil
-	case "shadow_quality":
+	case SettingShadowQuality:
 		return sm.settings.ShadowQuality, nil
-	case "texture_quality":
+	case SettingTextureQuality:
 		return sm.settings.TextureQuality, nil
-	case "effects_quality":
+	case SettingEffectsQuality:
 		return sm.settings.EffectsQuality, nil
 
 	// Audio settings
-	case "master_volume":
+	case SettingMasterVolume:
 		return sm.settings.MasterVolume, nil
-	case "music_volume":
+	case SettingMusicVolume:
 		return sm.settings.MusicVolume, nil
-	case "sfx_volume":
+	case SettingSFXVolume:
 		return sm.settings.SFXVolume, nil
-	case "ui_volume":
+	case SettingUIVolume:
 		return sm.settings.UIVolume, nil
-	case "ambient_volume":
+	case SettingAmbientVolume:
 		return sm.settings.AmbientVolume, nil
 
 	// UI settings
-	case "show_fps":
+	case SettingShowFPS:
 		return sm.settings.ShowFPS, nil
-	case "show_notifications":
+	case SettingShowNotifications:
 		return sm.settings.ShowNotifications, nil
-	case "show_tutorial_hints":
+	case SettingShowTutorialHints:
 		return sm.settings.ShowTutorialHints, nil
 
 	default:
@@ -517,25 +540,25 @@ func (sm *SettingsManager) SetSetting(key string, value interface{}) error {
 	// Set the value
 	switch key {
 	// Game settings
-	case "game_speed":
+	case SettingGameSpeed:
 		if v, ok := value.(float64); ok {
 			sm.settings.GameSpeed = v
 		} else {
 			return ErrInvalidType
 		}
-	case "difficulty":
+	case SettingDifficulty:
 		if v, ok := value.(string); ok {
 			sm.settings.Difficulty = v
 		} else {
 			return ErrInvalidType
 		}
-	case "auto_save":
+	case SettingAutoSave:
 		if v, ok := value.(bool); ok {
 			sm.settings.AutoSave = v
 		} else {
 			return ErrInvalidType
 		}
-	case "auto_save_interval":
+	case SettingAutoSaveInt:
 		if v, ok := value.(int); ok {
 			sm.settings.AutoSaveInterval = v
 		} else {
@@ -543,13 +566,13 @@ func (sm *SettingsManager) SetSetting(key string, value interface{}) error {
 		}
 
 	// Audio settings
-	case "music_volume":
+	case SettingMusicVolume:
 		if v, ok := value.(float64); ok {
 			sm.settings.MusicVolume = v
 		} else {
 			return ErrInvalidType
 		}
-	case "sfx_volume":
+	case SettingSFXVolume:
 		if v, ok := value.(float64); ok {
 			sm.settings.SFXVolume = v
 		} else {
@@ -579,11 +602,11 @@ func (sm *SettingsManager) SetSetting(key string, value interface{}) error {
 // GetSettingUnlocked gets a setting without locking (internal use)
 func (sm *SettingsManager) GetSettingUnlocked(key string) (interface{}, error) {
 	switch key {
-	case "game_speed":
+	case SettingGameSpeed:
 		return sm.settings.GameSpeed, nil
-	case "music_volume":
+	case SettingMusicVolume:
 		return sm.settings.MusicVolume, nil
-	case "sfx_volume":
+	case SettingSFXVolume:
 		return sm.settings.SFXVolume, nil
 	default:
 		if val, ok := sm.settings.CustomSettings[key]; ok {

@@ -2,11 +2,13 @@ package api
 
 import (
 	"fmt"
+	"math"
 	"sync"
 	"time"
 
 	"github.com/yourusername/merchant-tails/game/internal/domain/item"
 	"github.com/yourusername/merchant-tails/game/internal/domain/market"
+	"github.com/yourusername/merchant-tails/game/internal/domain/trading"
 )
 
 // PurchaseOption represents a purchasable item with current market data
@@ -67,20 +69,22 @@ type QuickBuyPreset struct {
 
 // PurchaseUIManager manages the purchase UI backend
 type PurchaseUIManager struct {
-	gameManager  *GameManager
-	marketMgr    *market.MarketManager
-	priceHistory map[string][]float64
-	presets      map[string]*QuickBuyPreset
-	mu           sync.RWMutex
+	gameManager   *GameManager
+	market        *market.Market
+	tradingSystem *trading.TradingSystem
+	priceHistory  map[string][]float64
+	presets       map[string]*QuickBuyPreset
+	mu            sync.RWMutex
 }
 
 // NewPurchaseUIManager creates a new purchase UI manager
-func NewPurchaseUIManager(gameManager *GameManager, marketMgr *market.MarketManager) *PurchaseUIManager {
+func NewPurchaseUIManager(gameManager *GameManager) *PurchaseUIManager {
 	return &PurchaseUIManager{
-		gameManager:  gameManager,
-		marketMgr:    marketMgr,
-		priceHistory: make(map[string][]float64),
-		presets:      createDefaultPresets(),
+		gameManager:   gameManager,
+		market:        gameManager.market,
+		tradingSystem: gameManager.trading,
+		priceHistory:  make(map[string][]float64),
+		presets:       createDefaultPresets(),
 	}
 }
 
@@ -138,7 +142,8 @@ func (pui *PurchaseUIManager) GetPurchaseOptions(category string, sortBy string)
 	options := make([]*PurchaseOption, 0)
 
 	// Get all available items from market
-	marketItems := pui.marketMgr.GetAvailableItems()
+	// For now, use a predefined list of items
+	marketItems := pui.getAvailableMarketItems()
 
 	for _, marketItem := range marketItems {
 		// Filter by category if specified
@@ -147,18 +152,18 @@ func (pui *PurchaseUIManager) GetPurchaseOptions(category string, sortBy string)
 		}
 
 		// Calculate market data
-		currentPrice := pui.marketMgr.GetCurrentPrice(marketItem.ID)
+		currentPrice := float64(pui.market.GetPrice(marketItem.ID))
 		priceHistory := pui.getPriceHistory(marketItem.ID)
 		trend := calculateTrend(priceHistory)
 		priceChange := calculatePriceChange(priceHistory)
-		supplyLevel := pui.marketMgr.GetSupplyLevel(marketItem.ID)
+		supplyLevel := pui.getSupplyLevel(marketItem.ID)
 
 		// Calculate profit potential and risk
 		profitPotential := calculateProfitPotential(currentPrice, priceHistory)
 		riskLevel := calculateRiskLevel(marketItem.Category, priceChange, supplyLevel)
 
 		// Calculate recommended quantity based on budget and risk
-		playerGold := pui.gameManager.GetGameState().Gold
+		playerGold := float64(pui.tradingSystem.GetGold())
 		recommendedQty := calculateRecommendedQuantity(currentPrice, playerGold, riskLevel)
 
 		option := &PurchaseOption{
@@ -201,7 +206,7 @@ func (pui *PurchaseUIManager) ExecutePurchase(request *PurchaseRequest) (*Purcha
 	}
 
 	// Get current price
-	currentPrice := pui.marketMgr.GetCurrentPrice(request.ItemID)
+	currentPrice := float64(pui.market.GetPrice(request.ItemID))
 
 	// Apply negotiation if requested
 	finalPrice := currentPrice
@@ -220,7 +225,7 @@ func (pui *PurchaseUIManager) ExecutePurchase(request *PurchaseRequest) (*Purcha
 	totalCost := finalPrice * float64(request.Quantity)
 
 	// Check if player has enough gold
-	playerGold := pui.gameManager.GetGameState().Gold
+	playerGold := float64(pui.tradingSystem.GetGold())
 	if totalCost > playerGold {
 		return &PurchaseResult{
 			Success: false,
@@ -229,8 +234,15 @@ func (pui *PurchaseUIManager) ExecutePurchase(request *PurchaseRequest) (*Purcha
 	}
 
 	// Check inventory space
-	inventory := pui.gameManager.GetPlayerInventory()
-	availableSpace := inventory.GetAvailableSpace()
+	inventory := pui.gameManager.inventory
+	// Use shop capacity for available space
+	currentShopItems := 0
+	if inventory.ShopInventory != nil {
+		for _, q := range inventory.ShopInventory.GetAll() {
+			currentShopItems += q
+		}
+	}
+	availableSpace := inventory.ShopCapacity - currentShopItems
 	if request.Quantity > availableSpace {
 		return &PurchaseResult{
 			Success: false,
@@ -238,13 +250,18 @@ func (pui *PurchaseUIManager) ExecutePurchase(request *PurchaseRequest) (*Purcha
 		}, nil
 	}
 
-	// Execute the purchase
-	buyResult := pui.gameManager.BuyItem(request.ItemID, finalPrice, request.Quantity)
+	// Execute the purchase through trading system
+	purchaseItem := &item.Item{
+		ID:        request.ItemID,
+		Name:      request.ItemID, // Will be replaced with actual name
+		BasePrice: int(finalPrice),
+	}
 
-	if !buyResult.Success {
+	_, err := pui.tradingSystem.BuyFromSupplier(purchaseItem, request.Quantity)
+	if err != nil {
 		return &PurchaseResult{
 			Success: false,
-			Message: buyResult.Message,
+			Message: err.Error(),
 		}, nil
 	}
 
@@ -260,8 +277,8 @@ func (pui *PurchaseUIManager) ExecutePurchase(request *PurchaseRequest) (*Purcha
 		Quantity:       request.Quantity,
 		UnitPrice:      finalPrice,
 		TotalCost:      totalCost,
-		GoldRemaining:  pui.gameManager.GetGameState().Gold,
-		InventorySpace: inventory.GetAvailableSpace(),
+		GoldRemaining:  float64(pui.tradingSystem.GetGold()),
+		InventorySpace: availableSpace - request.Quantity,
 		Message:        "Purchase successful",
 		Warnings:       warnings,
 	}, nil
@@ -317,7 +334,7 @@ func (pui *PurchaseUIManager) GetQuickBuyPresets() []*QuickBuyPreset {
 		// Update total cost
 		totalCost := 0.0
 		for _, item := range preset.Items {
-			price := pui.marketMgr.GetCurrentPrice(item.ItemID)
+			price := float64(pui.market.GetPrice(item.ItemID))
 			totalCost += price * float64(item.Quantity)
 		}
 		preset.TotalCost = totalCost
@@ -365,7 +382,7 @@ func (pui *PurchaseUIManager) getPriceHistory(itemID string) []float64 {
 	if history, exists := pui.priceHistory[itemID]; exists {
 		return history
 	}
-	return []float64{pui.marketMgr.GetCurrentPrice(itemID)}
+	return []float64{float64(pui.market.GetPrice(itemID))}
 }
 
 func (pui *PurchaseUIManager) updatePriceHistory(itemID string, price float64) {
@@ -407,13 +424,15 @@ func (pui *PurchaseUIManager) generatePurchaseWarnings(itemID string, price floa
 	}
 
 	// Check if buying large quantity of volatile item
-	marketItem := pui.marketMgr.GetItemInfo(itemID)
-	if marketItem != nil && marketItem.Volatility > 0.5 && quantity > 10 {
+	// Use price history to estimate volatility
+	historyData := pui.getPriceHistory(itemID)
+	volatility := calculateVolatility(historyData)
+	if volatility > 0.5 && quantity > 10 {
 		warnings = append(warnings, "High quantity of volatile item - increased risk")
 	}
 
-	// Check if item is perishable
-	if marketItem != nil && marketItem.Category == item.CategoryFruit {
+	// Check if item is perishable (fruits)
+	if itemID == "apple" || itemID == "orange" || itemID == "banana" {
 		warnings = append(warnings, "Perishable item - sell quickly to avoid losses")
 	}
 
@@ -541,4 +560,121 @@ func calculateAverage(values []float64) float64 {
 func sortPurchaseOptions(options []*PurchaseOption, sortBy string) {
 	// Implement sorting logic based on sortBy parameter
 	// Options: "name", "price", "profit", "risk", "trend"
+}
+
+// getAvailableMarketItems returns a list of available market items
+func (pui *PurchaseUIManager) getAvailableMarketItems() []*MarketItem {
+	// For now, return a predefined list of items
+	// In production, this would fetch from the actual market system
+	return []*MarketItem{
+		{
+			ID:          "apple",
+			Name:        "Apple",
+			Category:    item.CategoryFruit,
+			Description: "Fresh red apple",
+			Quality:     1,
+			MaxSupply:   100,
+		},
+		{
+			ID:          "sword_iron",
+			Name:        "Iron Sword",
+			Category:    item.CategoryWeapon,
+			Description: "A sturdy iron sword",
+			Quality:     2,
+			MaxSupply:   10,
+		},
+		{
+			ID:          "potion_health",
+			Name:        "Health Potion",
+			Category:    item.CategoryPotion,
+			Description: "Restores health",
+			Quality:     1,
+			MaxSupply:   50,
+		},
+		{
+			ID:          "gem_diamond",
+			Name:        "Diamond",
+			Category:    item.CategoryGem,
+			Description: "A sparkling diamond",
+			Quality:     5,
+			MaxSupply:   5,
+		},
+		{
+			ID:          "spellbook_rare",
+			Name:        "Rare Spellbook",
+			Category:    item.CategoryMagicBook,
+			Description: "Contains powerful spells",
+			Quality:     4,
+			MaxSupply:   3,
+		},
+		{
+			ID:          "accessory_gold_ring",
+			Name:        "Gold Ring",
+			Category:    item.CategoryAccessory,
+			Description: "A golden ring",
+			Quality:     3,
+			MaxSupply:   15,
+		},
+	}
+}
+
+// getSupplyLevel returns the supply level for an item
+func (pui *PurchaseUIManager) getSupplyLevel(itemID string) string {
+	// Simplified supply level calculation
+	// In production, this would be calculated from actual market data
+	state := pui.market.State
+	if state == nil {
+		return "normal"
+	}
+
+	// Use market state to determine supply level
+	supplyLevel := state.CurrentSupply
+
+	// Convert to supply level string
+	if supplyLevel == market.SupplyVeryLow {
+		return "scarce"
+	} else if supplyLevel == market.SupplyLow {
+		return "low"
+	} else if supplyLevel == market.SupplyHigh {
+		return "high"
+	} else if supplyLevel == market.SupplyVeryHigh {
+		return "abundant"
+	}
+	return "normal"
+}
+
+// MarketItem represents an item available in the market
+type MarketItem struct {
+	ID          string
+	Name        string
+	Category    item.Category
+	Description string
+	Quality     int
+	MaxSupply   int
+	Volatility  float64
+}
+
+// calculateVolatility calculates price volatility from history
+func calculateVolatility(history []float64) float64 {
+	if len(history) < 2 {
+		return 0.0
+	}
+
+	// Calculate standard deviation as a measure of volatility
+	mean := calculateAverage(history)
+	variance := 0.0
+	for _, price := range history {
+		diff := price - mean
+		variance += diff * diff
+	}
+	variance /= float64(len(history))
+
+	// Normalize to 0-1 range
+	stdDev := math.Sqrt(variance)
+	normalizedVolatility := stdDev / mean
+
+	if normalizedVolatility > 1.0 {
+		return 1.0
+	}
+	return normalizedVolatility
 }

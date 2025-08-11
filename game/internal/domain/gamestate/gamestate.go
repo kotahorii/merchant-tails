@@ -42,12 +42,17 @@ type GameConfig struct {
 // SaveData represents the data structure for saving/loading game state
 type SaveData struct {
 	Gold              int
+	PlayerName        string
 	PlayerRank        PlayerRank
+	CurrentDay        int
+	CurrentSeason     string
 	ShopCapacity      int
 	WarehouseCapacity int
 	Reputation        float64
 	TotalTransactions int
 	TotalProfit       int
+	TotalExpenses     int
+	TotalRevenue      int
 	SaveTime          time.Time
 }
 
@@ -75,10 +80,13 @@ type GoldChangeCallback func(amount int)
 // GameState manages the overall state of the game
 type GameState struct {
 	// Core state
-	currentState State
-	playerRank   PlayerRank
-	gold         int
-	reputation   float64
+	currentState  State
+	playerName    string
+	playerRank    PlayerRank
+	gold          int
+	reputation    float64
+	currentDay    int
+	currentSeason string
 
 	// Capacity
 	shopCapacity      int
@@ -128,9 +136,12 @@ func NewGameState(config *GameConfig) *GameState {
 
 	gs := &GameState{
 		currentState:         StateInitializing,
+		playerName:           "Merchant",
 		playerRank:           config.InitialRank,
 		gold:                 config.InitialGold,
 		reputation:           0.0,
+		currentDay:           1,
+		currentSeason:        "Spring",
 		shopCapacity:         config.ShopCapacity,
 		warehouseCapacity:    config.WarehouseCapacity,
 		totalTransactions:    0,
@@ -505,12 +516,17 @@ func (gs *GameState) CreateSaveData() *SaveData {
 
 	return &SaveData{
 		Gold:              gs.gold,
+		PlayerName:        gs.playerName,
 		PlayerRank:        gs.playerRank,
+		CurrentDay:        gs.currentDay,
+		CurrentSeason:     gs.currentSeason,
 		ShopCapacity:      gs.shopCapacity,
 		WarehouseCapacity: gs.warehouseCapacity,
 		Reputation:        gs.reputation,
 		TotalTransactions: gs.totalTransactions,
 		TotalProfit:       gs.totalProfit,
+		TotalExpenses:     gs.totalExpenses,
+		TotalRevenue:      gs.totalRevenue,
 		SaveTime:          time.Now(),
 	}
 }
@@ -525,12 +541,26 @@ func (gs *GameState) LoadSaveData(data *SaveData) error {
 	defer gs.mu.Unlock()
 
 	gs.gold = data.Gold
+	gs.playerName = data.PlayerName
+	if gs.playerName == "" {
+		gs.playerName = "Merchant" // Default for old saves
+	}
 	gs.playerRank = data.PlayerRank
+	gs.currentDay = data.CurrentDay
+	if gs.currentDay < 1 {
+		gs.currentDay = 1 // Default for old saves
+	}
+	gs.currentSeason = data.CurrentSeason
+	if gs.currentSeason == "" {
+		gs.currentSeason = "Spring" // Default for old saves
+	}
 	gs.shopCapacity = data.ShopCapacity
 	gs.warehouseCapacity = data.WarehouseCapacity
 	gs.reputation = data.Reputation
 	gs.totalTransactions = data.TotalTransactions
 	gs.totalProfit = data.TotalProfit
+	gs.totalExpenses = data.TotalExpenses
+	gs.totalRevenue = data.TotalRevenue
 
 	return nil
 }
@@ -582,4 +612,166 @@ func clampFloat64(value, min, max float64) float64 {
 		return max
 	}
 	return value
+}
+
+// GetPlayerName returns the player's name
+func (gs *GameState) GetPlayerName() string {
+	gs.mu.RLock()
+	defer gs.mu.RUnlock()
+	return gs.playerName
+}
+
+// SetPlayerName sets the player's name
+func (gs *GameState) SetPlayerName(name string) error {
+	gs.mu.Lock()
+	defer gs.mu.Unlock()
+
+	if name == "" {
+		return errors.New("player name cannot be empty")
+	}
+
+	gs.playerName = name
+	return nil
+}
+
+// GetCurrentDay returns the current in-game day
+func (gs *GameState) GetCurrentDay() int {
+	gs.mu.RLock()
+	defer gs.mu.RUnlock()
+	return gs.currentDay
+}
+
+// SetCurrentDay sets the current in-game day
+func (gs *GameState) SetCurrentDay(day int) {
+	gs.mu.Lock()
+	defer gs.mu.Unlock()
+
+	if day < 1 {
+		day = 1
+	}
+	gs.currentDay = day
+}
+
+// AdvanceDay advances the game by one day
+func (gs *GameState) AdvanceDay() {
+	gs.mu.Lock()
+	defer gs.mu.Unlock()
+
+	gs.currentDay++
+
+	// Update season every 30 days
+	seasonIndex := (gs.currentDay - 1) / 30 % 4
+	seasons := []string{"Spring", "Summer", "Autumn", "Winter"}
+	gs.currentSeason = seasons[seasonIndex]
+}
+
+// GetCurrentSeason returns the current season
+func (gs *GameState) GetCurrentSeason() string {
+	gs.mu.RLock()
+	defer gs.mu.RUnlock()
+	return gs.currentSeason
+}
+
+// SetCurrentSeason sets the current season
+func (gs *GameState) SetCurrentSeason(season string) error {
+	gs.mu.Lock()
+	defer gs.mu.Unlock()
+
+	validSeasons := []string{"Spring", "Summer", "Autumn", "Winter"}
+	for _, s := range validSeasons {
+		if s == season {
+			gs.currentSeason = season
+			return nil
+		}
+	}
+
+	return fmt.Errorf("invalid season: %s", season)
+}
+
+// GetRankBonus returns bonuses based on player rank
+func (gs *GameState) GetRankBonus() (shopCapBonus int, warehouseCapBonus int, priceDiscount float64) {
+	gs.mu.RLock()
+	defer gs.mu.RUnlock()
+
+	switch gs.playerRank {
+	case RankApprentice:
+		return 0, 0, 0.0
+	case RankJourneyman:
+		return 10, 50, 0.02 // +10 shop, +50 warehouse, 2% discount
+	case RankExpert:
+		return 25, 150, 0.05 // +25 shop, +150 warehouse, 5% discount
+	case RankMaster:
+		return 50, 300, 0.10 // +50 shop, +300 warehouse, 10% discount
+	default:
+		return 0, 0, 0.0
+	}
+}
+
+// GetRankProgress returns progress towards next rank (0.0 to 1.0)
+func (gs *GameState) GetRankProgress() float64 {
+	gs.mu.RLock()
+	defer gs.mu.RUnlock()
+
+	// Calculate progress based on gold, reputation, and transactions
+	goldProgress := float64(gs.gold) / VictoryGoldThreshold
+	repProgress := (gs.reputation + 100) / 200 // Normalize from -100,100 to 0,1
+	transProgress := float64(gs.totalTransactions) / 1000
+
+	// Weight the factors
+	progress := (goldProgress*0.4 + repProgress*0.3 + transProgress*0.3)
+
+	// Adjust for current rank
+	switch gs.playerRank {
+	case RankApprentice:
+		return clampFloat64(progress*4, 0, 1) // Need 25% total progress
+	case RankJourneyman:
+		return clampFloat64((progress-0.25)*2, 0, 1) // Need 50% total progress
+	case RankExpert:
+		return clampFloat64((progress-0.5)*1.33, 0, 1) // Need 75% total progress
+	case RankMaster:
+		return 1.0 // Already at max rank
+	default:
+		return 0.0
+	}
+}
+
+// CheckRankUp checks if player should rank up and performs it
+func (gs *GameState) CheckRankUp() bool {
+	gs.mu.Lock()
+	defer gs.mu.Unlock()
+
+	oldRank := gs.playerRank
+	shouldRankUp := false
+
+	switch gs.playerRank {
+	case RankApprentice:
+		if gs.gold >= 5000 && gs.reputation >= 20 && gs.totalTransactions >= 50 {
+			gs.playerRank = RankJourneyman
+			shouldRankUp = true
+		}
+	case RankJourneyman:
+		if gs.gold >= 15000 && gs.reputation >= 40 && gs.totalTransactions >= 200 {
+			gs.playerRank = RankExpert
+			shouldRankUp = true
+		}
+	case RankExpert:
+		if gs.gold >= 35000 && gs.reputation >= 60 && gs.totalTransactions >= 500 {
+			gs.playerRank = RankMaster
+			shouldRankUp = true
+		}
+	}
+
+	if shouldRankUp {
+		// Apply rank bonuses
+		shopBonus, warehouseBonus, _ := gs.GetRankBonus()
+		gs.shopCapacity += shopBonus
+		gs.warehouseCapacity += warehouseBonus
+
+		// Notify callbacks
+		for _, callback := range gs.rankChangeCallbacks {
+			callback(oldRank, gs.playerRank)
+		}
+	}
+
+	return shouldRankUp
 }

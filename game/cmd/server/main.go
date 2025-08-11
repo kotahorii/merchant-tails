@@ -11,26 +11,80 @@ import (
 	"syscall"
 	"time"
 
+	"github.com/prometheus/client_golang/prometheus/promhttp"
+	"github.com/yourusername/merchant-tails/game/internal/infrastructure/logging"
+	"github.com/yourusername/merchant-tails/game/internal/infrastructure/monitoring"
 	"github.com/yourusername/merchant-tails/game/internal/infrastructure/server"
 )
 
 var (
-	port     = flag.String("port", "8080", "Server port")
-	saveDir  = flag.String("save-dir", "./saves", "Save directory")
-	logLevel = flag.String("log-level", "info", "Log level (debug, info, warn, error)")
-	env      = flag.String("env", "development", "Environment (development, production)")
+	port        = flag.String("port", "8080", "Server port")
+	metricsPort = flag.String("metrics-port", "9090", "Metrics port for Prometheus")
+	saveDir     = flag.String("save-dir", "./saves", "Save directory")
+	logLevel    = flag.String("log-level", "info", "Log level (debug, info, warn, error)")
+	env         = flag.String("env", "development", "Environment (development, production)")
 )
 
 func main() {
 	flag.Parse()
 
-	// Initialize logger
-	initLogger(*logLevel)
+	// Initialize structured logging
+	logConfig := &logging.LoggerConfig{
+		Level:      parseLogLevel(*logLevel),
+		Console:    true,
+		JSON:       *env == "production",
+		TimeFormat: time.RFC3339,
+		Context: map[string]interface{}{
+			"environment": *env,
+			"service":     "merchant-tails-server",
+		},
+	}
+
+	logManagerConfig := &logging.LogManagerConfig{
+		LogDir:          "./logs",
+		MaxFileSize:     100 * 1024 * 1024, // 100MB
+		MaxBackups:      10,
+		MaxAge:          30,
+		Compress:        true,
+		BufferSize:      1000,
+		FlushInterval:   time.Second,
+		RotationTime:    24 * time.Hour,
+		FileNamePattern: "merchant-tails-%s.log",
+	}
+
+	if err := logging.Initialize(logConfig, logManagerConfig); err != nil {
+		log.Fatalf("Failed to initialize logging: %v", err)
+	}
+	defer logging.Close()
+
+	logging.Info("Starting Merchant Tails server")
+	logging.WithFields(map[string]interface{}{
+		"port":         *port,
+		"metrics_port": *metricsPort,
+		"environment":  *env,
+	}).Info("Server configuration")
 
 	// Create save directory if it doesn't exist
 	if err := os.MkdirAll(*saveDir, 0755); err != nil {
 		log.Fatalf("Failed to create save directory: %v", err)
 	}
+
+	// Initialize metrics collector
+	metricsCollector := monitoring.NewMetricsCollector()
+
+	// Start metrics server
+	metricsPortInt := 9090
+	if _, err := fmt.Sscanf(*metricsPort, "%d", &metricsPortInt); err != nil {
+		log.Printf("Invalid metrics port, using default 9090: %v", err)
+	}
+	if err := metricsCollector.StartServer(metricsPortInt); err != nil {
+		logging.WithError(err).Error("Failed to start metrics server")
+	}
+	logging.Infof("Metrics server started on port %d", metricsPortInt)
+
+	// Start runtime metrics collector
+	runtimeCollector := monitoring.NewRuntimeCollector(metricsCollector)
+	runtimeCollector.Start(10 * time.Second)
 
 	// Create game server
 	gameServer := server.NewGameServer(*saveDir)
@@ -47,9 +101,9 @@ func main() {
 
 	// Start server in goroutine
 	go func() {
-		log.Printf("Starting Merchant Tails server on %s (env: %s)", addr, *env)
+		logging.Infof("Starting Merchant Tails server on %s (env: %s)", addr, *env)
 		if err := srv.ListenAndServe(); err != nil && err != http.ErrServerClosed {
-			log.Fatalf("Server failed to start: %v", err)
+			logging.WithError(err).Fatal("Server failed to start")
 		}
 	}()
 
@@ -58,17 +112,24 @@ func main() {
 	signal.Notify(quit, syscall.SIGINT, syscall.SIGTERM)
 	<-quit
 
-	log.Println("Shutting down server...")
+	logging.Info("Shutting down server...")
 
 	// Graceful shutdown with timeout
 	ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
 	defer cancel()
 
 	if err := srv.Shutdown(ctx); err != nil {
-		log.Printf("Server forced to shutdown: %v", err)
+		logging.WithError(err).Error("Server forced to shutdown")
 	}
 
-	log.Println("Server exited")
+	// Stop metrics collector
+	if metricsCollector != nil {
+		if err := metricsCollector.StopServer(); err != nil {
+			logging.WithError(err).Error("Error stopping metrics server")
+		}
+	}
+
+	logging.Info("Server exited")
 }
 
 func createHandler(gameServer *server.GameServer) http.Handler {
@@ -82,14 +143,7 @@ func createHandler(gameServer *server.GameServer) http.Handler {
 	})
 
 	// Metrics endpoint (for Prometheus)
-	mux.HandleFunc("/metrics", func(w http.ResponseWriter, r *http.Request) {
-		// TODO: Implement Prometheus metrics
-		w.Header().Set("Content-Type", "text/plain")
-		w.WriteHeader(http.StatusOK)
-		fmt.Fprintln(w, "# HELP merchant_tails_up Is the server up")
-		fmt.Fprintln(w, "# TYPE merchant_tails_up gauge")
-		fmt.Fprintln(w, "merchant_tails_up 1")
-	})
+	mux.Handle("/metrics", promhttp.Handler())
 
 	// Version endpoint
 	mux.HandleFunc("/version", func(w http.ResponseWriter, r *http.Request) {
@@ -121,8 +175,17 @@ func corsMiddleware(next http.Handler) http.Handler {
 	})
 }
 
-func initLogger(level string) {
-	// TODO: Implement proper logging with levels
-	log.SetFlags(log.Ldate | log.Ltime | log.Lshortfile)
-	log.Printf("Logger initialized with level: %s", level)
+func parseLogLevel(level string) logging.LogLevel {
+	switch level {
+	case "debug":
+		return logging.DebugLevel
+	case "info":
+		return logging.InfoLevel
+	case "warn":
+		return logging.WarnLevel
+	case "error":
+		return logging.ErrorLevel
+	default:
+		return logging.InfoLevel
+	}
 }

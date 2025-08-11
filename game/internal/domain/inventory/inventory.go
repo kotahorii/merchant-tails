@@ -22,6 +22,7 @@ type InventoryManager struct {
 	minimumStock       map[string]int
 	salesHistory       map[string]*SalesHistory
 	spoiledItems       []*SpoiledItem
+	capacityManager    *CapacityManager // Capacity management
 	mu                 sync.RWMutex
 }
 
@@ -88,7 +89,16 @@ func NewInventoryManager(shopCapacity, warehouseCapacity int) (*InventoryManager
 		return nil, errors.New("warehouse capacity must be positive")
 	}
 
-	return &InventoryManager{
+	// Create capacity manager
+	capacityConfig := &CapacityConfig{
+		BaseShopCapacity:      shopCapacity,
+		BaseWarehouseCapacity: warehouseCapacity,
+		MaxShopCapacity:       shopCapacity * 10,
+		MaxWarehouseCapacity:  warehouseCapacity * 10,
+		AutoExpandEnabled:     false,
+	}
+
+	im := &InventoryManager{
 		ShopCapacity:       shopCapacity,
 		WarehouseCapacity:  warehouseCapacity,
 		ShopInventory:      item.NewInventory(),
@@ -99,7 +109,10 @@ func NewInventoryManager(shopCapacity, warehouseCapacity int) (*InventoryManager
 		minimumStock:       make(map[string]int),
 		salesHistory:       make(map[string]*SalesHistory),
 		spoiledItems:       make([]*SpoiledItem, 0),
-	}, nil
+		capacityManager:    NewCapacityManager(capacityConfig),
+	}
+
+	return im, nil
 }
 
 // AddToShop adds items to shop inventory
@@ -108,9 +121,14 @@ func (im *InventoryManager) AddToShop(item *item.Item, quantity int) error {
 	defer im.mu.Unlock()
 
 	currentTotal := im.getTotalShopItemsUnsafe()
-	if currentTotal+quantity > im.ShopCapacity {
+	actualCapacity := im.ShopCapacity
+	if im.capacityManager != nil {
+		actualCapacity = im.capacityManager.GetShopCapacity()
+	}
+
+	if currentTotal+quantity > actualCapacity {
 		return fmt.Errorf("exceeds shop capacity: current %d + new %d > capacity %d",
-			currentTotal, quantity, im.ShopCapacity)
+			currentTotal, quantity, actualCapacity)
 	}
 
 	err := im.ShopInventory.AddItem(item, quantity)
@@ -136,9 +154,14 @@ func (im *InventoryManager) AddToWarehouse(item *item.Item, quantity int) error 
 	defer im.mu.Unlock()
 
 	currentTotal := im.getTotalWarehouseItemsUnsafe()
-	if currentTotal+quantity > im.WarehouseCapacity {
+	actualCapacity := im.WarehouseCapacity
+	if im.capacityManager != nil {
+		actualCapacity = im.capacityManager.GetWarehouseCapacity()
+	}
+
+	if currentTotal+quantity > actualCapacity {
 		return fmt.Errorf("exceeds warehouse capacity: current %d + new %d > capacity %d",
-			currentTotal, quantity, im.WarehouseCapacity)
+			currentTotal, quantity, actualCapacity)
 	}
 
 	err := im.WarehouseInventory.AddItem(item, quantity)
@@ -711,4 +734,179 @@ func (s *VelocityBasedStrategy) DetermineSellPriority(items []*InventoryItem, cu
 
 func (s *VelocityBasedStrategy) GetName() string {
 	return "VelocityBased"
+}
+
+// GetCapacityManager returns the capacity manager
+func (im *InventoryManager) GetCapacityManager() *CapacityManager {
+	im.mu.RLock()
+	defer im.mu.RUnlock()
+	return im.capacityManager
+}
+
+// UpdateCapacity records current capacity utilization
+func (im *InventoryManager) UpdateCapacity() {
+	im.mu.Lock()
+	defer im.mu.Unlock()
+
+	if im.capacityManager != nil {
+		shopItems := im.getTotalShopItemsUnsafe()
+		warehouseItems := im.getTotalWarehouseItemsUnsafe()
+		im.capacityManager.RecordUtilization(shopItems, warehouseItems)
+	}
+}
+
+// GetCapacityStats returns capacity statistics
+func (im *InventoryManager) GetCapacityStats() *CapacityStats {
+	im.mu.RLock()
+	defer im.mu.RUnlock()
+
+	if im.capacityManager == nil {
+		return nil
+	}
+
+	shopItems := im.getTotalShopItemsUnsafe()
+	warehouseItems := im.getTotalWarehouseItemsUnsafe()
+	return im.capacityManager.GetCapacityStats(shopItems, warehouseItems)
+}
+
+// GetCapacityAlerts returns current capacity alerts
+func (im *InventoryManager) GetCapacityAlerts() []CapacityAlert {
+	im.mu.RLock()
+	defer im.mu.RUnlock()
+
+	if im.capacityManager == nil {
+		return []CapacityAlert{}
+	}
+
+	return im.capacityManager.GetCapacityAlerts()
+}
+
+// UpgradeCapacity upgrades shop or warehouse capacity
+func (im *InventoryManager) UpgradeCapacity(location InventoryLocation, amount int) error {
+	im.mu.Lock()
+	defer im.mu.Unlock()
+
+	if im.capacityManager == nil {
+		return errors.New("capacity manager not initialized")
+	}
+
+	err := im.capacityManager.UpgradeCapacity(location, amount)
+	if err != nil {
+		return err
+	}
+
+	// Update base capacities
+	if location == LocationShop {
+		im.ShopCapacity = im.capacityManager.GetShopCapacity()
+	} else {
+		im.WarehouseCapacity = im.capacityManager.GetWarehouseCapacity()
+	}
+
+	return nil
+}
+
+// OptimizeCapacityUsage optimizes capacity usage by rebalancing items
+func (im *InventoryManager) OptimizeCapacityUsage() error {
+	im.mu.Lock()
+	defer im.mu.Unlock()
+
+	if im.capacityManager == nil {
+		return errors.New("capacity manager not initialized")
+	}
+
+	shopItems := im.getTotalShopItemsUnsafe()
+	warehouseItems := im.getTotalWarehouseItemsUnsafe()
+
+	toShop, toWarehouse := im.capacityManager.CalculateOptimalTransfer(shopItems, warehouseItems)
+
+	// Move items from warehouse to shop if needed
+	if toShop > 0 {
+		// Get items to transfer (prioritize by velocity)
+		for itemID, entry := range im.warehouseItems {
+			if toShop <= 0 {
+				break
+			}
+
+			transferQty := entry.Quantity
+			if transferQty > toShop {
+				transferQty = toShop
+			}
+
+			// Transfer without locks (we're already locked)
+			im.WarehouseInventory.RemoveItem(itemID, transferQty)
+			im.ShopInventory.AddItem(entry.Item, transferQty)
+			toShop -= transferQty
+		}
+	}
+
+	// Move items from shop to warehouse if needed
+	if toWarehouse > 0 {
+		// Get items to transfer (prioritize low velocity items)
+		for itemID, entry := range im.shopItems {
+			if toWarehouse <= 0 {
+				break
+			}
+
+			// Skip high velocity items
+			if velocity, exists := im.salesVelocity[itemID]; exists && velocity > 1.0 {
+				continue
+			}
+
+			transferQty := entry.Quantity
+			if transferQty > toWarehouse {
+				transferQty = toWarehouse
+			}
+
+			// Transfer without locks
+			im.ShopInventory.RemoveItem(itemID, transferQty)
+			im.WarehouseInventory.AddItem(entry.Item, transferQty)
+			toWarehouse -= transferQty
+		}
+	}
+
+	return nil
+}
+
+// SetAutoExpand enables or disables auto-expansion
+func (im *InventoryManager) SetAutoExpand(enabled bool) {
+	im.mu.Lock()
+	defer im.mu.Unlock()
+
+	if im.capacityManager != nil {
+		im.capacityManager.SetAutoExpand(enabled)
+	}
+}
+
+// AddCapacityModifier adds a capacity modifier (e.g., from upgrades or bonuses)
+func (im *InventoryManager) AddCapacityModifier(location InventoryLocation, name string, modifier float64) {
+	im.mu.Lock()
+	defer im.mu.Unlock()
+
+	if im.capacityManager != nil {
+		im.capacityManager.AddCapacityModifier(location, name, modifier)
+
+		// Update base capacities
+		if location == LocationShop {
+			im.ShopCapacity = im.capacityManager.GetShopCapacity()
+		} else {
+			im.WarehouseCapacity = im.capacityManager.GetWarehouseCapacity()
+		}
+	}
+}
+
+// RemoveCapacityModifier removes a capacity modifier
+func (im *InventoryManager) RemoveCapacityModifier(location InventoryLocation, name string) {
+	im.mu.Lock()
+	defer im.mu.Unlock()
+
+	if im.capacityManager != nil {
+		im.capacityManager.RemoveCapacityModifier(location, name)
+
+		// Update base capacities
+		if location == LocationShop {
+			im.ShopCapacity = im.capacityManager.GetShopCapacity()
+		} else {
+			im.WarehouseCapacity = im.capacityManager.GetWarehouseCapacity()
+		}
+	}
 }

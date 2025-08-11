@@ -2,7 +2,6 @@ package item
 
 import (
 	"errors"
-	"fmt"
 	"sync"
 	"time"
 )
@@ -123,109 +122,6 @@ func getDurabilityByCategory(category Category) int {
 	default:
 		return -1
 	}
-}
-
-// Inventory manages a collection of items
-type Inventory struct {
-	items map[string]*InventoryItem
-	mu    sync.RWMutex
-}
-
-// InventoryItem represents an item with quantity in inventory
-type InventoryItem struct {
-	Item     *Item
-	Quantity int
-}
-
-// NewInventory creates a new inventory
-func NewInventory() *Inventory {
-	return &Inventory{
-		items: make(map[string]*InventoryItem),
-	}
-}
-
-// AddItem adds an item to the inventory
-func (inv *Inventory) AddItem(item *Item, quantity int) error {
-	if quantity <= 0 {
-		return errors.New("quantity must be positive")
-	}
-
-	inv.mu.Lock()
-	defer inv.mu.Unlock()
-
-	if existing, ok := inv.items[item.ID]; ok {
-		existing.Quantity += quantity
-	} else {
-		inv.items[item.ID] = &InventoryItem{
-			Item:     item,
-			Quantity: quantity,
-		}
-	}
-
-	return nil
-}
-
-// RemoveItem removes items from inventory
-func (inv *Inventory) RemoveItem(itemID string, quantity int) error {
-	if quantity <= 0 {
-		return errors.New("quantity must be positive")
-	}
-
-	inv.mu.Lock()
-	defer inv.mu.Unlock()
-
-	existing, ok := inv.items[itemID]
-	if !ok || existing.Quantity == 0 {
-		return errors.New("item not found in inventory")
-	}
-
-	if existing.Quantity < quantity {
-		return fmt.Errorf("insufficient quantity: have %d, want %d", existing.Quantity, quantity)
-	}
-
-	existing.Quantity -= quantity
-	if existing.Quantity == 0 {
-		delete(inv.items, itemID)
-	}
-
-	return nil
-}
-
-// GetQuantity returns the quantity of an item in inventory
-func (inv *Inventory) GetQuantity(itemID string) int {
-	inv.mu.RLock()
-	defer inv.mu.RUnlock()
-
-	if item, ok := inv.items[itemID]; ok {
-		return item.Quantity
-	}
-	return 0
-}
-
-// GetItems returns all items in the inventory
-func (inv *Inventory) GetItems() []*InventoryItem {
-	inv.mu.RLock()
-	defer inv.mu.RUnlock()
-
-	items := make([]*InventoryItem, 0, len(inv.items))
-	for _, item := range inv.items {
-		items = append(items, &InventoryItem{
-			Item:     item.Item,
-			Quantity: item.Quantity,
-		})
-	}
-	return items
-}
-
-// HasItem checks if an item exists with sufficient quantity
-func (inv *Inventory) HasItem(itemID string, quantity int) bool {
-	inv.mu.RLock()
-	defer inv.mu.RUnlock()
-
-	if item, ok := inv.items[itemID]; ok {
-		return item.Quantity >= quantity
-	}
-	return false
 }
 
 // ItemMaster represents master data for an item type
