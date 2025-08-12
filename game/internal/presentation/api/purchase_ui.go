@@ -167,7 +167,7 @@ func (pui *PurchaseUIManager) GetPurchaseOptions(category string, sortBy string)
 		riskLevel := calculateRiskLevel(marketItem.Category, priceChange, supplyLevel)
 
 		// Calculate recommended quantity based on budget and risk
-		playerGold := float64(pui.tradingSystem.GetGold())
+		playerGold := float64(pui.gameManager.gameState.GetGold())
 		recommendedQty := calculateRecommendedQuantity(currentPrice, playerGold, riskLevel)
 
 		option := &PurchaseOption{
@@ -229,7 +229,7 @@ func (pui *PurchaseUIManager) ExecutePurchase(request *PurchaseRequest) (*Purcha
 	totalCost := finalPrice * float64(request.Quantity)
 
 	// Check if player has enough gold
-	playerGold := float64(pui.tradingSystem.GetGold())
+	playerGold := float64(pui.gameManager.gameState.GetGold())
 	if totalCost > playerGold {
 		return &PurchaseResult{
 			Success: false,
@@ -254,14 +254,9 @@ func (pui *PurchaseUIManager) ExecutePurchase(request *PurchaseRequest) (*Purcha
 		}, nil
 	}
 
-	// Execute the purchase through trading system
-	purchaseItem := &item.Item{
-		ID:        request.ItemID,
-		Name:      request.ItemID, // Will be replaced with actual name
-		BasePrice: int(finalPrice),
-	}
-
-	_, err := pui.tradingSystem.BuyFromSupplier(purchaseItem, request.Quantity)
+	// Execute the purchase directly
+	pui.gameManager.gameState.SetGold(int(playerGold - totalCost))
+	err := pui.gameManager.inventory.AddToWarehouseByID(request.ItemID, request.Quantity, int(finalPrice))
 	if err != nil {
 		return &PurchaseResult{
 			Success: false,
@@ -281,7 +276,7 @@ func (pui *PurchaseUIManager) ExecutePurchase(request *PurchaseRequest) (*Purcha
 		Quantity:       request.Quantity,
 		UnitPrice:      finalPrice,
 		TotalCost:      totalCost,
-		GoldRemaining:  float64(pui.tradingSystem.GetGold()),
+		GoldRemaining:  float64(pui.gameManager.gameState.GetGold()),
 		InventorySpace: availableSpace - request.Quantity,
 		Message:        "Purchase successful",
 		Warnings:       warnings,

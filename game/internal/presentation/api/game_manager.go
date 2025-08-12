@@ -1066,9 +1066,9 @@ func (gm *GameManager) applySettingsChanges(category string, updates map[string]
 		// Game settings changes
 		if autoSave, ok := updates["autoSave"].(bool); ok && gm.saveManager != nil {
 			if autoSave {
-				logging.Info("Auto-save enabled", "")
+				logging.Info("Auto-save enabled")
 			} else {
-				logging.Info("Auto-save disabled", "")
+				logging.Info("Auto-save disabled")
 			}
 		}
 	case "graphics":
