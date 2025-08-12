@@ -656,7 +656,7 @@ func (iui *InventoryUIManager) getItemCategory(itemID string) item.Category {
 	return item.CategoryFruit
 }
 
-func (iui *InventoryUIManager) getDaysInStock(itemID string) int {
+func (iui *InventoryUIManager) getDaysInStock(_ string) int {
 	// Simplified - return random value for demo
 	return 3
 }
