@@ -276,6 +276,22 @@ func (r *ClassRegistry) GetClassMethods(className string) ([]*MethodInfo, bool) 
 	return methods, exists
 }
 
+// RegisterSignal registers a signal for a class
+func (r *ClassRegistry) RegisterSignal(className, signalName string, parameters []string) error {
+	r.mu.Lock()
+	defer r.mu.Unlock()
+
+	_, exists := r.classes[className]
+	if !exists {
+		return fmt.Errorf("class %s not found", className)
+	}
+
+	// For now, just log the signal registration
+	// In a full implementation, this would interface with Godot's signal system
+	fmt.Printf("Registered signal %s for class %s with parameters: %v\n", signalName, className, parameters)
+	return nil
+}
+
 // Clear removes all registered classes and methods
 func (r *ClassRegistry) Clear() {
 	r.mu.Lock()

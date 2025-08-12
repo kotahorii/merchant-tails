@@ -197,6 +197,15 @@ func (am *AchievementManager) initializeAchievements() {
 	})
 
 	am.registerAchievement(&Achievement{
+		ID:          AchievementGold100000,
+		Name:        "Hundred Thousand Gold",
+		Description: "Accumulate 100,000 gold",
+		Tier:        TierGold,
+		Points:      50,
+		Icon:        "icons/gold_100k.png",
+	})
+
+	am.registerAchievement(&Achievement{
 		ID:          AchievementMillionaire,
 		Name:        "Millionaire",
 		Description: "Accumulate 1,000,000 gold",
@@ -213,6 +222,15 @@ func (am *AchievementManager) initializeAchievements() {
 		Description: "Upgrade your shop to level 3",
 		Tier:        TierBronze,
 		Points:      15,
+		Icon:        "icons/shop.png",
+	})
+
+	am.registerAchievement(&Achievement{
+		ID:          AchievementShopLevel5,
+		Name:        "Thriving Business",
+		Description: "Upgrade your shop to level 5",
+		Tier:        TierSilver,
+		Points:      25,
 		Icon:        "icons/shop.png",
 	})
 
@@ -261,6 +279,15 @@ func (am *AchievementManager) initializeAchievements() {
 		Description: "Survive 30 days",
 		Tier:        TierBronze,
 		Points:      10,
+		Icon:        "icons/calendar.png",
+	})
+
+	am.registerAchievement(&Achievement{
+		ID:          AchievementDay100,
+		Name:        "Hundred Days",
+		Description: "Survive 100 days",
+		Tier:        TierSilver,
+		Points:      25,
 		Icon:        "icons/calendar.png",
 	})
 
@@ -431,6 +458,8 @@ func (am *AchievementManager) unlockAchievement(id AchievementID) {
 
 	achievement, exists := am.achievements[id]
 	if !exists {
+		// Debug: print when achievement doesn't exist
+		// fmt.Printf("Achievement %v does not exist\n", id)
 		return
 	}
 

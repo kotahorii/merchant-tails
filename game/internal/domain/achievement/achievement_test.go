@@ -70,18 +70,24 @@ func TestUpdateGoldStats(t *testing.T) {
 	am := NewAchievementManager()
 
 	// Test gold achievements
+	t.Logf("Initial HighestGold: %d", am.statistics.HighestGold)
+
 	am.UpdateGoldStats(500)
+	t.Logf("After 500: HighestGold=%d", am.statistics.HighestGold)
 	assert.False(t, am.unlocked[AchievementGold1000])
 
 	am.UpdateGoldStats(1000)
+	t.Logf("After 1000: HighestGold=%d, unlocked[Gold1000]=%v", am.statistics.HighestGold, am.unlocked[AchievementGold1000])
 	assert.True(t, am.unlocked[AchievementGold1000])
 	assert.False(t, am.unlocked[AchievementGold10000])
 
 	am.UpdateGoldStats(10000)
+	t.Logf("After 10000: HighestGold=%d, unlocked[Gold10000]=%v", am.statistics.HighestGold, am.unlocked[AchievementGold10000])
 	assert.True(t, am.unlocked[AchievementGold10000])
 	assert.False(t, am.unlocked[AchievementGold100000])
 
 	am.UpdateGoldStats(100000)
+	t.Logf("After 100000: HighestGold=%d, unlocked[Gold100000]=%v", am.statistics.HighestGold, am.unlocked[AchievementGold100000])
 	assert.True(t, am.unlocked[AchievementGold100000])
 	assert.False(t, am.unlocked[AchievementMillionaire])
 

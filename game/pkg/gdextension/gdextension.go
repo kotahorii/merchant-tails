@@ -5,6 +5,7 @@ package gdextension
 #cgo CFLAGS: -I../../godot/bin
 #include <stdint.h>
 #include <stdlib.h>
+#include <string.h>
 
 // GDExtension interface types
 typedef void* GDExtensionInterfaceGetProcAddress;
@@ -156,4 +157,51 @@ func GetLevelName(level InitializationLevel) string {
 	default:
 		return fmt.Sprintf("Unknown(%d)", level)
 	}
+}
+
+// Helper functions for pointer conversions
+
+// GetStringFromPointer converts a C string pointer to Go string
+func GetStringFromPointer(ptr unsafe.Pointer) string {
+	if ptr == nil {
+		return ""
+	}
+	return C.GoString((*C.char)(ptr))
+}
+
+// SetStringToPointer sets a Go string to a C string pointer
+func SetStringToPointer(ptr unsafe.Pointer, value string) {
+	if ptr == nil {
+		return
+	}
+	cstr := C.CString(value)
+	*(**C.char)(ptr) = cstr
+}
+
+// SetBoolToPointer sets a bool value to a pointer
+func SetBoolToPointer(ptr unsafe.Pointer, value bool) {
+	if ptr == nil {
+		return
+	}
+	if value {
+		*(*C.int32_t)(ptr) = 1
+	} else {
+		*(*C.int32_t)(ptr) = 0
+	}
+}
+
+// GetIntFromPointer gets an int value from a pointer
+func GetIntFromPointer(ptr unsafe.Pointer) int {
+	if ptr == nil {
+		return 0
+	}
+	return int(*(*C.int32_t)(ptr))
+}
+
+// GetFloatFromPointer gets a float value from a pointer
+func GetFloatFromPointer(ptr unsafe.Pointer) float64 {
+	if ptr == nil {
+		return 0.0
+	}
+	return float64(*(*C.double)(ptr))
 }

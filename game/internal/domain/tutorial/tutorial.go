@@ -469,7 +469,21 @@ func (hs *HintSystem) GetHint(context string) *TutorialHint {
 	var bestHint *TutorialHint
 	highestPriority := -1
 
+	// Sort hints by ID for consistent ordering
+	var sortedHints []*TutorialHint
 	for _, hint := range hs.hints {
+		sortedHints = append(sortedHints, hint)
+	}
+	// Sort by ID to ensure consistent order
+	for i := 0; i < len(sortedHints)-1; i++ {
+		for j := i + 1; j < len(sortedHints); j++ {
+			if sortedHints[i].ID > sortedHints[j].ID {
+				sortedHints[i], sortedHints[j] = sortedHints[j], sortedHints[i]
+			}
+		}
+	}
+
+	for _, hint := range sortedHints {
 		if hint.Context == context &&
 			!hint.Shown &&
 			hint.ShowCount < hint.MaxShows &&

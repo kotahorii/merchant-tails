@@ -174,7 +174,7 @@ func godot_gdextension_terminate() {
 // registerGameManagerMethods registers all GameManager methods with Godot
 func registerGameManagerMethods(registry *gdextension.ClassRegistry) {
 	// Start new game
-	registry.RegisterMethod("MerchantGame", "start_new_game",
+	_, _ = registry.RegisterMethod("MerchantGame", "start_new_game",
 		func(methodData unsafe.Pointer, instance unsafe.Pointer, args []unsafe.Pointer, ret unsafe.Pointer) error {
 			if gameManager == nil {
 				return fmt.Errorf("game manager not initialized")
@@ -191,7 +191,7 @@ func registerGameManagerMethods(registry *gdextension.ClassRegistry) {
 	)
 
 	// Get game state
-	registry.RegisterMethod("MerchantGame", "get_game_state",
+	_, _ = registry.RegisterMethod("MerchantGame", "get_game_state",
 		func(methodData unsafe.Pointer, instance unsafe.Pointer, args []unsafe.Pointer, ret unsafe.Pointer) error {
 			if gameManager == nil {
 				return fmt.Errorf("game manager not initialized")
@@ -209,7 +209,7 @@ func registerGameManagerMethods(registry *gdextension.ClassRegistry) {
 	)
 
 	// Get market data
-	registry.RegisterMethod("MerchantGame", "get_market_data",
+	_, _ = registry.RegisterMethod("MerchantGame", "get_market_data",
 		func(methodData unsafe.Pointer, instance unsafe.Pointer, args []unsafe.Pointer, ret unsafe.Pointer) error {
 			if gameManager == nil {
 				return fmt.Errorf("game manager not initialized")
@@ -229,7 +229,7 @@ func registerGameManagerMethods(registry *gdextension.ClassRegistry) {
 	)
 
 	// Get inventory data
-	registry.RegisterMethod("MerchantGame", "get_inventory_data",
+	_, _ = registry.RegisterMethod("MerchantGame", "get_inventory_data",
 		func(methodData unsafe.Pointer, instance unsafe.Pointer, args []unsafe.Pointer, ret unsafe.Pointer) error {
 			if gameManager == nil {
 				return fmt.Errorf("game manager not initialized")
@@ -249,7 +249,7 @@ func registerGameManagerMethods(registry *gdextension.ClassRegistry) {
 	)
 
 	// Pause game
-	registry.RegisterMethod("MerchantGame", "pause_game",
+	_, _ = registry.RegisterMethod("MerchantGame", "pause_game",
 		func(methodData unsafe.Pointer, instance unsafe.Pointer, args []unsafe.Pointer, ret unsafe.Pointer) error {
 			if gameManager == nil {
 				return fmt.Errorf("game manager not initialized")
@@ -261,7 +261,7 @@ func registerGameManagerMethods(registry *gdextension.ClassRegistry) {
 	)
 
 	// Resume game
-	registry.RegisterMethod("MerchantGame", "resume_game",
+	_, _ = registry.RegisterMethod("MerchantGame", "resume_game",
 		func(methodData unsafe.Pointer, instance unsafe.Pointer, args []unsafe.Pointer, ret unsafe.Pointer) error {
 			if gameManager == nil {
 				return fmt.Errorf("game manager not initialized")
@@ -273,7 +273,7 @@ func registerGameManagerMethods(registry *gdextension.ClassRegistry) {
 	)
 
 	// Buy item
-	registry.RegisterMethod("MerchantGame", "buy_item",
+	_, _ = registry.RegisterMethod("MerchantGame", "buy_item",
 		func(methodData unsafe.Pointer, instance unsafe.Pointer, args []unsafe.Pointer, ret unsafe.Pointer) error {
 			if gameManager == nil {
 				return fmt.Errorf("game manager not initialized")
@@ -296,7 +296,7 @@ func registerGameManagerMethods(registry *gdextension.ClassRegistry) {
 	)
 
 	// Sell item
-	registry.RegisterMethod("MerchantGame", "sell_item",
+	_, _ = registry.RegisterMethod("MerchantGame", "sell_item",
 		func(methodData unsafe.Pointer, instance unsafe.Pointer, args []unsafe.Pointer, ret unsafe.Pointer) error {
 			if gameManager == nil {
 				return fmt.Errorf("game manager not initialized")
@@ -319,7 +319,7 @@ func registerGameManagerMethods(registry *gdextension.ClassRegistry) {
 	)
 
 	// Save game
-	registry.RegisterMethod("MerchantGame", "save_game",
+	_, _ = registry.RegisterMethod("MerchantGame", "save_game",
 		func(methodData unsafe.Pointer, instance unsafe.Pointer, args []unsafe.Pointer, ret unsafe.Pointer) error {
 			if gameManager == nil {
 				return fmt.Errorf("game manager not initialized")
@@ -333,7 +333,7 @@ func registerGameManagerMethods(registry *gdextension.ClassRegistry) {
 	)
 
 	// Load game
-	registry.RegisterMethod("MerchantGame", "load_game",
+	_, _ = registry.RegisterMethod("MerchantGame", "load_game",
 		func(methodData unsafe.Pointer, instance unsafe.Pointer, args []unsafe.Pointer, ret unsafe.Pointer) error {
 			if gameManager == nil {
 				return fmt.Errorf("game manager not initialized")
@@ -385,8 +385,8 @@ func registerGameManagerMethods(registry *gdextension.ClassRegistry) {
 	)
 
 	// Register signals
-	registry.RegisterSignal("MerchantGame", "state_changed", []string{"state_json"})
-	registry.RegisterSignal("MerchantGame", "event_published", []string{"event_name", "event_data"})
+	_ = registry.RegisterSignal("MerchantGame", "state_changed", []string{"state_json"})
+	_ = registry.RegisterSignal("MerchantGame", "event_published", []string{"event_name", "event_data"})
 }
 
 func main() {
