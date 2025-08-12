@@ -1,0 +1,310 @@
+# English translations for Merchant Tails
+msgid ""
+msgstr ""
+"Project-Id-Version: Merchant Tails 0.1.0\n"
+"POT-Creation-Date: 2025-08-12 21:00+0900\n"
+"PO-Revision-Date: 2025-08-12 21:00+0900\n"
+"Language: en\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+
+# Main Menu
+msgid "TITLE_GAME"
+msgstr "Merchant Tails"
+
+msgid "MENU_START_GAME"
+msgstr "Start Game"
+
+msgid "MENU_CONTINUE"
+msgstr "Continue"
+
+msgid "MENU_SETTINGS"
+msgstr "Settings"
+
+msgid "MENU_QUIT"
+msgstr "Quit"
+
+msgid "MENU_NEW_GAME"
+msgstr "New Game"
+
+msgid "MENU_LOAD_GAME"
+msgstr "Load Game"
+
+msgid "MENU_TUTORIAL"
+msgstr "Tutorial"
+
+# Game UI
+msgid "UI_GOLD"
+msgstr "Gold"
+
+msgid "UI_DAY"
+msgstr "Day"
+
+msgid "UI_SEASON"
+msgstr "Season"
+
+msgid "UI_REPUTATION"
+msgstr "Reputation"
+
+msgid "UI_RANK"
+msgstr "Rank"
+
+msgid "UI_INVENTORY"
+msgstr "Inventory"
+
+msgid "UI_SHOP"
+msgstr "Shop"
+
+msgid "UI_WAREHOUSE"
+msgstr "Warehouse"
+
+msgid "UI_MARKET"
+msgstr "Market"
+
+msgid "UI_BANK"
+msgstr "Bank"
+
+# Trading
+msgid "TRADE_BUY"
+msgstr "Buy"
+
+msgid "TRADE_SELL"
+msgstr "Sell"
+
+msgid "TRADE_PRICE"
+msgstr "Price"
+
+msgid "TRADE_QUANTITY"
+msgstr "Quantity"
+
+msgid "TRADE_TOTAL"
+msgstr "Total"
+
+msgid "TRADE_CONFIRM"
+msgstr "Confirm"
+
+msgid "TRADE_CANCEL"
+msgstr "Cancel"
+
+msgid "TRADE_INSUFFICIENT_GOLD"
+msgstr "Insufficient gold!"
+
+msgid "TRADE_INSUFFICIENT_SPACE"
+msgstr "Not enough inventory space!"
+
+msgid "TRADE_SUCCESS"
+msgstr "Transaction successful!"
+
+# Items
+msgid "ITEM_APPLE"
+msgstr "Apple"
+
+msgid "ITEM_ORANGE"
+msgstr "Orange"
+
+msgid "ITEM_BANANA"
+msgstr "Banana"
+
+msgid "ITEM_HEALTH_POTION"
+msgstr "Health Potion"
+
+msgid "ITEM_MANA_POTION"
+msgstr "Mana Potion"
+
+msgid "ITEM_IRON_SWORD"
+msgstr "Iron Sword"
+
+msgid "ITEM_STEEL_SWORD"
+msgstr "Steel Sword"
+
+msgid "ITEM_GOLD_RING"
+msgstr "Gold Ring"
+
+msgid "ITEM_SILVER_NECKLACE"
+msgstr "Silver Necklace"
+
+msgid "ITEM_SPELLBOOK"
+msgstr "Spellbook"
+
+msgid "ITEM_DIAMOND"
+msgstr "Diamond"
+
+msgid "ITEM_RUBY"
+msgstr "Ruby"
+
+# Seasons
+msgid "SEASON_SPRING"
+msgstr "Spring"
+
+msgid "SEASON_SUMMER"
+msgstr "Summer"
+
+msgid "SEASON_AUTUMN"
+msgstr "Autumn"
+
+msgid "SEASON_WINTER"
+msgstr "Winter"
+
+# Weather
+msgid "WEATHER_SUNNY"
+msgstr "Sunny"
+
+msgid "WEATHER_RAINY"
+msgstr "Rainy"
+
+msgid "WEATHER_CLOUDY"
+msgstr "Cloudy"
+
+# Difficulty
+msgid "DIFFICULTY_EASY"
+msgstr "Easy"
+
+msgid "DIFFICULTY_NORMAL"
+msgstr "Normal"
+
+msgid "DIFFICULTY_HARD"
+msgstr "Hard"
+
+# Tutorial
+msgid "TUTORIAL_WELCOME"
+msgstr "Welcome to Merchant Tails!"
+
+msgid "TUTORIAL_BUY_ITEMS"
+msgstr "Visit the market to buy items from suppliers."
+
+msgid "TUTORIAL_SET_PRICES"
+msgstr "Set your selling prices wisely."
+
+msgid "TUTORIAL_MANAGE_INVENTORY"
+msgstr "Keep track of your inventory."
+
+msgid "TUTORIAL_WATCH_MARKET"
+msgstr "Prices change based on supply and demand."
+
+msgid "TUTORIAL_MAKE_PROFIT"
+msgstr "Your goal is to make profit."
+
+msgid "TUTORIAL_USE_BANK"
+msgstr "Save your profits in the bank to earn interest."
+
+msgid "TUTORIAL_COMPLETE"
+msgstr "Tutorial Complete! Good luck!"
+
+msgid "TUTORIAL_SKIP"
+msgstr "Skip Tutorial"
+
+msgid "TUTORIAL_NEXT"
+msgstr "Next"
+
+msgid "TUTORIAL_PREVIOUS"
+msgstr "Previous"
+
+# Settings
+msgid "SETTINGS_TITLE"
+msgstr "Settings"
+
+msgid "SETTINGS_GRAPHICS"
+msgstr "Graphics"
+
+msgid "SETTINGS_AUDIO"
+msgstr "Audio"
+
+msgid "SETTINGS_GAMEPLAY"
+msgstr "Gameplay"
+
+msgid "SETTINGS_DIFFICULTY"
+msgstr "Difficulty"
+
+msgid "SETTINGS_LANGUAGE"
+msgstr "Language"
+
+msgid "SETTINGS_RESOLUTION"
+msgstr "Resolution"
+
+msgid "SETTINGS_FULLSCREEN"
+msgstr "Fullscreen"
+
+msgid "SETTINGS_MASTER_VOLUME"
+msgstr "Master Volume"
+
+msgid "SETTINGS_MUSIC_VOLUME"
+msgstr "Music Volume"
+
+msgid "SETTINGS_SFX_VOLUME"
+msgstr "SFX Volume"
+
+msgid "SETTINGS_APPLY"
+msgstr "Apply"
+
+msgid "SETTINGS_BACK"
+msgstr "Back"
+
+# Messages
+msgid "MSG_SAVE_SUCCESS"
+msgstr "Game saved successfully!"
+
+msgid "MSG_LOAD_SUCCESS"
+msgstr "Game loaded successfully!"
+
+msgid "MSG_CONFIRM_QUIT"
+msgstr "Are you sure you want to quit?"
+
+msgid "MSG_CONFIRM_NEW_GAME"
+msgstr "Starting a new game will overwrite your current progress. Continue?"
+
+msgid "MSG_YES"
+msgstr "Yes"
+
+msgid "MSG_NO"
+msgstr "No"
+
+# UI Labels
+msgid "UI_WEATHER"
+msgstr "Weather"
+
+msgid "UI_PRICE"
+msgstr "Price"
+
+msgid "UI_DEMAND"
+msgstr "Demand"
+
+msgid "UI_BALANCE"
+msgstr "Balance"
+
+# Game Messages
+msgid "MSG_TRANSACTION_COMPLETE"
+msgstr "Transaction complete"
+
+msgid "MSG_DAY_CHANGED"
+msgstr "Day changed"
+
+msgid "MSG_WEATHER_CHANGED"
+msgstr "Weather changed"
+
+msgid "MSG_GAME_SAVED"
+msgstr "Game saved"
+
+msgid "MSG_SAVE_FAILED"
+msgstr "Save failed"
+
+msgid "MSG_NO_ITEM_SELECTED"
+msgstr "No item selected"
+
+msgid "MSG_PURCHASE_SUCCESS"
+msgstr "Purchase successful"
+
+msgid "MSG_PURCHASE_FAILED"
+msgstr "Purchase failed"
+
+msgid "MSG_DEPOSIT_SUCCESS"
+msgstr "Deposit successful"
+
+msgid "MSG_DEPOSIT_FAILED"
+msgstr "Deposit failed"
+
+msgid "MSG_WITHDRAW_SUCCESS"
+msgstr "Withdrawal successful"
+
+msgid "MSG_WITHDRAW_FAILED"
+msgstr "Withdrawal failed"

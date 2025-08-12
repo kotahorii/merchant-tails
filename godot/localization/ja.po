@@ -1,0 +1,310 @@
+# Japanese translations for Merchant Tails
+msgid ""
+msgstr ""
+"Project-Id-Version: Merchant Tails 0.1.0\n"
+"POT-Creation-Date: 2025-08-12 21:00+0900\n"
+"PO-Revision-Date: 2025-08-12 21:00+0900\n"
+"Language: ja\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+
+# Main Menu
+msgid "TITLE_GAME"
+msgstr "マーチャントテイル"
+
+msgid "MENU_START_GAME"
+msgstr "ゲームを始める"
+
+msgid "MENU_CONTINUE"
+msgstr "続きから"
+
+msgid "MENU_SETTINGS"
+msgstr "設定"
+
+msgid "MENU_QUIT"
+msgstr "終了"
+
+msgid "MENU_NEW_GAME"
+msgstr "新規ゲーム"
+
+msgid "MENU_LOAD_GAME"
+msgstr "ロード"
+
+msgid "MENU_TUTORIAL"
+msgstr "チュートリアル"
+
+# Game UI
+msgid "UI_GOLD"
+msgstr "ゴールド"
+
+msgid "UI_DAY"
+msgstr "日"
+
+msgid "UI_SEASON"
+msgstr "季節"
+
+msgid "UI_REPUTATION"
+msgstr "評判"
+
+msgid "UI_RANK"
+msgstr "ランク"
+
+msgid "UI_INVENTORY"
+msgstr "在庫"
+
+msgid "UI_SHOP"
+msgstr "店舗"
+
+msgid "UI_WAREHOUSE"
+msgstr "倉庫"
+
+msgid "UI_MARKET"
+msgstr "市場"
+
+msgid "UI_BANK"
+msgstr "銀行"
+
+# Trading
+msgid "TRADE_BUY"
+msgstr "購入"
+
+msgid "TRADE_SELL"
+msgstr "販売"
+
+msgid "TRADE_PRICE"
+msgstr "価格"
+
+msgid "TRADE_QUANTITY"
+msgstr "数量"
+
+msgid "TRADE_TOTAL"
+msgstr "合計"
+
+msgid "TRADE_CONFIRM"
+msgstr "確認"
+
+msgid "TRADE_CANCEL"
+msgstr "キャンセル"
+
+msgid "TRADE_INSUFFICIENT_GOLD"
+msgstr "ゴールドが不足しています！"
+
+msgid "TRADE_INSUFFICIENT_SPACE"
+msgstr "在庫スペースが不足しています！"
+
+msgid "TRADE_SUCCESS"
+msgstr "取引成功！"
+
+# Items
+msgid "ITEM_APPLE"
+msgstr "りんご"
+
+msgid "ITEM_ORANGE"
+msgstr "オレンジ"
+
+msgid "ITEM_BANANA"
+msgstr "バナナ"
+
+msgid "ITEM_HEALTH_POTION"
+msgstr "体力ポーション"
+
+msgid "ITEM_MANA_POTION"
+msgstr "マナポーション"
+
+msgid "ITEM_IRON_SWORD"
+msgstr "鉄の剣"
+
+msgid "ITEM_STEEL_SWORD"
+msgstr "鋼の剣"
+
+msgid "ITEM_GOLD_RING"
+msgstr "金の指輪"
+
+msgid "ITEM_SILVER_NECKLACE"
+msgstr "銀のネックレス"
+
+msgid "ITEM_SPELLBOOK"
+msgstr "魔法書"
+
+msgid "ITEM_DIAMOND"
+msgstr "ダイヤモンド"
+
+msgid "ITEM_RUBY"
+msgstr "ルビー"
+
+# Seasons
+msgid "SEASON_SPRING"
+msgstr "春"
+
+msgid "SEASON_SUMMER"
+msgstr "夏"
+
+msgid "SEASON_AUTUMN"
+msgstr "秋"
+
+msgid "SEASON_WINTER"
+msgstr "冬"
+
+# Weather
+msgid "WEATHER_SUNNY"
+msgstr "晴れ"
+
+msgid "WEATHER_RAINY"
+msgstr "雨"
+
+msgid "WEATHER_CLOUDY"
+msgstr "曇り"
+
+# Difficulty
+msgid "DIFFICULTY_EASY"
+msgstr "かんたん"
+
+msgid "DIFFICULTY_NORMAL"
+msgstr "ふつう"
+
+msgid "DIFFICULTY_HARD"
+msgstr "むずかしい"
+
+# Tutorial
+msgid "TUTORIAL_WELCOME"
+msgstr "マーチャントテイルへようこそ！"
+
+msgid "TUTORIAL_BUY_ITEMS"
+msgstr "市場で商品を仕入れましょう。"
+
+msgid "TUTORIAL_SET_PRICES"
+msgstr "販売価格を賢く設定しましょう。"
+
+msgid "TUTORIAL_MANAGE_INVENTORY"
+msgstr "在庫を管理しましょう。"
+
+msgid "TUTORIAL_WATCH_MARKET"
+msgstr "価格は需要と供給で変動します。"
+
+msgid "TUTORIAL_MAKE_PROFIT"
+msgstr "利益を上げることが目標です。"
+
+msgid "TUTORIAL_USE_BANK"
+msgstr "銀行に預金して利息を得ましょう。"
+
+msgid "TUTORIAL_COMPLETE"
+msgstr "チュートリアル完了！頑張ってください！"
+
+msgid "TUTORIAL_SKIP"
+msgstr "スキップ"
+
+msgid "TUTORIAL_NEXT"
+msgstr "次へ"
+
+msgid "TUTORIAL_PREVIOUS"
+msgstr "前へ"
+
+# Settings
+msgid "SETTINGS_TITLE"
+msgstr "設定"
+
+msgid "SETTINGS_GRAPHICS"
+msgstr "グラフィック"
+
+msgid "SETTINGS_AUDIO"
+msgstr "オーディオ"
+
+msgid "SETTINGS_GAMEPLAY"
+msgstr "ゲームプレイ"
+
+msgid "SETTINGS_DIFFICULTY"
+msgstr "難易度"
+
+msgid "SETTINGS_LANGUAGE"
+msgstr "言語"
+
+msgid "SETTINGS_RESOLUTION"
+msgstr "解像度"
+
+msgid "SETTINGS_FULLSCREEN"
+msgstr "フルスクリーン"
+
+msgid "SETTINGS_MASTER_VOLUME"
+msgstr "マスター音量"
+
+msgid "SETTINGS_MUSIC_VOLUME"
+msgstr "BGM音量"
+
+msgid "SETTINGS_SFX_VOLUME"
+msgstr "効果音音量"
+
+msgid "SETTINGS_APPLY"
+msgstr "適用"
+
+msgid "SETTINGS_BACK"
+msgstr "戻る"
+
+# Messages
+msgid "MSG_SAVE_SUCCESS"
+msgstr "セーブしました！"
+
+msgid "MSG_LOAD_SUCCESS"
+msgstr "ロードしました！"
+
+msgid "MSG_CONFIRM_QUIT"
+msgstr "本当に終了しますか？"
+
+msgid "MSG_CONFIRM_NEW_GAME"
+msgstr "新規ゲームを開始すると現在の進行状況が失われます。続けますか？"
+
+msgid "MSG_YES"
+msgstr "はい"
+
+msgid "MSG_NO"
+msgstr "いいえ"
+
+# UI Labels
+msgid "UI_WEATHER"
+msgstr "天気"
+
+msgid "UI_PRICE"
+msgstr "価格"
+
+msgid "UI_DEMAND"
+msgstr "需要"
+
+msgid "UI_BALANCE"
+msgstr "残高"
+
+# Game Messages
+msgid "MSG_TRANSACTION_COMPLETE"
+msgstr "取引完了"
+
+msgid "MSG_DAY_CHANGED"
+msgstr "日が変わりました"
+
+msgid "MSG_WEATHER_CHANGED"
+msgstr "天気が変わりました"
+
+msgid "MSG_GAME_SAVED"
+msgstr "セーブしました"
+
+msgid "MSG_SAVE_FAILED"
+msgstr "セーブに失敗しました"
+
+msgid "MSG_NO_ITEM_SELECTED"
+msgstr "アイテムが選択されていません"
+
+msgid "MSG_PURCHASE_SUCCESS"
+msgstr "購入成功"
+
+msgid "MSG_PURCHASE_FAILED"
+msgstr "購入失敗"
+
+msgid "MSG_DEPOSIT_SUCCESS"
+msgstr "預金成功"
+
+msgid "MSG_DEPOSIT_FAILED"
+msgstr "預金失敗"
+
+msgid "MSG_WITHDRAW_SUCCESS"
+msgstr "引き出し成功"
+
+msgid "MSG_WITHDRAW_FAILED"
+msgstr "引き出し失敗"

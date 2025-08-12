@@ -1,0 +1,171 @@
+[gd_scene load_steps=3 format=3 uid="uid://b5settings"]
+
+[ext_resource type="Script" path="res://scripts/ui/Settings.gd" id="1"]
+[ext_resource type="Theme" path="res://resources/default_theme.tres" id="2"]
+
+[node name="Settings" type="Control"]
+anchor_right = 1.0
+anchor_bottom = 1.0
+theme = ExtResource("2")
+script = ExtResource("1")
+
+[node name="Background" type="ColorRect" parent="."]
+anchor_right = 1.0
+anchor_bottom = 1.0
+color = Color(0.1, 0.1, 0.15, 1)
+
+[node name="Container" type="VBoxContainer" parent="."]
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -400.0
+offset_top = -300.0
+offset_right = 400.0
+offset_bottom = 300.0
+theme_override_constants/separation = 20
+
+[node name="Title" type="Label" parent="Container"]
+text = "SETTINGS_TITLE"
+theme_override_font_sizes/font_size = 36
+horizontal_alignment = 1
+
+[node name="HSeparator" type="HSeparator" parent="Container"]
+
+[node name="TabContainer" type="TabContainer" parent="Container"]
+minimum_size = Vector2(0, 400)
+
+[node name="Gameplay" type="ScrollContainer" parent="Container/TabContainer"]
+layout_mode = 2
+
+[node name="VBox" type="VBoxContainer" parent="Container/TabContainer/Gameplay"]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_constants/separation = 15
+
+[node name="DifficultyLabel" type="Label" parent="Container/TabContainer/Gameplay/VBox"]
+text = "SETTINGS_DIFFICULTY"
+theme_override_font_sizes/font_size = 18
+
+[node name="DifficultyOption" type="OptionButton" parent="Container/TabContainer/Gameplay/VBox"]
+minimum_size = Vector2(300, 40)
+selected = 1
+
+[node name="HSeparator" type="HSeparator" parent="Container/TabContainer/Gameplay/VBox"]
+
+[node name="LanguageLabel" type="Label" parent="Container/TabContainer/Gameplay/VBox"]
+text = "SETTINGS_LANGUAGE"
+theme_override_font_sizes/font_size = 18
+
+[node name="LanguageOption" type="OptionButton" parent="Container/TabContainer/Gameplay/VBox"]
+minimum_size = Vector2(300, 40)
+
+[node name="HSeparator2" type="HSeparator" parent="Container/TabContainer/Gameplay/VBox"]
+
+[node name="AutoSaveLabel" type="Label" parent="Container/TabContainer/Gameplay/VBox"]
+text = "Auto Save"
+theme_override_font_sizes/font_size = 18
+
+[node name="AutoSaveCheck" type="CheckBox" parent="Container/TabContainer/Gameplay/VBox"]
+text = "Enable Auto Save"
+button_pressed = true
+
+[node name="Graphics" type="ScrollContainer" parent="Container/TabContainer"]
+visible = false
+layout_mode = 2
+
+[node name="VBox" type="VBoxContainer" parent="Container/TabContainer/Graphics"]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_constants/separation = 15
+
+[node name="ResolutionLabel" type="Label" parent="Container/TabContainer/Graphics/VBox"]
+text = "SETTINGS_RESOLUTION"
+theme_override_font_sizes/font_size = 18
+
+[node name="ResolutionOption" type="OptionButton" parent="Container/TabContainer/Graphics/VBox"]
+minimum_size = Vector2(300, 40)
+
+[node name="HSeparator" type="HSeparator" parent="Container/TabContainer/Graphics/VBox"]
+
+[node name="FullscreenCheck" type="CheckBox" parent="Container/TabContainer/Graphics/VBox"]
+text = "SETTINGS_FULLSCREEN"
+
+[node name="HSeparator2" type="HSeparator" parent="Container/TabContainer/Graphics/VBox"]
+
+[node name="VSyncCheck" type="CheckBox" parent="Container/TabContainer/Graphics/VBox"]
+text = "Enable VSync"
+button_pressed = true
+
+[node name="Audio" type="ScrollContainer" parent="Container/TabContainer"]
+visible = false
+layout_mode = 2
+
+[node name="VBox" type="VBoxContainer" parent="Container/TabContainer/Audio"]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_constants/separation = 15
+
+[node name="MasterLabel" type="Label" parent="Container/TabContainer/Audio/VBox"]
+text = "SETTINGS_MASTER_VOLUME"
+theme_override_font_sizes/font_size = 18
+
+[node name="MasterSlider" type="HSlider" parent="Container/TabContainer/Audio/VBox"]
+minimum_size = Vector2(400, 0)
+max_value = 100.0
+value = 80.0
+
+[node name="MasterValue" type="Label" parent="Container/TabContainer/Audio/VBox"]
+text = "80%"
+
+[node name="HSeparator" type="HSeparator" parent="Container/TabContainer/Audio/VBox"]
+
+[node name="MusicLabel" type="Label" parent="Container/TabContainer/Audio/VBox"]
+text = "SETTINGS_MUSIC_VOLUME"
+theme_override_font_sizes/font_size = 18
+
+[node name="MusicSlider" type="HSlider" parent="Container/TabContainer/Audio/VBox"]
+minimum_size = Vector2(400, 0)
+max_value = 100.0
+value = 70.0
+
+[node name="MusicValue" type="Label" parent="Container/TabContainer/Audio/VBox"]
+text = "70%"
+
+[node name="HSeparator2" type="HSeparator" parent="Container/TabContainer/Audio/VBox"]
+
+[node name="SFXLabel" type="Label" parent="Container/TabContainer/Audio/VBox"]
+text = "SETTINGS_SFX_VOLUME"
+theme_override_font_sizes/font_size = 18
+
+[node name="SFXSlider" type="HSlider" parent="Container/TabContainer/Audio/VBox"]
+minimum_size = Vector2(400, 0)
+max_value = 100.0
+value = 90.0
+
+[node name="SFXValue" type="Label" parent="Container/TabContainer/Audio/VBox"]
+text = "90%"
+
+[node name="ButtonContainer" type="HBoxContainer" parent="Container"]
+alignment = 1
+theme_override_constants/separation = 20
+
+[node name="ApplyButton" type="Button" parent="Container/ButtonContainer"]
+minimum_size = Vector2(150, 50)
+text = "SETTINGS_APPLY"
+
+[node name="BackButton" type="Button" parent="Container/ButtonContainer"]
+minimum_size = Vector2(150, 50)
+text = "SETTINGS_BACK"
+
+[connection signal="item_selected" from="Container/TabContainer/Gameplay/VBox/DifficultyOption" to="." method="_on_difficulty_selected"]
+[connection signal="item_selected" from="Container/TabContainer/Gameplay/VBox/LanguageOption" to="." method="_on_language_selected"]
+[connection signal="toggled" from="Container/TabContainer/Gameplay/VBox/AutoSaveCheck" to="." method="_on_auto_save_toggled"]
+[connection signal="item_selected" from="Container/TabContainer/Graphics/VBox/ResolutionOption" to="." method="_on_resolution_selected"]
+[connection signal="toggled" from="Container/TabContainer/Graphics/VBox/FullscreenCheck" to="." method="_on_fullscreen_toggled"]
+[connection signal="toggled" from="Container/TabContainer/Graphics/VBox/VSyncCheck" to="." method="_on_vsync_toggled"]
+[connection signal="value_changed" from="Container/TabContainer/Audio/VBox/MasterSlider" to="." method="_on_master_volume_changed"]
+[connection signal="value_changed" from="Container/TabContainer/Audio/VBox/MusicSlider" to="." method="_on_music_volume_changed"]
+[connection signal="value_changed" from="Container/TabContainer/Audio/VBox/SFXSlider" to="." method="_on_sfx_volume_changed"]
+[connection signal="pressed" from="Container/ButtonContainer/ApplyButton" to="." method="_on_apply_pressed"]
+[connection signal="pressed" from="Container/ButtonContainer/BackButton" to="." method="_on_back_pressed"]

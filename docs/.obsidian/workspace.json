@@ -179,6 +179,9 @@
   },
   "active": "90b5c754913b030f",
   "lastOpenFiles": [
+    "user-manual.md",
+    "developer-guide.md",
+    "api-specification.md",
     "development-todo.md.tmp.90218.1754979428904",
     "development-todo.md.tmp.3279.1754678224710",
     "development-todo.md.tmp.10231.1754555878799",
@@ -195,7 +198,6 @@
     "development-todo.md.tmp.97287.1754284590859",
     "design-doc.md.tmp.97287.1754284580491",
     "design-doc.md.tmp.97287.1754284566399",
-    "design-doc.md.tmp.97287.1754284556789",
     "unity-version-decision.md",
     "Welcome.md",
     "prd.md"

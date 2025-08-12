@@ -1,0 +1,254 @@
+[gd_scene load_steps=4 format=3 uid="uid://c4sjg4nqmx5x"]
+
+[ext_resource type="Script" path="res://scripts/game/GameMain.gd" id="1"]
+[ext_resource type="Theme" path="res://resources/default_theme.tres" id="2"]
+[ext_resource type="PackedScene" uid="uid://dqmx5x" path="res://scenes/ui/HUD.tscn" id="3"]
+
+[node name="GameMain" type="Control"]
+anchor_right = 1.0
+anchor_bottom = 1.0
+theme = ExtResource("2")
+script = ExtResource("1")
+
+[node name="Background" type="ColorRect" parent="."]
+anchor_right = 1.0
+anchor_bottom = 1.0
+color = Color(0.15, 0.15, 0.2, 1)
+
+[node name="MainContainer" type="HSplitContainer" parent="."]
+anchor_right = 1.0
+anchor_bottom = 1.0
+split_offset = 300
+
+[node name="LeftPanel" type="VBoxContainer" parent="MainContainer"]
+minimum_size = Vector2(300, 0)
+theme_override_constants/separation = 10
+
+[node name="PlayerInfo" type="PanelContainer" parent="MainContainer/LeftPanel"]
+minimum_size = Vector2(0, 150)
+
+[node name="VBox" type="VBoxContainer" parent="MainContainer/LeftPanel/PlayerInfo"]
+layout_mode = 2
+margin = Rect2(10, 10, 10, 10)
+
+[node name="PlayerName" type="Label" parent="MainContainer/LeftPanel/PlayerInfo/VBox"]
+text = "Player Name"
+theme_override_font_sizes/font_size = 24
+
+[node name="GoldLabel" type="Label" parent="MainContainer/LeftPanel/PlayerInfo/VBox"]
+text = "UI_GOLD: 1000"
+theme_override_font_sizes/font_size = 20
+
+[node name="RankLabel" type="Label" parent="MainContainer/LeftPanel/PlayerInfo/VBox"]
+text = "UI_RANK: Apprentice"
+
+[node name="ReputationLabel" type="Label" parent="MainContainer/LeftPanel/PlayerInfo/VBox"]
+text = "UI_REPUTATION: 50"
+
+[node name="DayLabel" type="Label" parent="MainContainer/LeftPanel/PlayerInfo/VBox"]
+text = "UI_DAY: 1"
+
+[node name="SeasonLabel" type="Label" parent="MainContainer/LeftPanel/PlayerInfo/VBox"]
+text = "UI_SEASON: Spring"
+
+[node name="QuickActions" type="PanelContainer" parent="MainContainer/LeftPanel"]
+minimum_size = Vector2(0, 200)
+
+[node name="VBox" type="VBoxContainer" parent="MainContainer/LeftPanel/QuickActions"]
+layout_mode = 2
+margin = Rect2(10, 10, 10, 10)
+
+[node name="Label" type="Label" parent="MainContainer/LeftPanel/QuickActions/VBox"]
+text = "Quick Actions"
+theme_override_font_sizes/font_size = 18
+
+[node name="MarketButton" type="Button" parent="MainContainer/LeftPanel/QuickActions/VBox"]
+text = "UI_MARKET"
+minimum_size = Vector2(0, 40)
+
+[node name="InventoryButton" type="Button" parent="MainContainer/LeftPanel/QuickActions/VBox"]
+text = "UI_INVENTORY"
+minimum_size = Vector2(0, 40)
+
+[node name="BankButton" type="Button" parent="MainContainer/LeftPanel/QuickActions/VBox"]
+text = "UI_BANK"
+minimum_size = Vector2(0, 40)
+
+[node name="SaveButton" type="Button" parent="MainContainer/LeftPanel/QuickActions/VBox"]
+text = "Save Game"
+minimum_size = Vector2(0, 40)
+
+[node name="WeatherInfo" type="PanelContainer" parent="MainContainer/LeftPanel"]
+minimum_size = Vector2(0, 100)
+
+[node name="VBox" type="VBoxContainer" parent="MainContainer/LeftPanel/WeatherInfo"]
+layout_mode = 2
+margin = Rect2(10, 10, 10, 10)
+
+[node name="WeatherLabel" type="Label" parent="MainContainer/LeftPanel/WeatherInfo/VBox"]
+text = "Weather: Sunny"
+theme_override_font_sizes/font_size = 16
+
+[node name="WeatherEffect" type="Label" parent="MainContainer/LeftPanel/WeatherInfo/VBox"]
+text = "Price: -5%, Demand: +10%"
+theme_override_font_sizes/font_size = 14
+
+[node name="CenterPanel" type="TabContainer" parent="MainContainer"]
+tab_alignment = 0
+
+[node name="Shop" type="Control" parent="MainContainer/CenterPanel"]
+layout_mode = 2
+
+[node name="ShopView" type="PanelContainer" parent="MainContainer/CenterPanel/Shop"]
+anchor_right = 1.0
+anchor_bottom = 1.0
+
+[node name="VBox" type="VBoxContainer" parent="MainContainer/CenterPanel/Shop/ShopView"]
+layout_mode = 2
+margin = Rect2(20, 20, 20, 20)
+
+[node name="Title" type="Label" parent="MainContainer/CenterPanel/Shop/ShopView/VBox"]
+text = "UI_SHOP"
+theme_override_font_sizes/font_size = 24
+
+[node name="HSeparator" type="HSeparator" parent="MainContainer/CenterPanel/Shop/ShopView/VBox"]
+
+[node name="ItemGrid" type="GridContainer" parent="MainContainer/CenterPanel/Shop/ShopView/VBox"]
+columns = 4
+theme_override_constants/h_separation = 10
+theme_override_constants/v_separation = 10
+
+[node name="Market" type="Control" parent="MainContainer/CenterPanel"]
+visible = false
+layout_mode = 2
+
+[node name="MarketView" type="PanelContainer" parent="MainContainer/CenterPanel/Market"]
+anchor_right = 1.0
+anchor_bottom = 1.0
+
+[node name="VBox" type="VBoxContainer" parent="MainContainer/CenterPanel/Market/MarketView"]
+layout_mode = 2
+margin = Rect2(20, 20, 20, 20)
+
+[node name="Title" type="Label" parent="MainContainer/CenterPanel/Market/MarketView/VBox"]
+text = "UI_MARKET"
+theme_override_font_sizes/font_size = 24
+
+[node name="HSeparator" type="HSeparator" parent="MainContainer/CenterPanel/Market/MarketView/VBox"]
+
+[node name="ItemList" type="ItemList" parent="MainContainer/CenterPanel/Market/MarketView/VBox"]
+minimum_size = Vector2(0, 400)
+
+[node name="BuyPanel" type="HBoxContainer" parent="MainContainer/CenterPanel/Market/MarketView/VBox"]
+theme_override_constants/separation = 20
+
+[node name="QuantityLabel" type="Label" parent="MainContainer/CenterPanel/Market/MarketView/VBox/BuyPanel"]
+text = "TRADE_QUANTITY:"
+
+[node name="QuantitySpinBox" type="SpinBox" parent="MainContainer/CenterPanel/Market/MarketView/VBox/BuyPanel"]
+min_value = 1.0
+max_value = 999.0
+value = 1.0
+
+[node name="BuyButton" type="Button" parent="MainContainer/CenterPanel/Market/MarketView/VBox/BuyPanel"]
+text = "TRADE_BUY"
+minimum_size = Vector2(100, 40)
+
+[node name="Inventory" type="Control" parent="MainContainer/CenterPanel"]
+visible = false
+layout_mode = 2
+
+[node name="InventoryView" type="PanelContainer" parent="MainContainer/CenterPanel/Inventory"]
+anchor_right = 1.0
+anchor_bottom = 1.0
+
+[node name="VBox" type="VBoxContainer" parent="MainContainer/CenterPanel/Inventory/InventoryView"]
+layout_mode = 2
+margin = Rect2(20, 20, 20, 20)
+
+[node name="Title" type="Label" parent="MainContainer/CenterPanel/Inventory/InventoryView/VBox"]
+text = "UI_INVENTORY"
+theme_override_font_sizes/font_size = 24
+
+[node name="HSplitContainer" type="HSplitContainer" parent="MainContainer/CenterPanel/Inventory/InventoryView/VBox"]
+split_offset = 400
+
+[node name="ShopInventory" type="VBoxContainer" parent="MainContainer/CenterPanel/Inventory/InventoryView/VBox/HSplitContainer"]
+
+[node name="Label" type="Label" parent="MainContainer/CenterPanel/Inventory/InventoryView/VBox/HSplitContainer/ShopInventory"]
+text = "UI_SHOP"
+theme_override_font_sizes/font_size = 18
+
+[node name="ShopList" type="ItemList" parent="MainContainer/CenterPanel/Inventory/InventoryView/VBox/HSplitContainer/ShopInventory"]
+minimum_size = Vector2(0, 300)
+
+[node name="WarehouseInventory" type="VBoxContainer" parent="MainContainer/CenterPanel/Inventory/InventoryView/VBox/HSplitContainer"]
+
+[node name="Label" type="Label" parent="MainContainer/CenterPanel/Inventory/InventoryView/VBox/HSplitContainer/WarehouseInventory"]
+text = "UI_WAREHOUSE"
+theme_override_font_sizes/font_size = 18
+
+[node name="WarehouseList" type="ItemList" parent="MainContainer/CenterPanel/Inventory/InventoryView/VBox/HSplitContainer/WarehouseInventory"]
+minimum_size = Vector2(0, 300)
+
+[node name="Bank" type="Control" parent="MainContainer/CenterPanel"]
+visible = false
+layout_mode = 2
+
+[node name="BankView" type="PanelContainer" parent="MainContainer/CenterPanel/Bank"]
+anchor_right = 1.0
+anchor_bottom = 1.0
+
+[node name="VBox" type="VBoxContainer" parent="MainContainer/CenterPanel/Bank/BankView"]
+layout_mode = 2
+margin = Rect2(20, 20, 20, 20)
+
+[node name="Title" type="Label" parent="MainContainer/CenterPanel/Bank/BankView/VBox"]
+text = "UI_BANK"
+theme_override_font_sizes/font_size = 24
+
+[node name="HSeparator" type="HSeparator" parent="MainContainer/CenterPanel/Bank/BankView/VBox"]
+
+[node name="BalanceLabel" type="Label" parent="MainContainer/CenterPanel/Bank/BankView/VBox"]
+text = "Balance: 0 Gold"
+theme_override_font_sizes/font_size = 20
+
+[node name="InterestLabel" type="Label" parent="MainContainer/CenterPanel/Bank/BankView/VBox"]
+text = "Interest Rate: 2% per year"
+
+[node name="HBoxContainer" type="HBoxContainer" parent="MainContainer/CenterPanel/Bank/BankView/VBox"]
+theme_override_constants/separation = 20
+
+[node name="AmountSpinBox" type="SpinBox" parent="MainContainer/CenterPanel/Bank/BankView/VBox/HBoxContainer"]
+min_value = 1.0
+max_value = 999999.0
+value = 100.0
+
+[node name="DepositButton" type="Button" parent="MainContainer/CenterPanel/Bank/BankView/VBox/HBoxContainer"]
+text = "Deposit"
+minimum_size = Vector2(100, 40)
+
+[node name="WithdrawButton" type="Button" parent="MainContainer/CenterPanel/Bank/BankView/VBox/HBoxContainer"]
+text = "Withdraw"
+minimum_size = Vector2(100, 40)
+
+[node name="HUD" parent="." instance=ExtResource("3")]
+
+[node name="NotificationPanel" type="PanelContainer" parent="."]
+anchor_left = 1.0
+anchor_right = 1.0
+offset_left = -300.0
+offset_bottom = 100.0
+visible = false
+
+[node name="NotificationText" type="RichTextLabel" parent="NotificationPanel"]
+layout_mode = 2
+text = "Notification"
+
+[connection signal="pressed" from="MainContainer/LeftPanel/QuickActions/VBox/MarketButton" to="." method="_on_market_button_pressed"]
+[connection signal="pressed" from="MainContainer/LeftPanel/QuickActions/VBox/InventoryButton" to="." method="_on_inventory_button_pressed"]
+[connection signal="pressed" from="MainContainer/LeftPanel/QuickActions/VBox/BankButton" to="." method="_on_bank_button_pressed"]
+[connection signal="pressed" from="MainContainer/LeftPanel/QuickActions/VBox/SaveButton" to="." method="_on_save_button_pressed"]
+[connection signal="pressed" from="MainContainer/CenterPanel/Market/MarketView/VBox/BuyPanel/BuyButton" to="." method="_on_buy_button_pressed"]
+[connection signal="pressed" from="MainContainer/CenterPanel/Bank/BankView/VBox/HBoxContainer/DepositButton" to="." method="_on_deposit_button_pressed"]
+[connection signal="pressed" from="MainContainer/CenterPanel/Bank/BankView/VBox/HBoxContainer/WithdrawButton" to="." method="_on_withdraw_button_pressed"]
