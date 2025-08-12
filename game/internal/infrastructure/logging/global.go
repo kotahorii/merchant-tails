@@ -42,7 +42,7 @@ func InitializeDefault() error {
 func Get() *Logger {
 	if globalLogger == nil {
 		// Initialize with defaults if not already initialized
-		InitializeDefault()
+		_ = InitializeDefault()
 	}
 	return globalLogger
 }

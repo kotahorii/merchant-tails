@@ -163,7 +163,7 @@ func (rfw *RotatingFileWriter) openFile() error {
 	// Get file size
 	info, err := file.Stat()
 	if err != nil {
-		file.Close()
+		_ = file.Close()
 		return fmt.Errorf("failed to stat log file: %w", err)
 	}
 
@@ -196,18 +196,18 @@ func (rfw *RotatingFileWriter) compressFile(filename string) {
 	if err != nil {
 		return
 	}
-	defer src.Close()
+	defer func() { _ = src.Close() }()
 
 	// Create compressed file
 	dst, err := os.Create(filename + ".gz")
 	if err != nil {
 		return
 	}
-	defer dst.Close()
+	defer func() { _ = dst.Close() }()
 
 	// Create gzip writer
 	gz := gzip.NewWriter(dst)
-	defer gz.Close()
+	defer func() { _ = gz.Close() }()
 
 	// Copy data
 	if _, err := io.Copy(gz, src); err != nil {
@@ -215,7 +215,7 @@ func (rfw *RotatingFileWriter) compressFile(filename string) {
 	}
 
 	// Remove original file after successful compression
-	os.Remove(filename)
+	_ = os.Remove(filename)
 }
 
 // cleanupOldFiles removes old backup files
@@ -232,7 +232,7 @@ func (rfw *RotatingFileWriter) cleanupOldFiles() {
 
 	// Find all backup files
 	var backups []string
-	filepath.Walk(dir, func(path string, info os.FileInfo, err error) error {
+	_ = filepath.Walk(dir, func(path string, info os.FileInfo, err error) error {
 		if err != nil {
 			return nil
 		}
@@ -262,7 +262,7 @@ func (rfw *RotatingFileWriter) cleanupOldFiles() {
 	// Remove old backups
 	if len(backups) > rfw.config.MaxBackups {
 		for _, backup := range backups[:len(backups)-rfw.config.MaxBackups] {
-			os.Remove(backup)
+			_ = os.Remove(backup)
 		}
 	}
 }
@@ -275,7 +275,7 @@ func (rfw *RotatingFileWriter) rotationChecker() {
 	for range ticker.C {
 		rfw.mu.Lock()
 		if rfw.shouldRotate() {
-			rfw.rotate()
+			_ = rfw.rotate()
 		}
 		rfw.mu.Unlock()
 	}

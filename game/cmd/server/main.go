@@ -55,7 +55,11 @@ func main() {
 	if err := logging.Initialize(logConfig, logManagerConfig); err != nil {
 		log.Fatalf("Failed to initialize logging: %v", err)
 	}
-	defer logging.Close()
+	defer func() {
+		if err := logging.Close(); err != nil {
+			log.Printf("Failed to close logging: %v", err)
+		}
+	}()
 
 	logging.Info("Starting Merchant Tails server")
 	logging.WithFields(map[string]interface{}{
@@ -139,7 +143,7 @@ func createHandler(gameServer *server.GameServer) http.Handler {
 	mux.HandleFunc("/health", func(w http.ResponseWriter, r *http.Request) {
 		w.Header().Set("Content-Type", "application/json")
 		w.WriteHeader(http.StatusOK)
-		fmt.Fprintf(w, `{"status":"healthy","timestamp":"%s"}`, time.Now().Format(time.RFC3339))
+		_, _ = fmt.Fprintf(w, `{"status":"healthy","timestamp":"%s"}`, time.Now().Format(time.RFC3339))
 	})
 
 	// Metrics endpoint (for Prometheus)
@@ -149,7 +153,7 @@ func createHandler(gameServer *server.GameServer) http.Handler {
 	mux.HandleFunc("/version", func(w http.ResponseWriter, r *http.Request) {
 		w.Header().Set("Content-Type", "application/json")
 		w.WriteHeader(http.StatusOK)
-		fmt.Fprintf(w, `{"version":"1.0.0","api_version":"v1","build_time":"%s"}`, time.Now().Format(time.RFC3339))
+		_, _ = fmt.Fprintf(w, `{"version":"1.0.0","api_version":"v1","build_time":"%s"}`, time.Now().Format(time.RFC3339))
 	})
 
 	// Add CORS middleware for development

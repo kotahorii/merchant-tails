@@ -78,7 +78,7 @@ func NewEventCalendar() *EventCalendar {
 // initializeDefaultEvents sets up regular calendar events
 func (ec *EventCalendar) initializeDefaultEvents() {
 	// Weekly market day
-	ec.AddEvent(&CalendarEvent{
+	_ = ec.AddEvent(&CalendarEvent{
 		ID:          "weekly_market",
 		Name:        "Weekly Market Day",
 		Description: "Special market prices and increased customer traffic",
@@ -93,7 +93,7 @@ func (ec *EventCalendar) initializeDefaultEvents() {
 	})
 
 	// Monthly festival
-	ec.AddEvent(&CalendarEvent{
+	_ = ec.AddEvent(&CalendarEvent{
 		ID:          "monthly_festival",
 		Name:        "Town Festival",
 		Description: "Celebration with special items and bonuses",
@@ -119,7 +119,7 @@ func (ec *EventCalendar) initializeDefaultEvents() {
 // addSeasonalEvents adds season-specific events
 func (ec *EventCalendar) addSeasonalEvents() {
 	// Spring Harvest
-	ec.AddEvent(&CalendarEvent{
+	_ = ec.AddEvent(&CalendarEvent{
 		ID:          "spring_harvest",
 		Name:        "Spring Harvest Festival",
 		Description: "Celebration of spring crops with reduced food prices",
@@ -133,7 +133,7 @@ func (ec *EventCalendar) addSeasonalEvents() {
 	})
 
 	// Summer Tournament
-	ec.AddEvent(&CalendarEvent{
+	_ = ec.AddEvent(&CalendarEvent{
 		ID:          "summer_tournament",
 		Name:        "Knights' Tournament",
 		Description: "Weapon and armor demand increases",
@@ -147,7 +147,7 @@ func (ec *EventCalendar) addSeasonalEvents() {
 	})
 
 	// Autumn Harvest
-	ec.AddEvent(&CalendarEvent{
+	_ = ec.AddEvent(&CalendarEvent{
 		ID:          "autumn_harvest",
 		Name:        "Grand Harvest Festival",
 		Description: "Biggest festival of the year",
@@ -166,7 +166,7 @@ func (ec *EventCalendar) addSeasonalEvents() {
 	})
 
 	// Winter Solstice
-	ec.AddEvent(&CalendarEvent{
+	_ = ec.AddEvent(&CalendarEvent{
 		ID:          "winter_solstice",
 		Name:        "Winter Solstice Market",
 		Description: "Special winter items and magical goods",

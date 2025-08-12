@@ -347,7 +347,7 @@ func registerGameManagerMethods(registry *gdextension.ClassRegistry) {
 	)
 
 	// Get save slots
-	registry.RegisterMethod("MerchantGame", "get_save_slots",
+	_, _ = registry.RegisterMethod("MerchantGame", "get_save_slots",
 		func(methodData unsafe.Pointer, instance unsafe.Pointer, args []unsafe.Pointer, ret unsafe.Pointer) error {
 			if gameManager == nil {
 				gdextension.SetStringToPointer(ret, "[]")
@@ -366,7 +366,7 @@ func registerGameManagerMethods(registry *gdextension.ClassRegistry) {
 	)
 
 	// Get queued events
-	registry.RegisterMethod("MerchantGame", "get_queued_events",
+	_, _ = registry.RegisterMethod("MerchantGame", "get_queued_events",
 		func(methodData unsafe.Pointer, instance unsafe.Pointer, args []unsafe.Pointer, ret unsafe.Pointer) error {
 			if gameManager == nil {
 				gdextension.SetStringToPointer(ret, "[]")

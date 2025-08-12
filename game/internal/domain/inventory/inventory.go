@@ -833,8 +833,8 @@ func (im *InventoryManager) OptimizeCapacityUsage() error {
 			}
 
 			// Transfer without locks (we're already locked)
-			im.WarehouseInventory.RemoveItem(itemID, transferQty)
-			im.ShopInventory.AddItem(entry.Item, transferQty)
+			_ = im.WarehouseInventory.RemoveItem(itemID, transferQty)
+			_ = im.ShopInventory.AddItem(entry.Item, transferQty)
 			toShop -= transferQty
 		}
 	}
@@ -858,8 +858,8 @@ func (im *InventoryManager) OptimizeCapacityUsage() error {
 			}
 
 			// Transfer without locks
-			im.ShopInventory.RemoveItem(itemID, transferQty)
-			im.WarehouseInventory.AddItem(entry.Item, transferQty)
+			_ = im.ShopInventory.RemoveItem(itemID, transferQty)
+			_ = im.WarehouseInventory.AddItem(entry.Item, transferQty)
 			toWarehouse -= transferQty
 		}
 	}

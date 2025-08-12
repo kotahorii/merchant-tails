@@ -237,17 +237,17 @@ func (lm *LogManager) compressFile(filePath string) {
 		fmt.Printf("Failed to open file for compression: %v\n", err)
 		return
 	}
-	defer source.Close()
+	defer func() { _ = source.Close() }()
 
 	dest, err := os.Create(filePath + ".gz")
 	if err != nil {
 		fmt.Printf("Failed to create compressed file: %v\n", err)
 		return
 	}
-	defer dest.Close()
+	defer func() { _ = dest.Close() }()
 
 	gz := gzip.NewWriter(dest)
-	defer gz.Close()
+	defer func() { _ = gz.Close() }()
 
 	if _, err := io.Copy(gz, source); err != nil {
 		fmt.Printf("Failed to compress file: %v\n", err)
@@ -255,7 +255,7 @@ func (lm *LogManager) compressFile(filePath string) {
 	}
 
 	// Remove original file after successful compression
-	os.Remove(filePath)
+	_ = os.Remove(filePath)
 }
 
 // flushWorker periodically flushes the buffer
@@ -369,7 +369,7 @@ func (lm *LogManager) cleanup() {
 
 		// Remove if too old or exceeds max backups
 		if fi.modTime.Before(cutoffTime) || keepCount > lm.config.MaxBackups {
-			os.Remove(fi.path)
+			_ = os.Remove(fi.path)
 		}
 	}
 }
