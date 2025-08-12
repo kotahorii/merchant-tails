@@ -145,7 +145,7 @@ func (fm *FrequencyManager) ShouldTriggerEvent(eventID string, rarity EventRarit
 	defer fm.mu.Unlock()
 
 	// Check cooldown
-	if !fm.checkCooldown(eventID, rarity) {
+	if !fm.checkCooldown(eventID) {
 		return false
 	}
 
@@ -165,7 +165,7 @@ func (fm *FrequencyManager) ShouldTriggerEvent(eventID string, rarity EventRarit
 }
 
 // checkCooldown checks if event is off cooldown
-func (fm *FrequencyManager) checkCooldown(eventID string, _ EventRarity) bool {
+func (fm *FrequencyManager) checkCooldown(eventID string) bool {
 	data, exists := fm.eventHistory[eventID]
 	if !exists {
 		return true // Never occurred, no cooldown
@@ -321,7 +321,7 @@ func (fm *FrequencyManager) GetNextEvents(count int) []EventSuggestion {
 
 	// Calculate weights for all eligible events
 	for eventID, data := range fm.eventHistory {
-		if fm.checkCooldown(eventID, data.EventType) {
+		if fm.checkCooldown(eventID) {
 			weight := fm.calculateEventWeight(data)
 			suggestions = append(suggestions, EventSuggestion{
 				EventID:     eventID,

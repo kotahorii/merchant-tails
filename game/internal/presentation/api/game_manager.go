@@ -134,19 +134,19 @@ func (gm *GameManager) initializeSystems() {
 func (gm *GameManager) setupEventListeners() {
 	// Listen for time events
 	gm.eventBus.Subscribe("time.advanced", func(e event.Event) error {
-		gm.handleTimeAdvanced(e)
+		gm.handleTimeAdvanced()
 		return nil
 	})
 
 	// Listen for trade events
 	gm.eventBus.Subscribe(event.EventNameTransactionComplete, func(e event.Event) error {
-		gm.handleTradeCompleted(e)
+		gm.handleTradeCompleted()
 		return nil
 	})
 
 	// Listen for market events
 	gm.eventBus.Subscribe(event.EventNamePriceUpdated, func(e event.Event) error {
-		gm.handleMarketPriceChanged(e)
+		gm.handleMarketPriceChanged()
 		return nil
 	})
 }
@@ -379,7 +379,7 @@ func (gm *GameManager) GetSaveSlots() (string, error) {
 }
 
 // handleTimeAdvanced handles time advancement events
-func (gm *GameManager) handleTimeAdvanced(_ event.Event) {
+func (gm *GameManager) handleTimeAdvanced() {
 	// Advance game day
 	gm.gameState.AdvanceDay()
 
@@ -398,7 +398,7 @@ func (gm *GameManager) handleTimeAdvanced(_ event.Event) {
 }
 
 // handleTradeCompleted handles trade completion events
-func (gm *GameManager) handleTradeCompleted(_ event.Event) {
+func (gm *GameManager) handleTradeCompleted() {
 	// Extract trade data from event
 	revenue := 0.0
 	success := true
@@ -425,7 +425,7 @@ func (gm *GameManager) handleTradeCompleted(_ event.Event) {
 }
 
 // handleMarketPriceChanged handles market price change events
-func (gm *GameManager) handleMarketPriceChanged(_ event.Event) {
+func (gm *GameManager) handleMarketPriceChanged() {
 	// Update market prices for all items
 	if gm.market != nil {
 		for _, itemID := range []string{"apple", "potion", "sword"} {
