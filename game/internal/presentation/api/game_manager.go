@@ -7,7 +7,6 @@ import (
 	"sync"
 	"time"
 
-	"github.com/yourusername/merchant-tails/game/internal/domain/calendar"
 	"github.com/yourusername/merchant-tails/game/internal/domain/event"
 	"github.com/yourusername/merchant-tails/game/internal/domain/gameloop"
 	"github.com/yourusername/merchant-tails/game/internal/domain/gamestate"
@@ -16,9 +15,7 @@ import (
 	"github.com/yourusername/merchant-tails/game/internal/domain/progression"
 	"github.com/yourusername/merchant-tails/game/internal/domain/settings"
 	timemanager "github.com/yourusername/merchant-tails/game/internal/domain/time"
-	"github.com/yourusername/merchant-tails/game/internal/domain/trading"
 	"github.com/yourusername/merchant-tails/game/internal/infrastructure/logging"
-	"github.com/yourusername/merchant-tails/game/internal/infrastructure/monitoring"
 	"github.com/yourusername/merchant-tails/game/internal/infrastructure/persistence"
 )
 
@@ -39,15 +36,12 @@ type GameManager struct {
 	eventBridge *EventBridge
 
 	// Game systems
-	market        *market.Market
-	inventory     *inventory.InventoryManager
-	trading       *trading.TradingSystem
-	progression   *progression.ProgressionManager
-	eventCalendar *calendar.EventCalendar
+	market      *market.Market
+	inventory   *inventory.InventoryManager
+	progression *progression.ProgressionManager
 
 	// Infrastructure
 	saveManager *persistence.SaveManager
-	metrics     *monitoring.MetricsCollector
 	settings    *settings.SettingsManager
 
 	// State management
@@ -66,7 +60,6 @@ func NewGameManager() *GameManager {
 		gameState:   gamestate.NewGameState(nil), // Use default config
 		eventBus:    event.GetGlobalEventBus(),
 		eventBridge: NewEventBridge(),
-		metrics:     monitoring.NewMetricsCollector(),
 		ctx:         ctx,
 		cancel:      cancel,
 	}
@@ -83,7 +76,7 @@ func (gm *GameManager) initializeSystems() {
 	gm.settings = settings.NewSettingsManager("./config/settings.json")
 	if err := gm.settings.LoadSettings(); err != nil {
 		// Log error but continue with defaults
-		logging.WithError(err).Warn("Failed to load settings, using defaults")
+		logging.Warn("Failed to load settings: %v", err)
 	}
 
 	// Create market
@@ -111,24 +104,8 @@ func (gm *GameManager) initializeSystems() {
 	}
 	gm.inventory = invManager
 
-	// Create trading system
-	tradingSystem, err := trading.NewTradingSystem(gm.inventory, nil)
-	if err != nil {
-		panic(err) // Should not happen with valid parameters
-	}
-	gm.trading = tradingSystem
-
 	// Create progression manager
 	gm.progression = progression.NewProgressionManager()
-
-	// Create event calendar
-	gm.eventCalendar = calendar.NewEventCalendar()
-
-	// Register calendar callback to publish events
-	gm.eventCalendar.RegisterCallback(func(calEvent *calendar.CalendarEvent, status string) {
-		eventName := fmt.Sprintf("calendar.event.%s", status)
-		gm.eventBus.PublishAsync(event.NewBaseEvent(eventName))
-	})
 
 	// AI system removed - single player only
 
@@ -212,7 +189,8 @@ func (gm *GameManager) StartNewGame(playerName string) error {
 	gm.isPaused = false
 
 	// Log game start
-	logging.LogGameState("started", gm.gameState.GetGold(), gm.gameState.GetCurrentDay(), gm.gameState.GetReputation())
+	logging.Info("Game started - Gold: %d, Day: %d, Reputation: %.2f",
+		gm.gameState.GetGold(), gm.gameState.GetCurrentDay(), gm.gameState.GetReputation())
 
 	go gm.runGameLoop()
 
@@ -249,25 +227,8 @@ func (gm *GameManager) update(deltaTime float64) {
 	// Check for game events
 	gm.checkGameEvents()
 
-	// Record metrics
-	if gm.metrics != nil {
-		gm.metrics.RecordUpdateLoop(time.Since(updateStart))
-
-		// Update player metrics
-		playerGold := gm.gameState.GetGold()
-		gm.metrics.UpdatePlayerMetrics(playerGold, gm.gameState.GetCurrentDay(), gm.gameState.GetReputation())
-
-		// Update inventory metrics
-		if gm.inventory != nil {
-			shop := gm.inventory.GetShop()
-			totalItems := 0
-			totalValue := 0.0
-			for _, quantity := range shop.GetAll() {
-				totalItems += quantity
-			}
-			gm.metrics.UpdateInventoryMetrics(totalItems, totalValue)
-		}
-	}
+	// Metrics removed - too complex
+	_ = updateStart
 }
 
 // initializeAIMerchants removed - single player only
@@ -431,7 +392,7 @@ func (gm *GameManager) handleTimeAdvanced(e event.Event) {
 
 	// Check for rank up
 	if gm.gameState.CheckRankUp() {
-		logging.Infof("Player ranked up to %s!", gamestate.GetRankName(gm.gameState.GetRank()))
+		logging.Info("Player ranked up to %s!", gamestate.GetRankName(gm.gameState.GetRank()))
 		gm.eventBus.PublishAsync(event.NewBaseEvent("RankUp"))
 	}
 
@@ -440,10 +401,7 @@ func (gm *GameManager) handleTimeAdvanced(e event.Event) {
 		gm.market.UpdatePrices()
 	}
 
-	// Update event calendar
-	if gm.eventCalendar != nil {
-		gm.eventCalendar.UpdateDate(time.Now())
-	}
+	// Event calendar removed - too complex
 }
 
 // handleTradeCompleted handles trade completion events
@@ -454,12 +412,11 @@ func (gm *GameManager) handleTradeCompleted(e event.Event) {
 	transactionID := fmt.Sprintf("trans-%d", time.Now().Unix())
 
 	// Log transaction
-	logging.LogTransaction(transactionID, "unknown", 1, revenue, success)
+	logging.LogTransaction(transactionID, "unknown", 1, revenue, 0.0)
 
-	// Record metrics
-	if gm.metrics != nil {
-		gm.metrics.RecordTransaction(success, revenue)
-	}
+	// Metrics removed
+	_ = success
+	_ = revenue
 
 	if gm.progression != nil {
 		// Update progression with dummy values for now
@@ -468,16 +425,16 @@ func (gm *GameManager) handleTradeCompleted(e event.Event) {
 		// Update game state
 		if result.RankUp {
 			gm.gameState.SetRank(gamestate.PlayerRank(result.NewRank))
-			logging.LogGameState("rank_up", gm.gameState.GetGold(), gm.gameState.GetCurrentDay(), gm.gameState.GetReputation())
+			logging.Info("Rank up - Gold: %d, Day: %d, Reputation: %.2f",
+				gm.gameState.GetGold(), gm.gameState.GetCurrentDay(), gm.gameState.GetReputation())
 		}
 	}
 }
 
 // handleMarketPriceChanged handles market price change events
 func (gm *GameManager) handleMarketPriceChanged(e event.Event) {
-	// Record price update metrics
-	if gm.metrics != nil && gm.market != nil {
-		// Update market price metrics for all items
+	// Update market prices for all items
+	if gm.market != nil {
 		for _, itemID := range []string{"apple", "potion", "sword"} {
 			oldPrice := float64(gm.market.GetPrice(itemID))
 			gm.market.UpdatePrice(itemID)
@@ -485,9 +442,8 @@ func (gm *GameManager) handleMarketPriceChanged(e event.Event) {
 
 			// Log market event
 			impact := (newPrice - oldPrice) / oldPrice * 100
-			logging.LogMarketEvent("price_change", itemID, oldPrice, newPrice, impact)
-
-			gm.metrics.UpdateMarketPrice(itemID, newPrice)
+			logging.Info("Market price change - Item: %s, Old: %.2f, New: %.2f, Impact: %.2f%%",
+				itemID, oldPrice, newPrice, impact)
 		}
 	}
 
@@ -720,91 +676,22 @@ func (gm *GameManager) GetQueuedEvents() (string, error) {
 	return string(jsonData), nil
 }
 
-// GetUpcomingEvents returns upcoming calendar events
+// GetUpcomingEvents returns upcoming events (simplified)
 func (gm *GameManager) GetUpcomingEvents(days int) (string, error) {
-	gm.mu.RLock()
-	defer gm.mu.RUnlock()
-
-	if gm.eventCalendar == nil {
-		return "[]", nil
-	}
-
-	events := gm.eventCalendar.GetUpcomingEvents(days)
-
-	// Convert to simpler format for Godot
-	simpleEvents := make([]map[string]interface{}, 0, len(events))
-	for _, event := range events {
-		simpleEvents = append(simpleEvents, map[string]interface{}{
-			"id":          event.ID,
-			"name":        event.Name,
-			"description": event.Description,
-			"type":        int(event.Type),
-			"priority":    int(event.Priority),
-			"startDate":   event.StartDate.Format(time.RFC3339),
-			"endDate":     event.EndDate.Format(time.RFC3339),
-			"effects":     event.Effects,
-			"rewards":     event.Rewards,
-		})
-	}
-
-	jsonData, err := json.Marshal(simpleEvents)
-	if err != nil {
-		return "[]", err
-	}
-
-	return string(jsonData), nil
+	// Event calendar removed - too complex
+	return "[]", nil
 }
 
-// GetActiveEvents returns currently active calendar events
+// GetActiveEvents returns currently active events (simplified)
 func (gm *GameManager) GetActiveEvents() (string, error) {
-	gm.mu.RLock()
-	defer gm.mu.RUnlock()
-
-	if gm.eventCalendar == nil {
-		return "[]", nil
-	}
-
-	events := gm.eventCalendar.GetActiveEvents()
-
-	// Convert to simpler format for Godot
-	simpleEvents := make([]map[string]interface{}, 0, len(events))
-	for _, event := range events {
-		simpleEvents = append(simpleEvents, map[string]interface{}{
-			"id":          event.ID,
-			"name":        event.Name,
-			"description": event.Description,
-			"type":        int(event.Type),
-			"priority":    int(event.Priority),
-			"effects":     event.Effects,
-			"rewards":     event.Rewards,
-		})
-	}
-
-	jsonData, err := json.Marshal(simpleEvents)
-	if err != nil {
-		return "[]", err
-	}
-
-	return string(jsonData), nil
+	// Event calendar removed - too complex
+	return "[]", nil
 }
 
-// GetEventEffects returns the combined effects of all active events
+// GetEventEffects returns the combined effects of all active events (simplified)
 func (gm *GameManager) GetEventEffects() (string, error) {
-	gm.mu.RLock()
-	defer gm.mu.RUnlock()
-
-	if gm.eventCalendar == nil {
-		return "{}", nil
-	}
-
-	effects := gm.eventCalendar.GetEventEffects()
-
-	jsonData, err := json.Marshal(effects)
-	if err != nil {
-		return "{}", err
-	}
-
-	return string(jsonData), nil
+	// Event calendar removed - too complex
+	return "{}", nil
 }
 
 // SetEventCallback sets the callback for sending events to Godot
@@ -860,7 +747,7 @@ func (gm *GameManager) AdvanceTime(days int) {
 
 		// Check for rank up after each day
 		if gm.gameState.CheckRankUp() {
-			logging.Infof("Player ranked up to %s!", gamestate.GetRankName(gm.gameState.GetRank()))
+			logging.Info("Player ranked up to %s!", gamestate.GetRankName(gm.gameState.GetRank()))
 			gm.eventBus.PublishAsync(event.NewBaseEvent("RankUp"))
 		}
 	}
@@ -922,10 +809,7 @@ func (gm *GameManager) UpgradeInventoryCapacity(location string, amount int, cos
 			newCapacity = stats.CurrentWarehouseCapacity
 		}
 
-		// Record metrics
-		if gm.metrics != nil {
-			gm.metrics.RecordUpgrade(location, cost)
-		}
+		// Metrics removed
 
 		return map[string]interface{}{
 			"success":       true,
@@ -1176,17 +1060,21 @@ func (gm *GameManager) applySettingsChanges(category string, updates map[string]
 	case "audio":
 		// Audio changes would be applied to the audio system
 		if volume, ok := updates["musicVolume"].(float64); ok {
-			logging.Infof("Music volume changed to: %.2f", volume)
+			logging.Info("Music volume changed to: %.2f", volume)
 		}
 	case "game":
 		// Game settings changes
 		if autoSave, ok := updates["autoSave"].(bool); ok && gm.saveManager != nil {
-			logging.Infof("Auto-save %s", map[bool]string{true: "enabled", false: "disabled"}[autoSave])
+			if autoSave {
+				logging.Info("Auto-save enabled", "")
+			} else {
+				logging.Info("Auto-save disabled", "")
+			}
 		}
 	case "graphics":
 		// Graphics settings would trigger rendering updates
 		if fps, ok := updates["targetFPS"].(int); ok && gm.gameLoop != nil {
-			logging.Infof("Target FPS changed to: %d", fps)
+			logging.Info("Target FPS changed to: %d", fps)
 		}
 	}
 }

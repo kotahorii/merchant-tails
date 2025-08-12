@@ -4,7 +4,13 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Project Overview
 
-Merchant Tails is a business simulation game teaching investment fundamentals through fantasy merchant trading. Built with Godot 4.4.1 for rendering/UI and Go 1.24 for core game logic via GDExtension.
+Merchant Tails is a **SIMPLE** business simulation game teaching investment fundamentals through fantasy merchant trading. Built with Godot 4.4.1 for rendering/UI and Go 1.24 for core game logic via GDExtension.
+
+**🚨 IMPORTANT: SIMPLICITY IS THE #1 PRIORITY 🚨**
+- This is a game for beginners learning investment basics
+- Complex features have been intentionally removed
+- Always choose the simplest solution that works
+- If a feature seems complex, it probably shouldn't be implemented
 
 ## Build and Development Commands
 
@@ -48,10 +54,11 @@ cd game && go test -coverprofile=coverage.out ./internal/domain/item
 ## Architecture Overview
 
 ### Core Architecture Principles
-1. **Clean Architecture** - Strict layer separation with dependency inversion
-2. **Domain-Driven Design (DDD)** - Business logic in domain layer
-3. **Test-Driven Development (TDD)** - Tests written before implementation
-4. **Event-Driven Architecture** - Loose coupling via event bus
+1. **Simplicity First** - Choose simple solutions over complex abstractions
+2. **Clean Architecture** - Basic layer separation (no over-engineering)
+3. **Domain-Driven Design (DDD)** - Core business logic in domain layer
+4. **Test-Driven Development (TDD)** - Tests for core functionality only
+5. **Minimal Dependencies** - Avoid unnecessary libraries and frameworks
 
 ### Layer Structure
 ```
@@ -175,6 +182,44 @@ GitHub Actions workflow (`.github/workflows/ci.yml`):
 - golangci-lint for code quality
 - air for hot reload development
 
+## Simplified Systems (After Major Cleanup)
+
+### What We Removed (23,500+ lines)
+- ❌ ECS (Entity Component System) - Over-engineered for a merchant game
+- ❌ Memory profiling/optimization - Unnecessary for turn-based game
+- ❌ Concurrent processing/worker pools - Added complexity without benefit
+- ❌ Server/networking - Single-player only
+- ❌ Rendering optimization - No 3D graphics to optimize
+- ❌ Complex save systems - Simple JSON is enough
+- ❌ Performance testing - Not needed for simple game
+- ❌ Monitoring/metrics - Overkill for indie game
+- ❌ AI trading strategies - Confuses learning objectives
+- ❌ Analytics/charts - Too complex for beginners
+- ❌ Protocol Buffers/gRPC - No network communication needed
+
+### What We Simplified
+- ✅ Bank system → Basic savings only (no loans/investments)
+- ✅ Tutorial → Simple step-by-step guide (no interactive features)
+- ✅ Difficulty → 3 simple levels (Easy/Normal/Hard)
+- ✅ Logging → Basic console output only
+- ✅ Weather → Simple price effects only
+
+## Development Guidelines
+
+### Before Adding ANY Feature, Ask:
+1. **Is this absolutely necessary for teaching investment basics?**
+2. **Can we achieve the same goal with something simpler?**
+3. **Will beginners understand this easily?**
+4. **Does this add complexity without clear value?**
+
+### Code Style
+- Write readable code over "clever" code
+- Use simple variable names
+- Avoid deep nesting (max 3 levels)
+- Keep functions under 50 lines
+- No premature optimization
+- Comments only where business logic is non-obvious
+
 ## Critical Pre-Push Checklist
 
 **IMPORTANT: ALWAYS run these commands before pushing to GitHub:**
@@ -198,3 +243,4 @@ make check
 - NEVER push if build errors exist
 - ALWAYS fix all issues before committing
 - If CI fails after push, fix immediately
+- **NEVER add complex features without explicit user request**

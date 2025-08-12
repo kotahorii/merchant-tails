@@ -201,12 +201,13 @@ func (sm *SaveManager) GetSaveDirectory() string {
 
 // SaveMetadata contains quick-access save information
 type SaveMetadata struct {
-	Slot       int       `json:"slot"`
-	Timestamp  time.Time `json:"timestamp"`
-	PlayerName string    `json:"playerName"`
-	Gold       int       `json:"gold"`
-	Day        int       `json:"day"`
-	Rank       string    `json:"rank"`
+	Slot       int           `json:"slot"`
+	Timestamp  time.Time     `json:"timestamp"`
+	PlayerName string        `json:"playerName"`
+	Gold       int           `json:"gold"`
+	Day        int           `json:"day"`
+	Rank       string        `json:"rank"`
+	PlayTime   time.Duration `json:"playTime"`
 }
 
 // SaveSlotInfo contains information about a save slot

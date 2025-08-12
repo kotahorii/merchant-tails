@@ -8,7 +8,6 @@ import (
 
 	"github.com/yourusername/merchant-tails/game/internal/domain/item"
 	"github.com/yourusername/merchant-tails/game/internal/domain/market"
-	"github.com/yourusername/merchant-tails/game/internal/domain/trading"
 )
 
 // Risk level constants
@@ -76,22 +75,20 @@ type QuickBuyPreset struct {
 
 // PurchaseUIManager manages the purchase UI backend
 type PurchaseUIManager struct {
-	gameManager   *GameManager
-	market        *market.Market
-	tradingSystem *trading.TradingSystem
-	priceHistory  map[string][]float64
-	presets       map[string]*QuickBuyPreset
-	mu            sync.RWMutex
+	gameManager  *GameManager
+	market       *market.Market
+	priceHistory map[string][]float64
+	presets      map[string]*QuickBuyPreset
+	mu           sync.RWMutex
 }
 
 // NewPurchaseUIManager creates a new purchase UI manager
 func NewPurchaseUIManager(gameManager *GameManager) *PurchaseUIManager {
 	return &PurchaseUIManager{
-		gameManager:   gameManager,
-		market:        gameManager.market,
-		tradingSystem: gameManager.trading,
-		priceHistory:  make(map[string][]float64),
-		presets:       createDefaultPresets(),
+		gameManager:  gameManager,
+		market:       gameManager.market,
+		priceHistory: make(map[string][]float64),
+		presets:      createDefaultPresets(),
 	}
 }
 
