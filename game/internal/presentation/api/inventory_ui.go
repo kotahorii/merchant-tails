@@ -15,6 +15,13 @@ const (
 	itemApple  = "apple"
 	itemOrange = "orange"
 	itemBanana = "banana"
+
+	// Location constants
+	locationShop      = "shop"
+	locationWarehouse = "warehouse"
+
+	// Category filter constant
+	categoryAll = "all"
 )
 
 // InventoryUIItem represents an item in the inventory UI
@@ -485,11 +492,11 @@ func (iui *InventoryUIManager) matchesFilter(item *InventoryUIItem, filter *Inve
 		return true
 	}
 
-	if filter.Category != "" && filter.Category != "all" && string(item.Category) != filter.Category {
+	if filter.Category != "" && filter.Category != categoryAll && string(item.Category) != filter.Category {
 		return false
 	}
 
-	if filter.Location != "" && filter.Location != "all" && item.Location != filter.Location {
+	if filter.Location != "" && filter.Location != categoryAll && item.Location != filter.Location {
 		return false
 	}
 

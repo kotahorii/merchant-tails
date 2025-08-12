@@ -598,7 +598,7 @@ func (psu *PriceSettingUIManager) getDemandLevel(itemID string) string {
 		return demandVeryLow
 	}
 
-	return "normal"
+	return demandNormal
 }
 
 func (psu *PriceSettingUIManager) calculateElasticity(itemID string) float64 {

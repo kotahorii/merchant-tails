@@ -3,7 +3,6 @@ package weather
 import (
 	"math/rand"
 	"sync"
-	"time"
 )
 
 // SimpleWeatherType represents basic weather conditions
@@ -38,7 +37,7 @@ func (sw *SimpleWeather) UpdateWeather() {
 	defer sw.mu.Unlock()
 
 	// Simple random weather change
-	rand.Seed(time.Now().UnixNano())
+	// Random seed is automatically initialized in Go 1.20+
 	weatherType := SimpleWeatherType(rand.Intn(3))
 
 	sw.currentWeather = weatherType

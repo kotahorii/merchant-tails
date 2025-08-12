@@ -19,13 +19,6 @@ import (
 	"github.com/yourusername/merchant-tails/game/internal/infrastructure/persistence"
 )
 
-// Location constants
-const (
-	locationShop      = "shop"
-	locationWarehouse = "warehouse"
-	categoryAll       = "all"
-)
-
 // GameManager manages the overall game state and coordinates between systems
 type GameManager struct {
 	// Core systems
@@ -76,7 +69,7 @@ func (gm *GameManager) initializeSystems() {
 	gm.settings = settings.NewSettingsManager("./config/settings.json")
 	if err := gm.settings.LoadSettings(); err != nil {
 		// Log error but continue with defaults
-		logging.Warn("Failed to load settings: %v", err)
+		logging.Warnf("Failed to load settings: %v", err)
 	}
 
 	// Create market
@@ -189,7 +182,7 @@ func (gm *GameManager) StartNewGame(playerName string) error {
 	gm.isPaused = false
 
 	// Log game start
-	logging.Info("Game started - Gold: %d, Day: %d, Reputation: %.2f",
+	logging.Infof("Game started - Gold: %d, Day: %d, Reputation: %.2f",
 		gm.gameState.GetGold(), gm.gameState.GetCurrentDay(), gm.gameState.GetReputation())
 
 	go gm.runGameLoop()
@@ -392,7 +385,7 @@ func (gm *GameManager) handleTimeAdvanced(e event.Event) {
 
 	// Check for rank up
 	if gm.gameState.CheckRankUp() {
-		logging.Info("Player ranked up to %s!", gamestate.GetRankName(gm.gameState.GetRank()))
+		logging.Infof("Player ranked up to %s!", gamestate.GetRankName(gm.gameState.GetRank()))
 		gm.eventBus.PublishAsync(event.NewBaseEvent("RankUp"))
 	}
 
@@ -425,7 +418,7 @@ func (gm *GameManager) handleTradeCompleted(e event.Event) {
 		// Update game state
 		if result.RankUp {
 			gm.gameState.SetRank(gamestate.PlayerRank(result.NewRank))
-			logging.Info("Rank up - Gold: %d, Day: %d, Reputation: %.2f",
+			logging.Infof("Rank up - Gold: %d, Day: %d, Reputation: %.2f",
 				gm.gameState.GetGold(), gm.gameState.GetCurrentDay(), gm.gameState.GetReputation())
 		}
 	}
@@ -442,7 +435,7 @@ func (gm *GameManager) handleMarketPriceChanged(e event.Event) {
 
 			// Log market event
 			impact := (newPrice - oldPrice) / oldPrice * 100
-			logging.Info("Market price change - Item: %s, Old: %.2f, New: %.2f, Impact: %.2f%%",
+			logging.Infof("Market price change - Item: %s, Old: %.2f, New: %.2f, Impact: %.2f%%",
 				itemID, oldPrice, newPrice, impact)
 		}
 	}
@@ -452,9 +445,6 @@ func (gm *GameManager) handleMarketPriceChanged(e event.Event) {
 }
 
 // getMarketItems removed - AI system no longer needed
-func (gm *GameManager) getMarketItems() []interface{} {
-	return []interface{}{}
-}
 
 // GetMarketData returns current market data
 func (gm *GameManager) GetMarketData() map[string]interface{} {
@@ -747,7 +737,7 @@ func (gm *GameManager) AdvanceTime(days int) {
 
 		// Check for rank up after each day
 		if gm.gameState.CheckRankUp() {
-			logging.Info("Player ranked up to %s!", gamestate.GetRankName(gm.gameState.GetRank()))
+			logging.Infof("Player ranked up to %s!", gamestate.GetRankName(gm.gameState.GetRank()))
 			gm.eventBus.PublishAsync(event.NewBaseEvent("RankUp"))
 		}
 	}
@@ -1060,21 +1050,21 @@ func (gm *GameManager) applySettingsChanges(category string, updates map[string]
 	case "audio":
 		// Audio changes would be applied to the audio system
 		if volume, ok := updates["musicVolume"].(float64); ok {
-			logging.Info("Music volume changed to: %.2f", volume)
+			logging.Infof("Music volume changed to: %.2f", volume)
 		}
 	case "game":
 		// Game settings changes
 		if autoSave, ok := updates["autoSave"].(bool); ok && gm.saveManager != nil {
 			if autoSave {
-				logging.Info("Auto-save enabled")
+				logging.Infof("Auto-save enabled")
 			} else {
-				logging.Info("Auto-save disabled")
+				logging.Infof("Auto-save disabled")
 			}
 		}
 	case "graphics":
 		// Graphics settings would trigger rendering updates
 		if fps, ok := updates["targetFPS"].(int); ok && gm.gameLoop != nil {
-			logging.Info("Target FPS changed to: %d", fps)
+			logging.Infof("Target FPS changed to: %d", fps)
 		}
 	}
 }

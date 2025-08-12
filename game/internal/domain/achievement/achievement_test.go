@@ -272,7 +272,7 @@ func TestGetProgress(t *testing.T) {
 	am.UpdateGoldStats(1000)      // Gold 1000: 10 points
 	am.CompleteTutorial()         // Tutorial: 5 points
 
-	unlocked, total, points = am.GetProgress()
+	unlocked, _, points = am.GetProgress()
 	assert.Equal(t, 3, unlocked)
 	assert.Equal(t, 25, points)
 }

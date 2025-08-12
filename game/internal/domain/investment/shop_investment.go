@@ -325,9 +325,7 @@ func (si *ShopInvestment) checkUnlocks() {
 	}
 
 	// Unlock based on total investment
-	if si.totalInvested >= 10000 {
-		// Unlock special upgrades
-	}
+	// TODO: Unlock special upgrades when totalInvested >= 10000
 }
 
 // UpgradeShopLevel upgrades the shop to the next level

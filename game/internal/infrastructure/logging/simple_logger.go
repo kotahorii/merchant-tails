@@ -41,27 +41,27 @@ func (sl *SimpleLogger) SetLevel(level LogLevel) {
 }
 
 // Debug logs a debug message
-func (sl *SimpleLogger) Debug(format string, args ...interface{}) {
-	sl.log(LevelDebug, "DEBUG", format, args...)
+func (sl *SimpleLogger) Debugf(format string, args ...interface{}) {
+	sl.logf(LevelDebug, "DEBUG", format, args...)
 }
 
 // Info logs an info message
-func (sl *SimpleLogger) Info(format string, args ...interface{}) {
-	sl.log(LevelInfo, "INFO", format, args...)
+func (sl *SimpleLogger) Infof(format string, args ...interface{}) {
+	sl.logf(LevelInfo, "INFO", format, args...)
 }
 
 // Warn logs a warning message
-func (sl *SimpleLogger) Warn(format string, args ...interface{}) {
-	sl.log(LevelWarn, "WARN", format, args...)
+func (sl *SimpleLogger) Warnf(format string, args ...interface{}) {
+	sl.logf(LevelWarn, "WARN", format, args...)
 }
 
 // Error logs an error message
-func (sl *SimpleLogger) Error(format string, args ...interface{}) {
-	sl.log(LevelError, "ERROR", format, args...)
+func (sl *SimpleLogger) Errorf(format string, args ...interface{}) {
+	sl.logf(LevelError, "ERROR", format, args...)
 }
 
 // log handles the actual logging
-func (sl *SimpleLogger) log(level LogLevel, prefix string, format string, args ...interface{}) {
+func (sl *SimpleLogger) logf(level LogLevel, prefix string, format string, args ...interface{}) {
 	sl.mu.RLock()
 	if level < sl.level {
 		sl.mu.RUnlock()
@@ -102,41 +102,41 @@ func SetGlobalLevel(level LogLevel) {
 }
 
 // Debug logs a debug message globally
-func Debug(format string, args ...interface{}) {
-	globalLogger.Debug(format, args...)
+func Debugf(format string, args ...interface{}) {
+	globalLogger.Debugf(format, args...)
 }
 
 // Info logs an info message globally
-func Info(format string, args ...interface{}) {
-	globalLogger.Info(format, args...)
+func Infof(format string, args ...interface{}) {
+	globalLogger.Infof(format, args...)
 }
 
 // Warn logs a warning message globally
-func Warn(format string, args ...interface{}) {
-	globalLogger.Warn(format, args...)
+func Warnf(format string, args ...interface{}) {
+	globalLogger.Warnf(format, args...)
 }
 
 // Error logs an error message globally
-func Error(format string, args ...interface{}) {
-	globalLogger.Error(format, args...)
+func Errorf(format string, args ...interface{}) {
+	globalLogger.Errorf(format, args...)
 }
 
 // LogGameEvent logs a game event in a simple format
 func LogGameEvent(eventType string, data map[string]interface{}) {
 	timestamp := time.Now().Format("2006-01-02 15:04:05")
-	Info("GameEvent [%s] at %s: %v", eventType, timestamp, data)
+	Infof("GameEvent [%s] at %s: %v", eventType, timestamp, data)
 }
 
 // LogTransaction logs a transaction
 func LogTransaction(playerID string, itemName string, quantity int, price float64, profit float64) {
-	Info("Transaction: Player=%s Item=%s Qty=%d Price=%.2f Profit=%.2f",
+	Infof("Transaction: Player=%s Item=%s Qty=%d Price=%.2f Profit=%.2f",
 		playerID, itemName, quantity, price, profit)
 }
 
 // LogError logs an error with context
 func LogError(context string, err error) {
 	if err != nil {
-		Error("%s: %v", context, err)
+		Errorf("%s: %v", context, err)
 	}
 }
 
