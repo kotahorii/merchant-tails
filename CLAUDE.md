@@ -92,12 +92,12 @@ The market system uses:
 - Event system for market events (dragon attacks, festivals)
 - Price history with trend analysis
 
-#### Merchant System Architecture
-Merchants have:
-- Personality types (Aggressive, Conservative, Balanced, Opportunistic)
-- Trading strategies implementing `TradingStrategy` interface
-- Network effects for information propagation
-- Risk tolerance calculations based on personality and gold
+#### Merchant System Architecture (Simplified)
+Single-player merchant only:
+- No AI merchants (removed for simplicity)
+- Basic inventory management
+- Simple profit/loss tracking
+- Reputation system (affects customer visits)
 
 ## Testing Strategy
 
@@ -182,9 +182,27 @@ GitHub Actions workflow (`.github/workflows/ci.yml`):
 - golangci-lint for code quality
 - air for hot reload development
 
-## Simplified Systems (After Major Cleanup)
+## Current Implementation Status (2025-08-12)
 
-### What We Removed (23,500+ lines)
+### ✅ Completed Features
+- **Core Game Systems**: Market, Trading, Inventory, Banking
+- **Simplified Systems**: Tutorial (8 steps), Weather (3 types), Difficulty (3 levels)
+- **Godot UI**: Main Menu, Game Screen, Settings, Tutorial
+- **Localization**: Full English/Japanese support
+- **Documentation**: API Spec, Developer Guide, User Manual, Release Notes
+- **Save System**: Auto-save and manual save
+- **Event System**: Basic market events without complexity
+
+### 🚧 Cannot Be Implemented (External Resources Required)
+- **Art Assets**: Character designs, backgrounds, item icons
+- **Audio**: Music, sound effects
+- **Platform Builds**: Windows/Mac/Linux executables
+- **Marketing**: Screenshots, trailers
+- **Playtesting**: Requires actual players
+
+### Simplified Systems (After Major Cleanup)
+
+#### What We Removed (23,500+ lines)
 - ❌ ECS (Entity Component System) - Over-engineered for a merchant game
 - ❌ Memory profiling/optimization - Unnecessary for turn-based game
 - ❌ Concurrent processing/worker pools - Added complexity without benefit
@@ -197,12 +215,12 @@ GitHub Actions workflow (`.github/workflows/ci.yml`):
 - ❌ Analytics/charts - Too complex for beginners
 - ❌ Protocol Buffers/gRPC - No network communication needed
 
-### What We Simplified
+#### What We Simplified
 - ✅ Bank system → Basic savings only (no loans/investments)
-- ✅ Tutorial → Simple step-by-step guide (no interactive features)
+- ✅ Tutorial → Simple 8-step guide (no interactive features)
 - ✅ Difficulty → 3 simple levels (Easy/Normal/Hard)
 - ✅ Logging → Basic console output only
-- ✅ Weather → Simple price effects only
+- ✅ Weather → Simple price effects only (3 types)
 
 ## Development Guidelines
 

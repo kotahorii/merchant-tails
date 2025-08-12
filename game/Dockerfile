@@ -23,7 +23,7 @@ RUN buf generate
 COPY . .
 
 # Build the application
-RUN CGO_ENABLED=0 GOOS=linux go build -a -installsuffix cgo -o merchant-tails ./cmd/server
+RUN CGO_ENABLED=0 GOOS=linux go build -a -installsuffix cgo -o merchant-tails ./cmd/gdextension
 
 # Final stage
 FROM alpine:latest
