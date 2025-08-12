@@ -632,22 +632,22 @@ func (gm *GameManager) SellItem(itemID string, quantity int, price float64) map[
 func (gm *GameManager) checkGameEvents() {
 	// Check victory conditions
 	if gm.gameState.GetGold() >= 100000 {
-		gm.triggerVictory("wealth")
+		gm.triggerVictory()
 	}
 
 	// Check defeat conditions
 	if gm.gameState.GetGold() <= 0 && gm.inventory.IsEmpty() {
-		gm.triggerDefeat("bankruptcy")
+		gm.triggerDefeat()
 	}
 }
 
 // triggerVictory triggers a victory condition
-func (gm *GameManager) triggerVictory(_ string) {
+func (gm *GameManager) triggerVictory() {
 	gm.eventBus.PublishAsync(event.NewBaseEvent("GameVictory"))
 }
 
 // triggerDefeat triggers a defeat condition
-func (gm *GameManager) triggerDefeat(_ string) {
+func (gm *GameManager) triggerDefeat() {
 	gm.eventBus.PublishAsync(event.NewBaseEvent("GameDefeat"))
 }
 

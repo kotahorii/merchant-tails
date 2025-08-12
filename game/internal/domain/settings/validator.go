@@ -251,7 +251,7 @@ func (v *Validator) Validate(settings map[string]interface{}) *ValidationResult 
 		}
 
 		// Validate the field value
-		if err := v.validateField(field, value, rule); err != nil {
+		if err := v.validateField(value, rule); err != nil {
 			result.Valid = false
 			result.Errors = append(result.Errors, ValidationError{
 				Field:   field,
@@ -265,7 +265,7 @@ func (v *Validator) Validate(settings map[string]interface{}) *ValidationResult 
 }
 
 // validateField validates a single field
-func (v *Validator) validateField(_ string, value interface{}, rule ValidationRule) error {
+func (v *Validator) validateField(value interface{}, rule ValidationRule) error {
 	// Check nil values
 	if value == nil {
 		if rule.Required {
@@ -360,7 +360,7 @@ func (v *Validator) ValidatePartial(settings map[string]interface{}, fields []st
 		}
 
 		if exists {
-			if err := v.validateField(field, value, rule); err != nil {
+			if err := v.validateField(value, rule); err != nil {
 				result.Valid = false
 				result.Errors = append(result.Errors, ValidationError{
 					Field:   field,

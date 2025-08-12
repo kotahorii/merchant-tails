@@ -322,7 +322,7 @@ func (fm *FrequencyManager) GetNextEvents(count int) []EventSuggestion {
 	// Calculate weights for all eligible events
 	for eventID, data := range fm.eventHistory {
 		if fm.checkCooldown(eventID, data.EventType) {
-			weight := fm.calculateEventWeight(eventID, data)
+			weight := fm.calculateEventWeight(data)
 			suggestions = append(suggestions, EventSuggestion{
 				EventID:     eventID,
 				Weight:      weight,
@@ -351,7 +351,7 @@ type EventSuggestion struct {
 }
 
 // calculateEventWeight calculates weight for event selection
-func (fm *FrequencyManager) calculateEventWeight(_ string, data *EventFrequencyData) float64 {
+func (fm *FrequencyManager) calculateEventWeight(data *EventFrequencyData) float64 {
 	// Base weight by rarity
 	weight := 1.0 / (float64(data.EventType) + 1.0)
 

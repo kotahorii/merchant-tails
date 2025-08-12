@@ -160,7 +160,7 @@ func (pui *PurchaseUIManager) GetPurchaseOptions(category string, sortBy string)
 		priceHistory := pui.getPriceHistory(marketItem.ID)
 		trend := calculateTrend(priceHistory)
 		priceChange := calculatePriceChange(priceHistory)
-		supplyLevel := pui.getSupplyLevel(marketItem.ID)
+		supplyLevel := pui.getSupplyLevel()
 
 		// Calculate profit potential and risk
 		profitPotential := calculateProfitPotential(currentPrice, priceHistory)
@@ -618,7 +618,7 @@ func (pui *PurchaseUIManager) getAvailableMarketItems() []*MarketItem {
 }
 
 // getSupplyLevel returns the supply level for an item
-func (pui *PurchaseUIManager) getSupplyLevel(_ string) string {
+func (pui *PurchaseUIManager) getSupplyLevel() string {
 	// Simplified supply level calculation
 	// In production, this would be calculated from actual market data
 	state := pui.market.State

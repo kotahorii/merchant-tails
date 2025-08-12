@@ -447,7 +447,7 @@ func (iui *InventoryUIManager) getShopItems() []*InventoryUIItem {
 			PurchasePrice: purchasePrice,
 			CurrentPrice:  currentPrice,
 			ProfitMargin:  ((currentPrice - purchasePrice) / purchasePrice) * 100,
-			DaysInStock:   iui.getDaysInStock(itemID),
+			DaysInStock:   iui.getDaysInStock(),
 			Durability:    iui.getItemDurability(itemID),
 			SalesVelocity: iui.getSalesVelocity(itemID),
 			SpaceUsed:     quantity,
@@ -476,7 +476,7 @@ func (iui *InventoryUIManager) getWarehouseItems() []*InventoryUIItem {
 			PurchasePrice: purchasePrice,
 			CurrentPrice:  currentPrice,
 			ProfitMargin:  ((currentPrice - purchasePrice) / purchasePrice) * 100,
-			DaysInStock:   iui.getDaysInStock(itemID),
+			DaysInStock:   iui.getDaysInStock(),
 			Durability:    iui.getItemDurability(itemID),
 			SalesVelocity: iui.getSalesVelocity(itemID),
 			SpaceUsed:     quantity,
@@ -594,7 +594,7 @@ func (iui *InventoryUIManager) isExpiringSoon(itemID string, days int) bool {
 		return false
 	}
 
-	daysInStock := iui.getDaysInStock(itemID)
+	daysInStock := iui.getDaysInStock()
 	durability := iui.getItemDurability(itemID)
 
 	if durability > 0 {
@@ -656,7 +656,7 @@ func (iui *InventoryUIManager) getItemCategory(itemID string) item.Category {
 	return item.CategoryFruit
 }
 
-func (iui *InventoryUIManager) getDaysInStock(_ string) int {
+func (iui *InventoryUIManager) getDaysInStock() int {
 	// Simplified - return random value for demo
 	return 3
 }

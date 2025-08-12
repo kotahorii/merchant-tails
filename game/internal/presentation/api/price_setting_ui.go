@@ -255,7 +255,7 @@ func (psu *PriceSettingUIManager) GetPriceSettingItems(filter string) ([]*PriceS
 		purchasePrice := psu.getPurchasePrice(itemID)
 
 		// Calculate recommended price
-		recommendedPrice := psu.calculateRecommendedPrice(itemID, marketPrice, competitorPrice, purchasePrice)
+		recommendedPrice := psu.calculateRecommendedPrice(marketPrice, competitorPrice, purchasePrice)
 
 		// Calculate price bounds
 		minPrice := purchasePrice * 1.05 // At least 5% markup
@@ -268,7 +268,7 @@ func (psu *PriceSettingUIManager) GetPriceSettingItems(filter string) ([]*PriceS
 		}
 
 		// Get demand level
-		demandLevel := psu.getDemandLevel(itemID)
+		demandLevel := psu.getDemandLevel()
 
 		// Calculate elasticity
 		elasticity := psu.calculateElasticity(itemID)
@@ -547,7 +547,7 @@ func (psu *PriceSettingUIManager) getPurchasePrice(itemID string) float64 {
 	return float64(psu.market.GetPrice(itemID)) * 0.7
 }
 
-func (psu *PriceSettingUIManager) calculateRecommendedPrice(itemID string, marketPrice, competitorPrice, purchasePrice float64) float64 {
+func (psu *PriceSettingUIManager) calculateRecommendedPrice(marketPrice, competitorPrice, purchasePrice float64) float64 {
 	// Basic recommendation algorithm
 	targetMargin := 0.25 // 25% profit margin
 	minPrice := purchasePrice * (1 + targetMargin)
@@ -557,7 +557,7 @@ func (psu *PriceSettingUIManager) calculateRecommendedPrice(itemID string, marke
 
 	// Adjust based on demand
 	demandMultiplier := 1.0
-	demandLevel := psu.getDemandLevel(itemID)
+	demandLevel := psu.getDemandLevel()
 	switch demandLevel {
 	case demandVeryHigh:
 		demandMultiplier = 1.2
@@ -579,7 +579,7 @@ func (psu *PriceSettingUIManager) calculateRecommendedPrice(itemID string, marke
 	return recommendedPrice
 }
 
-func (psu *PriceSettingUIManager) getDemandLevel(_ string) string {
+func (psu *PriceSettingUIManager) getDemandLevel() string {
 	// Use market state to determine demand
 	state := psu.market.State
 	if state == nil {
@@ -703,7 +703,7 @@ func (psu *PriceSettingUIManager) calculateStrategyPrice(itemID string, strategy
 
 	case "dynamic":
 		// Adjust based on demand
-		demandLevel := psu.getDemandLevel(itemID)
+		demandLevel := psu.getDemandLevel()
 		multiplier := 1.0
 		switch demandLevel {
 		case demandVeryHigh:
@@ -795,7 +795,7 @@ func (psu *PriceSettingUIManager) checkCondition(rule *PriceRule, itemID string)
 		return quantity > 20
 
 	case "demand_low":
-		demandLevel := psu.getDemandLevel(itemID)
+		demandLevel := psu.getDemandLevel()
 		return demandLevel == demandLow || demandLevel == demandVeryLow
 
 	case "competitor_lower":

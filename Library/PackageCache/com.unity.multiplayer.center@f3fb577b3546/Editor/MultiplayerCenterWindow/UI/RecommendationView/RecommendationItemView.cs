@@ -51,12 +51,12 @@ namespace Unity.Multiplayer.Center.Window.UI.RecommendationView
             var topContainerLeft = new VisualElement();
             m_RecommendedBadge = new RecommendationBadge();
             m_PreReleaseBadge = new PreReleaseBadge();
-            
+
             m_InstalledIcon = new Image() { name = "icon-package-installed" };
             m_InstalledIcon.AddToClassList("icon");
             m_InstalledIcon.AddToClassList("icon-package-installed");
             m_InstalledIcon.tooltip = "Package is installed";
-            
+
             topContainerLeft.Add(m_RadioButton);
             topContainerLeft.Add(m_PackageNameLabel);
             topContainerLeft.Add(m_RecommendedBadge);
@@ -82,7 +82,7 @@ namespace Unity.Multiplayer.Center.Window.UI.RecommendationView
             m_PackageManagerIcon.tooltip = "Open Package Manager";
             m_PackageManagerIcon.RegisterCallback<ClickEvent>(_ => PackageManagement.OpenPackageManager(FeatureId));
             topContainerRight.Add(m_PackageManagerIcon);
-            
+
             topContainer.Add(topContainerRight);
             Add(topContainer);
 
@@ -95,12 +95,12 @@ namespace Unity.Multiplayer.Center.Window.UI.RecommendationView
         public void UpdateData(RecommendedPackageViewData package)
         {
             var featureName = package.Name;
-            
+
             m_PreReleaseBadge.style.display = string.IsNullOrEmpty(package.PreReleaseVersion)? DisplayStyle.None : DisplayStyle.Flex;
-            
+
             var featureId = package.PackageId;
             FeatureId = featureId;
-            
+
             SetFeatureName(featureName);
             SetIsSelected(package.Selected);
             SetRecommendationType(package.RecommendationType);
@@ -120,7 +120,7 @@ namespace Unity.Multiplayer.Center.Window.UI.RecommendationView
         {
             m_RadioButton.SetValueWithoutNotify(value);
         }
-        
+
         internal void SetCheckboxEnabled(bool value)
         {
             m_RadioButton.SetEnabled(value);
@@ -160,7 +160,7 @@ namespace Unity.Multiplayer.Center.Window.UI.RecommendationView
         {
             m_RecommendedBadge.style.display = value ? DisplayStyle.Flex : DisplayStyle.None;
         }
-        
+
         void SetReasonText(string value)
         {
             m_PackageNameLabel.tooltip = value;
@@ -189,7 +189,7 @@ namespace Unity.Multiplayer.Center.Window.UI.RecommendationView
             Application.OpenURL(m_DocsUrl);
         }
     }
-    
+
     internal class RecommendationBadge : Label
     {
         List<string> m_PossibleLabelStyles = new ()
@@ -232,7 +232,7 @@ namespace Unity.Multiplayer.Center.Window.UI.RecommendationView
 
     internal class PreReleaseBadge : Label
     {
-        public PreReleaseBadge() : base ("Pre") 
+        public PreReleaseBadge() : base ("Pre")
         {
             AddToClassList("badge");
             AddToClassList("pre-release-badge");
