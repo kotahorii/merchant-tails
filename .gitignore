@@ -44,8 +44,8 @@ export_presets.cfg
 *.swo
 *~
 
-# Protocol Buffer generated files
-*.pb.go
+# Protocol Buffer generated files are tracked in version control
+# to avoid requiring buf generation in CI for every job
 
 # Environment files
 .env
