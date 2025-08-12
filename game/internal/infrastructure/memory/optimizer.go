@@ -156,7 +156,7 @@ func (o *Optimizer) GetMemoryStats() MemoryStats {
 		StackInuse:   m.StackInuse,
 		StackSys:     m.StackSys,
 		NextGC:       m.NextGC,
-		LastGC:       time.Unix(0, int64(m.LastGC)),
+		LastGC:       time.Unix(0, int64(m.LastGC)), //nolint:gosec // LastGC is always valid nanoseconds
 		PauseTotal:   m.PauseTotalNs,
 		NumGoroutine: runtime.NumGoroutine(),
 	}

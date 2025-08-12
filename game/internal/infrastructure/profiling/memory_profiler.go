@@ -2,6 +2,7 @@ package profiling
 
 import (
 	"fmt"
+	"io"
 	"runtime"
 	"runtime/pprof"
 	"sync"
@@ -322,8 +323,8 @@ func formatBytes(bytes uint64) string {
 }
 
 // WriteHeapProfile writes heap profile to writer
-func (mp *MemoryProfiler) WriteHeapProfile(profile *pprof.Profile) error {
-	return pprof.WriteHeapProfile(profile)
+func (mp *MemoryProfiler) WriteHeapProfile(w io.Writer) error {
+	return pprof.WriteHeapProfile(w)
 }
 
 // ForceGC forces garbage collection
