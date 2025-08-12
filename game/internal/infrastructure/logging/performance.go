@@ -325,7 +325,7 @@ func (h *PerformanceHook) Levels() []LogLevel {
 // Benchmark runs a benchmark on a function
 func Benchmark(name string, iterations int, fn func()) *PerformanceMetric {
 	var totalDuration time.Duration
-	var minDuration = time.Duration(1<<63 - 1)
+	minDuration := time.Duration(1<<63 - 1)
 	var maxDuration time.Duration
 
 	for i := 0; i < iterations; i++ {

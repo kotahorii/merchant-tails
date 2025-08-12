@@ -10,6 +10,13 @@ import (
 	"github.com/yourusername/merchant-tails/game/internal/domain/item"
 )
 
+// Fruit item constants
+const (
+	itemApple  = "apple"
+	itemOrange = "orange"
+	itemBanana = "banana"
+)
+
 // InventoryUIItem represents an item in the inventory UI
 type InventoryUIItem struct {
 	ItemID        string        `json:"item_id"`
@@ -168,9 +175,9 @@ func (iui *InventoryUIManager) TransferItem(request *InventoryTransferRequest) (
 
 	// Execute transfer based on direction
 	var err error
-	if request.FromLocation == "shop" && request.ToLocation == "warehouse" {
+	if request.FromLocation == locationShop && request.ToLocation == locationWarehouse {
 		err = iui.inventory.TransferToWarehouse(request.ItemID, request.Quantity)
-	} else if request.FromLocation == "warehouse" && request.ToLocation == "shop" {
+	} else if request.FromLocation == locationWarehouse && request.ToLocation == locationShop {
 		err = iui.inventory.TransferToShop(request.ItemID, request.Quantity)
 	} else {
 		return &InventoryTransferResult{
@@ -571,7 +578,7 @@ func (iui *InventoryUIManager) getAverageDailySales(data *SalesData) float64 {
 
 func (iui *InventoryUIManager) isPerishable(itemID string) bool {
 	// Check if item is in fruit category or has durability
-	return itemID == "apple" || itemID == "orange" || itemID == "banana"
+	return itemID == itemApple || itemID == itemOrange || itemID == itemBanana
 }
 
 func (iui *InventoryUIManager) isExpiringSoon(itemID string, days int) bool {

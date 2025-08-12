@@ -6,10 +6,8 @@ import (
 	"time"
 )
 
-var (
-	// ErrItemNotFound is returned when an item is not found in the registry
-	ErrItemNotFound = errors.New("item not found in registry")
-)
+// ErrItemNotFound is returned when an item is not found in the registry
+var ErrItemNotFound = errors.New("item not found in registry")
 
 // ItemRegistry manages all available items in the game
 type ItemRegistry struct {

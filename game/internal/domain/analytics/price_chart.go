@@ -494,13 +494,14 @@ func (pc *PriceChart) GetPricePrediction() *PricePrediction {
 		recentTrend /= float64(lookback - 1)
 
 		// Determine direction based on recent trend
-		if recentTrend > 0.5 {
+		switch {
+		case recentTrend > 0.5:
 			direction = market.TrendUp
 			predictedPrice = lastPrice * 1.02
-		} else if recentTrend < -0.5 {
+		case recentTrend < -0.5:
 			direction = market.TrendDown
 			predictedPrice = lastPrice * 0.98
-		} else {
+		default:
 			direction = market.TrendStable
 			predictedPrice = lastPrice
 		}
@@ -512,25 +513,27 @@ func (pc *PriceChart) GetPricePrediction() *PricePrediction {
 	// Check trend direction from trend lines if available
 	if len(pc.trendLines) > 0 {
 		mainTrend := pc.trendLines[0]
-		if mainTrend.Slope > 0 {
+		switch {
+		case mainTrend.Slope > 0:
 			direction = market.TrendUp
 			predictedPrice = lastPrice * (1 + mainTrend.Slope*0.01)
-		} else if mainTrend.Slope < 0 {
+		case mainTrend.Slope < 0:
 			direction = market.TrendDown
 			predictedPrice = lastPrice * (1 + mainTrend.Slope*0.01)
-		} else {
+		default:
 			direction = market.TrendStable
 			predictedPrice = lastPrice
 		}
 
 		// Calculate confidence based on volatility
-		if pc.volatility < 5 {
+		switch {
+		case pc.volatility < 5:
 			confidence = 0.8
-		} else if pc.volatility < 10 {
+		case pc.volatility < 10:
 			confidence = 0.6
-		} else if pc.volatility < 20 {
+		case pc.volatility < 20:
 			confidence = 0.4
-		} else {
+		default:
 			confidence = 0.2
 		}
 	}
@@ -596,11 +599,12 @@ func (pc *PriceChart) Analyze() *ChartAnalysis {
 	// Determine trend direction
 	if len(pc.trendLines) > 0 {
 		mainTrend := pc.trendLines[0]
-		if mainTrend.Slope > 0.01 {
+		switch {
+		case mainTrend.Slope > 0.01:
 			analysis.TrendDirection = market.TrendUp
-		} else if mainTrend.Slope < -0.01 {
+		case mainTrend.Slope < -0.01:
 			analysis.TrendDirection = market.TrendDown
-		} else {
+		default:
 			analysis.TrendDirection = market.TrendStable
 		}
 	}

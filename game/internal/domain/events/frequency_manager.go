@@ -441,8 +441,7 @@ func (fm *FrequencyManager) GetEventStats() EventFrequencyStats {
 			current := stats.AverageIntervals[data.EventType]
 			count := stats.EventsByRarity[data.EventType]
 			// Update running average
-			stats.AverageIntervals[data.EventType] =
-				(current*time.Duration(count-1) + data.AverageInterval) / time.Duration(count)
+			stats.AverageIntervals[data.EventType] = (current*time.Duration(count-1) + data.AverageInterval) / time.Duration(count)
 		}
 	}
 

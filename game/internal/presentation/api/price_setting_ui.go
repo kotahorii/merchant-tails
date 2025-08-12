@@ -583,7 +583,7 @@ func (psu *PriceSettingUIManager) getDemandLevel(itemID string) string {
 	// Use market state to determine demand
 	state := psu.market.State
 	if state == nil {
-		return "normal"
+		return demandNormal
 	}
 
 	demand := state.CurrentDemand

@@ -223,17 +223,18 @@ func (ec *EventCalendar) UpdateDate(newDate time.Time) {
 		}
 
 		// Check if event should be active
-		if (event.StartDate.Before(newDate) || event.StartDate.Equal(newDate)) &&
-			(event.EndDate.After(newDate) || event.EndDate.IsZero()) {
+		switch {
+		case (event.StartDate.Before(newDate) || event.StartDate.Equal(newDate)) &&
+			(event.EndDate.After(newDate) || event.EndDate.IsZero()):
 			if !event.Active {
 				event.Active = true
 				ec.notifyCallbacks(event, "activated")
 			}
 			newActive = append(newActive, event)
-		} else if event.StartDate.After(newDate) {
+		case event.StartDate.After(newDate):
 			// Event is in the future
 			newUpcoming = append(newUpcoming, event)
-		} else if !event.EndDate.IsZero() && event.EndDate.Before(newDate) {
+		case !event.EndDate.IsZero() && event.EndDate.Before(newDate):
 			// Event has ended
 			if event.Active {
 				event.Active = false

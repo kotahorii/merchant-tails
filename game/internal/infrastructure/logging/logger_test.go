@@ -461,7 +461,6 @@ func TestMeasureFunc(t *testing.T) {
 		time.Sleep(10 * time.Millisecond)
 		return nil
 	})
-
 	if err != nil {
 		t.Error("Function should have succeeded")
 	}

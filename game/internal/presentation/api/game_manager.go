@@ -26,6 +26,7 @@ import (
 const (
 	locationShop      = "shop"
 	locationWarehouse = "warehouse"
+	categoryAll       = "all"
 )
 
 // GameManager manages the overall game state and coordinates between systems
@@ -336,7 +337,6 @@ func (gm *GameManager) SaveGame(slot int) error {
 		gm.inventory,
 		gm.progression,
 	)
-
 	if err != nil {
 		return fmt.Errorf("failed to save game: %w", err)
 	}
@@ -1204,7 +1204,7 @@ func (gm *GameManager) ResetSettings(category string) map[string]interface{} {
 	}
 
 	var err error
-	if category == "all" {
+	if category == categoryAll {
 		err = gm.settings.ResetToDefaults()
 	} else {
 		categoryMap := map[string]settings.SettingsCategory{

@@ -86,11 +86,11 @@ func NewLogger(config *LoggerConfig) (*Logger, error) {
 	if config.OutputPath != "" {
 		// Create log directory if it doesn't exist
 		dir := filepath.Dir(config.OutputPath)
-		if err := os.MkdirAll(dir, 0755); err != nil {
+		if err := os.MkdirAll(dir, 0o755); err != nil {
 			return nil, fmt.Errorf("failed to create log directory: %w", err)
 		}
 
-		file, err := os.OpenFile(config.OutputPath, os.O_CREATE|os.O_APPEND|os.O_WRONLY, 0644)
+		file, err := os.OpenFile(config.OutputPath, os.O_CREATE|os.O_APPEND|os.O_WRONLY, 0o644)
 		if err != nil {
 			return nil, fmt.Errorf("failed to open log file: %w", err)
 		}

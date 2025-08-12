@@ -68,7 +68,7 @@ func NewLogManager(config *LogManagerConfig) (*LogManager, error) {
 	}
 
 	// Create log directory
-	if err := os.MkdirAll(config.LogDir, 0755); err != nil {
+	if err := os.MkdirAll(config.LogDir, 0o755); err != nil {
 		return nil, fmt.Errorf("failed to create log directory: %w", err)
 	}
 
@@ -403,5 +403,5 @@ func openLogFile(logDir, pattern string) (*os.File, error) {
 	filename := fmt.Sprintf(pattern, timestamp)
 	filepath := filepath.Join(logDir, filename)
 
-	return os.OpenFile(filepath, os.O_CREATE|os.O_APPEND|os.O_WRONLY, 0644)
+	return os.OpenFile(filepath, os.O_CREATE|os.O_APPEND|os.O_WRONLY, 0o644)
 }

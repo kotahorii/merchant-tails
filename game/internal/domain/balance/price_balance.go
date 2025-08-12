@@ -217,13 +217,14 @@ func (pb *PriceBalancer) CalculateOptimalPrice(itemID string, playerRank int) fl
 	if balance.DemandLevel > 0 {
 		ratio := float64(balance.SupplyLevel) / float64(balance.DemandLevel)
 
-		if ratio > pb.config.OversupplyThreshold {
+		switch {
+		case ratio > pb.config.OversupplyThreshold:
 			// Oversupply - reduce price
 			optimal *= 0.8
-		} else if ratio < pb.config.ScarcityThreshold {
+		case ratio < pb.config.ScarcityThreshold:
 			// Scarcity - increase price
 			optimal *= 1.3
-		} else {
+		default:
 			// Normal supply/demand
 			optimal *= (2.0 - ratio) // Inverse relationship
 		}
@@ -300,11 +301,12 @@ func (pb *PriceBalancer) CalculateOptimalPriceInternal(itemID string, playerRank
 	if balance.DemandLevel > 0 {
 		ratio := float64(balance.SupplyLevel) / float64(balance.DemandLevel)
 
-		if ratio > pb.config.OversupplyThreshold {
+		switch {
+		case ratio > pb.config.OversupplyThreshold:
 			optimal *= 0.8
-		} else if ratio < pb.config.ScarcityThreshold {
+		case ratio < pb.config.ScarcityThreshold:
 			optimal *= 1.3
-		} else {
+		default:
 			optimal *= (2.0 - ratio)
 		}
 	}
@@ -368,13 +370,14 @@ func (pb *PriceBalancer) calculateVolatility(sales []SaleRecord) float64 {
 func (pb *PriceBalancer) getAdjustmentReason(balance *ItemBalance) string {
 	ratio := float64(balance.SupplyLevel) / float64(balance.DemandLevel+1)
 
-	if ratio > pb.config.OversupplyThreshold {
+	switch {
+	case ratio > pb.config.OversupplyThreshold:
 		return "oversupply"
-	} else if ratio < pb.config.ScarcityThreshold {
+	case ratio < pb.config.ScarcityThreshold:
 		return "scarcity"
-	} else if balance.Volatility > 0.2 {
+	case balance.Volatility > 0.2:
 		return "high_volatility"
-	} else {
+	default:
 		return "market_equilibrium"
 	}
 }

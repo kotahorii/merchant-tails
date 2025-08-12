@@ -239,13 +239,14 @@ func (dm *DifficultyManager) updateEmotionalState() {
 	successRate := dm.playerSkill.RecentPerformance
 
 	// Update frustration level
-	if successRate < dm.config.FrustrationThreshold {
+	switch {
+	case successRate < dm.config.FrustrationThreshold:
 		dm.playerSkill.FrustrationLevel = math.Min(1.0, dm.playerSkill.FrustrationLevel+0.1)
 		dm.playerSkill.EngagementLevel = math.Max(0.0, dm.playerSkill.EngagementLevel-0.05)
-	} else if successRate > dm.config.BoredomThreshold {
+	case successRate > dm.config.BoredomThreshold:
 		dm.playerSkill.FrustrationLevel = math.Max(0.0, dm.playerSkill.FrustrationLevel-0.1)
 		dm.playerSkill.EngagementLevel = math.Max(0.0, dm.playerSkill.EngagementLevel-0.1) // Boredom reduces engagement
-	} else {
+	default:
 		// Optimal challenge zone
 		dm.playerSkill.FrustrationLevel = math.Max(0.0, dm.playerSkill.FrustrationLevel-0.05)
 		dm.playerSkill.EngagementLevel = math.Min(1.0, dm.playerSkill.EngagementLevel+0.1)

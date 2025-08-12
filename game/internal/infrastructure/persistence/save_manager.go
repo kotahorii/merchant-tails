@@ -29,7 +29,7 @@ func NewSaveManager() (*SaveManager, error) {
 
 	// Create save directory
 	saveDir := filepath.Join(homeDir, ".merchant-tails", "saves")
-	if err := os.MkdirAll(saveDir, 0755); err != nil {
+	if err := os.MkdirAll(saveDir, 0o750); err != nil {
 		return nil, err
 	}
 
@@ -70,7 +70,7 @@ func (sm *SaveManager) SaveGame(
 
 	// Write to file
 	filename := sm.getSaveFilename(slot)
-	if err := os.WriteFile(filename, data, 0644); err != nil {
+	if err := os.WriteFile(filename, data, 0o600); err != nil {
 		return fmt.Errorf("failed to write save file: %w", err)
 	}
 
@@ -90,7 +90,7 @@ func (sm *SaveManager) SaveGame(
 		return err
 	}
 
-	return os.WriteFile(metadataFile, metadataJSON, 0644)
+	return os.WriteFile(metadataFile, metadataJSON, 0o600)
 }
 
 // LoadGame loads a saved game from a slot
@@ -98,7 +98,7 @@ func (sm *SaveManager) LoadGame(slot int) (map[string]interface{}, error) {
 	filename := sm.getSaveFilename(slot)
 
 	// Read save file
-	data, err := os.ReadFile(filename)
+	data, err := os.ReadFile(filepath.Clean(filename))
 	if err != nil {
 		if os.IsNotExist(err) {
 			return nil, fmt.Errorf("save slot %d is empty", slot)
@@ -127,7 +127,7 @@ func (sm *SaveManager) GetSaveSlots() ([]SaveSlotInfo, error) {
 
 		// Check if metadata exists
 		metadataFile := sm.getMetadataFilename(i)
-		if data, err := os.ReadFile(metadataFile); err == nil {
+		if data, err := os.ReadFile(filepath.Clean(metadataFile)); err == nil {
 			var metadata SaveMetadata
 			if err := json.Unmarshal(data, &metadata); err == nil {
 				info.Exists = true
@@ -157,7 +157,7 @@ func (sm *SaveManager) DeleteSave(slot int) error {
 func (sm *SaveManager) ExportSave(slot int, w io.Writer) error {
 	filename := sm.getSaveFilename(slot)
 
-	data, err := os.ReadFile(filename)
+	data, err := os.ReadFile(filepath.Clean(filename))
 	if err != nil {
 		return err
 	}
@@ -181,7 +181,7 @@ func (sm *SaveManager) ImportSave(slot int, r io.Reader) error {
 
 	// Write to slot
 	filename := sm.getSaveFilename(slot)
-	return os.WriteFile(filename, data, 0644)
+	return os.WriteFile(filename, data, 0o600)
 }
 
 // Helper methods

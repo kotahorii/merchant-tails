@@ -69,8 +69,9 @@ func main() {
 	}).Info("Server configuration")
 
 	// Create save directory if it doesn't exist
-	if err := os.MkdirAll(*saveDir, 0755); err != nil {
-		log.Fatalf("Failed to create save directory: %v", err)
+	if err := os.MkdirAll(*saveDir, 0o755); err != nil {
+		logging.WithError(err).Error("Failed to create save directory")
+		os.Exit(1)
 	}
 
 	// Initialize metrics collector

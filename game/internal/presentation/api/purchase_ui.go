@@ -11,6 +11,13 @@ import (
 	"github.com/yourusername/merchant-tails/game/internal/domain/trading"
 )
 
+// Risk level constants
+const (
+	riskLevelHigh   = "high"
+	riskLevelMedium = "medium"
+	riskLevelLow    = "low"
+)
+
 // PurchaseOption represents a purchasable item with current market data
 type PurchaseOption struct {
 	ItemID          string        `json:"item_id"`
@@ -519,11 +526,11 @@ func calculateRiskLevel(category item.Category, priceChange float64, supplyLevel
 	}
 
 	if risk > 0.6 {
-		return "high"
+		return riskLevelHigh
 	} else if risk > 0.3 {
-		return "medium"
+		return riskLevelMedium
 	}
-	return "low"
+	return riskLevelLow
 }
 
 func calculateRecommendedQuantity(price, budget float64, risk string) int {
