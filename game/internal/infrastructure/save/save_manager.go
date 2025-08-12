@@ -112,7 +112,7 @@ func NewSaveManager(saveDir string) *SaveManager {
 	}
 
 	// Ensure save directory exists
-	_ = os.MkdirAll(saveDir, 0o755)
+	_ = os.MkdirAll(saveDir, 0o750)
 
 	return sm
 }
@@ -177,7 +177,7 @@ func (sm *SaveManager) Save(state *savepb.GameState, fileName string, options *S
 	}
 
 	// Write to file
-	err = os.WriteFile(filePath, data, 0o644)
+	err = os.WriteFile(filePath, data, 0o600)
 	if err != nil {
 		if sm.onSaveError != nil {
 			sm.onSaveError(err)

@@ -241,7 +241,7 @@ func (psu *PriceSettingUIManager) GetPriceSettingItems(filter string) ([]*PriceS
 		}
 
 		// Filter by category if specified
-		if filter != "" && filter != "all" {
+		if filter != "" && filter != categoryAll {
 			category := psu.getItemCategory(itemID)
 			if string(category) != filter {
 				continue

@@ -532,9 +532,9 @@ func calculateRecommendedQuantity(price, budget float64, risk string) int {
 	// Adjust based on risk
 	switch risk {
 	case "high":
-		maxAffordable = maxAffordable / 3
+		maxAffordable /= 3
 	case "medium":
-		maxAffordable = maxAffordable / 2
+		maxAffordable /= 2
 	}
 
 	if maxAffordable < 1 {
