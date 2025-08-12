@@ -112,7 +112,7 @@ func NewSaveManager(saveDir string) *SaveManager {
 	}
 
 	// Ensure save directory exists
-	os.MkdirAll(saveDir, 0755)
+	_ = os.MkdirAll(saveDir, 0755)
 
 	return sm
 }
@@ -319,7 +319,7 @@ func (sm *SaveManager) StartAutoSave(stateProvider func() *savepb.GameState) {
 			select {
 			case <-sm.autoSaveTicker.C:
 				if state := stateProvider(); state != nil {
-					sm.AutoSave(state)
+					_ = sm.AutoSave(state)
 				}
 			case <-sm.autoSaveStop:
 				return
@@ -412,7 +412,7 @@ func (sm *SaveManager) compressData(data []byte) ([]byte, error) {
 	if err != nil {
 		return nil, err
 	}
-	defer gz.Close()
+	defer func() { _ = gz.Close() }()
 
 	if _, err := gz.Write(data); err != nil {
 		return nil, err
@@ -430,7 +430,7 @@ func (sm *SaveManager) decompressData(data []byte) ([]byte, error) {
 	if err != nil {
 		return nil, err
 	}
-	defer r.Close()
+	defer func() { _ = r.Close() }()
 
 	return io.ReadAll(r)
 }
@@ -512,7 +512,7 @@ func (sm *SaveManager) cleanupAutoSaves() {
 
 	// Delete old auto-saves
 	for i := sm.maxAutoSaves; i < len(autoSaves); i++ {
-		sm.DeleteSave(autoSaves[i].FileName)
+		_ = sm.DeleteSave(autoSaves[i].FileName)
 	}
 }
 

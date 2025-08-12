@@ -393,14 +393,14 @@ func (iui *InventoryUIManager) OptimizeLayout() error {
 		if suggestion.Priority >= 4 {
 			switch suggestion.Type {
 			case "move_to_shop":
-				iui.TransferItem(&InventoryTransferRequest{
+				_, _ = iui.TransferItem(&InventoryTransferRequest{
 					ItemID:       suggestion.ItemID,
 					Quantity:     suggestion.Quantity,
 					FromLocation: "warehouse",
 					ToLocation:   "shop",
 				})
 			case "move_to_warehouse":
-				iui.TransferItem(&InventoryTransferRequest{
+				_, _ = iui.TransferItem(&InventoryTransferRequest{
 					ItemID:       suggestion.ItemID,
 					Quantity:     suggestion.Quantity,
 					FromLocation: "shop",

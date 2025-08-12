@@ -11,6 +11,15 @@ import (
 	"github.com/yourusername/merchant-tails/game/internal/domain/market"
 )
 
+// Demand level constants
+const (
+	demandVeryHigh = "very_high"
+	demandHigh     = "high"
+	demandNormal   = "normal"
+	demandLow      = "low"
+	demandVeryLow  = "very_low"
+)
+
 // PriceSettingItem represents an item for price setting
 type PriceSettingItem struct {
 	ItemID           string        `json:"item_id"`
@@ -550,13 +559,13 @@ func (psu *PriceSettingUIManager) calculateRecommendedPrice(itemID string, marke
 	demandMultiplier := 1.0
 	demandLevel := psu.getDemandLevel(itemID)
 	switch demandLevel {
-	case "very_high":
+	case demandVeryHigh:
 		demandMultiplier = 1.2
-	case "high":
+	case demandHigh:
 		demandMultiplier = 1.1
-	case "low":
+	case demandLow:
 		demandMultiplier = 0.9
-	case "very_low":
+	case demandVeryLow:
 		demandMultiplier = 0.8
 	}
 
@@ -580,13 +589,13 @@ func (psu *PriceSettingUIManager) getDemandLevel(itemID string) string {
 	demand := state.CurrentDemand
 
 	if demand == market.DemandVeryHigh {
-		return "very_high"
+		return demandVeryHigh
 	} else if demand == market.DemandHigh {
-		return "high"
+		return demandHigh
 	} else if demand == market.DemandLow {
-		return "low"
+		return demandLow
 	} else if demand == market.DemandVeryLow {
-		return "very_low"
+		return demandVeryLow
 	}
 
 	return "normal"
@@ -696,13 +705,13 @@ func (psu *PriceSettingUIManager) calculateStrategyPrice(itemID string, strategy
 		demandLevel := psu.getDemandLevel(itemID)
 		multiplier := 1.0
 		switch demandLevel {
-		case "very_high":
+		case demandVeryHigh:
 			multiplier = 1.25
-		case "high":
+		case demandHigh:
 			multiplier = 1.15
-		case "low":
+		case demandLow:
 			multiplier = 0.9
-		case "very_low":
+		case demandVeryLow:
 			multiplier = 0.8
 		}
 		return marketPrice * multiplier
@@ -786,7 +795,7 @@ func (psu *PriceSettingUIManager) checkCondition(rule *PriceRule, itemID string)
 
 	case "demand_low":
 		demandLevel := psu.getDemandLevel(itemID)
-		return demandLevel == "low" || demandLevel == "very_low"
+		return demandLevel == demandLow || demandLevel == demandVeryLow
 
 	case "competitor_lower":
 		currentPrice := psu.getCurrentPrice(itemID)

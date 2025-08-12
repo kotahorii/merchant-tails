@@ -147,8 +147,8 @@ func (sm *SaveManager) DeleteSave(slot int) error {
 	metadataFile := sm.getMetadataFilename(slot)
 
 	// Remove both files
-	os.Remove(saveFile)
-	os.Remove(metadataFile)
+	_ = os.Remove(saveFile)
+	_ = os.Remove(metadataFile)
 
 	return nil
 }

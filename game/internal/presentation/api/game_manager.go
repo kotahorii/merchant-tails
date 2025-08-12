@@ -22,6 +22,12 @@ import (
 	"github.com/yourusername/merchant-tails/game/internal/infrastructure/persistence"
 )
 
+// Location constants
+const (
+	locationShop      = "shop"
+	locationWarehouse = "warehouse"
+)
+
 // GameManager manages the overall game state and coordinates between systems
 type GameManager struct {
 	// Core systems
@@ -360,14 +366,14 @@ func (gm *GameManager) LoadGame(slot int) error {
 	gm.gameState = gamestate.NewGameState(nil)
 	// Restore player name
 	if playerName, ok := saveData["playerName"].(string); ok && playerName != "" {
-		gm.gameState.SetPlayerName(playerName)
+		_ = gm.gameState.SetPlayerName(playerName)
 	}
 	// Restore day and season
 	if currentDay, ok := saveData["currentDay"].(float64); ok {
 		gm.gameState.SetCurrentDay(int(currentDay))
 	}
 	if currentSeason, ok := saveData["currentSeason"].(string); ok {
-		gm.gameState.SetCurrentSeason(currentSeason)
+		_ = gm.gameState.SetCurrentSeason(currentSeason)
 	}
 	gm.gameState.SetGold(int(saveData["gold"].(float64)))
 	gm.gameState.SetReputation(saveData["reputation"].(float64))
@@ -575,8 +581,8 @@ func (gm *GameManager) GetInventoryData() map[string]interface{} {
 	}
 
 	result := map[string]interface{}{
-		"shop":                 shopItems,
-		"warehouse":            warehouseItems,
+		locationShop:           shopItems,
+		locationWarehouse:      warehouseItems,
 		"shopCapacity":         shopCapacity,
 		"warehouseCapacity":    warehouseCapacity,
 		"shopUsed":             shopUsed,
@@ -626,7 +632,7 @@ func (gm *GameManager) BuyItem(itemID string, quantity int, price float64) map[s
 
 	// Add to inventory
 	if gm.inventory != nil {
-		gm.inventory.AddToWarehouseByID(itemID, quantity, int(price))
+		_ = gm.inventory.AddToWarehouseByID(itemID, quantity, int(price))
 	}
 
 	// Track with progression
@@ -657,7 +663,7 @@ func (gm *GameManager) SellItem(itemID string, quantity int, price float64) map[
 		}
 
 		// Remove from shop
-		shop.RemoveItem(itemID, quantity)
+		_ = shop.RemoveItem(itemID, quantity)
 	}
 
 	// Add gold
@@ -883,9 +889,9 @@ func (gm *GameManager) UpgradeInventoryCapacity(location string, amount int, cos
 
 	// Determine location
 	var invLocation inventory.InventoryLocation
-	if location == "shop" {
+	if location == locationShop {
 		invLocation = inventory.LocationShop
-	} else if location == "warehouse" {
+	} else if location == locationWarehouse {
 		invLocation = inventory.LocationWarehouse
 	} else {
 		return map[string]interface{}{
@@ -990,7 +996,7 @@ func (gm *GameManager) GetCapacityRecommendations() map[string]interface{} {
 		upgradeAmount := stats.RecommendedShopCapacity - stats.CurrentShopCapacity
 		if upgradeAmount > 0 {
 			recommendations = append(recommendations, map[string]interface{}{
-				"location":        "shop",
+				"location":        locationShop,
 				"currentCapacity": stats.CurrentShopCapacity,
 				"recommended":     stats.RecommendedShopCapacity,
 				"upgradeAmount":   upgradeAmount,
@@ -1005,7 +1011,7 @@ func (gm *GameManager) GetCapacityRecommendations() map[string]interface{} {
 		upgradeAmount := stats.RecommendedWarehouseCapacity - stats.CurrentWarehouseCapacity
 		if upgradeAmount > 0 {
 			recommendations = append(recommendations, map[string]interface{}{
-				"location":        "warehouse",
+				"location":        locationWarehouse,
 				"currentCapacity": stats.CurrentWarehouseCapacity,
 				"recommended":     stats.RecommendedWarehouseCapacity,
 				"upgradeAmount":   upgradeAmount,
@@ -1282,7 +1288,7 @@ func (gm *GameManager) Cleanup() {
 
 	// Save settings before cleanup
 	if gm.settings != nil {
-		gm.settings.SaveSettings()
+		_ = gm.settings.SaveSettings()
 	}
 
 	gm.isRunning = false
