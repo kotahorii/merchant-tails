@@ -182,11 +182,12 @@ func (iui *InventoryUIManager) TransferItem(request *InventoryTransferRequest) (
 
 	// Execute transfer based on direction
 	var err error
-	if request.FromLocation == locationShop && request.ToLocation == locationWarehouse {
+	switch {
+	case request.FromLocation == locationShop && request.ToLocation == locationWarehouse:
 		err = iui.inventory.TransferToWarehouse(request.ItemID, request.Quantity)
-	} else if request.FromLocation == locationWarehouse && request.ToLocation == locationShop {
+	case request.FromLocation == locationWarehouse && request.ToLocation == locationShop:
 		err = iui.inventory.TransferToShop(request.ItemID, request.Quantity)
-	} else {
+	default:
 		return &InventoryTransferResult{
 			Success: false,
 			Message: "Invalid transfer locations",

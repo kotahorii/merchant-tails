@@ -379,7 +379,7 @@ func (gm *GameManager) GetSaveSlots() (string, error) {
 }
 
 // handleTimeAdvanced handles time advancement events
-func (gm *GameManager) handleTimeAdvanced(e event.Event) {
+func (gm *GameManager) handleTimeAdvanced(_ event.Event) {
 	// Advance game day
 	gm.gameState.AdvanceDay()
 
@@ -398,7 +398,7 @@ func (gm *GameManager) handleTimeAdvanced(e event.Event) {
 }
 
 // handleTradeCompleted handles trade completion events
-func (gm *GameManager) handleTradeCompleted(e event.Event) {
+func (gm *GameManager) handleTradeCompleted(_ event.Event) {
 	// Extract trade data from event
 	revenue := 0.0
 	success := true
@@ -425,7 +425,7 @@ func (gm *GameManager) handleTradeCompleted(e event.Event) {
 }
 
 // handleMarketPriceChanged handles market price change events
-func (gm *GameManager) handleMarketPriceChanged(e event.Event) {
+func (gm *GameManager) handleMarketPriceChanged(_ event.Event) {
 	// Update market prices for all items
 	if gm.market != nil {
 		for _, itemID := range []string{"apple", "potion", "sword"} {
@@ -642,12 +642,12 @@ func (gm *GameManager) checkGameEvents() {
 }
 
 // triggerVictory triggers a victory condition
-func (gm *GameManager) triggerVictory(victoryType string) {
+func (gm *GameManager) triggerVictory(_ string) {
 	gm.eventBus.PublishAsync(event.NewBaseEvent("GameVictory"))
 }
 
 // triggerDefeat triggers a defeat condition
-func (gm *GameManager) triggerDefeat(defeatType string) {
+func (gm *GameManager) triggerDefeat(_ string) {
 	gm.eventBus.PublishAsync(event.NewBaseEvent("GameDefeat"))
 }
 
@@ -766,11 +766,12 @@ func (gm *GameManager) UpgradeInventoryCapacity(location string, amount int, cos
 
 	// Determine location
 	var invLocation inventory.InventoryLocation
-	if location == locationShop {
+	switch location {
+	case locationShop:
 		invLocation = inventory.LocationShop
-	} else if location == locationWarehouse {
+	case locationWarehouse:
 		invLocation = inventory.LocationWarehouse
-	} else {
+	default:
 		return map[string]interface{}{
 			"success": false,
 			"message": "Invalid location. Must be 'shop' or 'warehouse'",

@@ -618,7 +618,7 @@ func (pui *PurchaseUIManager) getAvailableMarketItems() []*MarketItem {
 }
 
 // getSupplyLevel returns the supply level for an item
-func (pui *PurchaseUIManager) getSupplyLevel(itemID string) string {
+func (pui *PurchaseUIManager) getSupplyLevel(_ string) string {
 	// Simplified supply level calculation
 	// In production, this would be calculated from actual market data
 	state := pui.market.State
@@ -630,16 +630,18 @@ func (pui *PurchaseUIManager) getSupplyLevel(itemID string) string {
 	supplyLevel := state.CurrentSupply
 
 	// Convert to supply level string
-	if supplyLevel == market.SupplyVeryLow {
+	switch supplyLevel {
+	case market.SupplyVeryLow:
 		return "scarce"
-	} else if supplyLevel == market.SupplyLow {
+	case market.SupplyLow:
 		return "low"
-	} else if supplyLevel == market.SupplyHigh {
+	case market.SupplyHigh:
 		return "high"
-	} else if supplyLevel == market.SupplyVeryHigh {
+	case market.SupplyVeryHigh:
 		return "abundant"
+	default:
+		return "normal"
 	}
-	return "normal"
 }
 
 // MarketItem represents an item available in the market

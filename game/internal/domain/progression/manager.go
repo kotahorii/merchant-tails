@@ -204,7 +204,6 @@ func (pm *ProgressionManager) CheckMilestone(milestoneType MilestoneType, value 
 	for _, milestone := range pm.milestones {
 		if milestone.Type == milestoneType &&
 			!milestone.Achieved && value >= milestone.Threshold {
-
 			// Mark as achieved
 			milestone.Achieved = true
 

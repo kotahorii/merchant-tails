@@ -87,7 +87,7 @@ func NewFrequencyManager() *FrequencyManager {
 	return &FrequencyManager{
 		config:       GetDefaultConfig(),
 		eventHistory: make(map[string]*EventFrequencyData),
-		rng:          rand.New(rand.NewSource(time.Now().UnixNano())),
+		rng:          rand.New(rand.NewSource(time.Now().UnixNano())), //nolint:gosec // Weak random is fine for game events
 	}
 }
 
@@ -165,7 +165,7 @@ func (fm *FrequencyManager) ShouldTriggerEvent(eventID string, rarity EventRarit
 }
 
 // checkCooldown checks if event is off cooldown
-func (fm *FrequencyManager) checkCooldown(eventID string, rarity EventRarity) bool {
+func (fm *FrequencyManager) checkCooldown(eventID string, _ EventRarity) bool {
 	data, exists := fm.eventHistory[eventID]
 	if !exists {
 		return true // Never occurred, no cooldown
@@ -351,7 +351,7 @@ type EventSuggestion struct {
 }
 
 // calculateEventWeight calculates weight for event selection
-func (fm *FrequencyManager) calculateEventWeight(eventID string, data *EventFrequencyData) float64 {
+func (fm *FrequencyManager) calculateEventWeight(_ string, data *EventFrequencyData) float64 {
 	// Base weight by rarity
 	weight := 1.0 / (float64(data.EventType) + 1.0)
 

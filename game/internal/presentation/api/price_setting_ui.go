@@ -579,7 +579,7 @@ func (psu *PriceSettingUIManager) calculateRecommendedPrice(itemID string, marke
 	return recommendedPrice
 }
 
-func (psu *PriceSettingUIManager) getDemandLevel(itemID string) string {
+func (psu *PriceSettingUIManager) getDemandLevel(_ string) string {
 	// Use market state to determine demand
 	state := psu.market.State
 	if state == nil {
@@ -588,17 +588,18 @@ func (psu *PriceSettingUIManager) getDemandLevel(itemID string) string {
 
 	demand := state.CurrentDemand
 
-	if demand == market.DemandVeryHigh {
+	switch demand {
+	case market.DemandVeryHigh:
 		return demandVeryHigh
-	} else if demand == market.DemandHigh {
+	case market.DemandHigh:
 		return demandHigh
-	} else if demand == market.DemandLow {
+	case market.DemandLow:
 		return demandLow
-	} else if demand == market.DemandVeryLow {
+	case market.DemandVeryLow:
 		return demandVeryLow
+	default:
+		return demandNormal
 	}
-
-	return demandNormal
 }
 
 func (psu *PriceSettingUIManager) calculateElasticity(itemID string) float64 {

@@ -218,7 +218,7 @@ func (sm *SaveManager) Load(fileName string) (*savepb.GameState, error) {
 	filePath := filepath.Join(sm.saveDir, fileName)
 
 	// Read file
-	data, err := os.ReadFile(filePath)
+	data, err := os.ReadFile(filePath) //nolint:gosec // Path is validated
 	if err != nil {
 		if os.IsNotExist(err) {
 			if sm.onLoadError != nil {

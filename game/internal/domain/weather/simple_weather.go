@@ -38,7 +38,7 @@ func (sw *SimpleWeather) UpdateWeather() {
 
 	// Simple random weather change
 	// Random seed is automatically initialized in Go 1.20+
-	weatherType := SimpleWeatherType(rand.Intn(3))
+	weatherType := SimpleWeatherType(rand.Intn(3)) //nolint:gosec // Weak random is fine for weather
 
 	sw.currentWeather = weatherType
 
