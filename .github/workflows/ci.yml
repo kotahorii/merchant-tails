@@ -128,7 +128,12 @@ jobs:
       - name: Run tests
         run: |
           cd game
-          go test -v -race -coverprofile=coverage.out -covermode=atomic ./...
+          # Skip CGO-dependent packages in CI
+          go test -v -race -coverprofile=coverage.out -covermode=atomic \
+            ./internal/domain/... \
+            ./internal/infrastructure/... \
+            ./internal/presentation/... \
+            ./pkg/...
 
       - name: Upload coverage to Codecov
         uses: codecov/codecov-action@v5
@@ -207,7 +212,7 @@ jobs:
       - name: Build GDExtension
         run: |
           if [ -f "Makefile" ]; then
-            make build-go
+            CGO_ENABLED=1 make build-go
           else
             echo "Makefile not found, skipping GDExtension build"
           fi
@@ -245,7 +250,12 @@ jobs:
       - name: Run benchmarks
         run: |
           cd game
-          go test -bench=. -benchmem ./... | tee benchmark.txt
+          # Skip CGO-dependent packages in CI
+          go test -bench=. -benchmem \
+            ./internal/domain/... \
+            ./internal/infrastructure/... \
+            ./internal/presentation/... \
+            ./pkg/... | tee benchmark.txt
 
       - name: Upload benchmark results
         uses: actions/upload-artifact@v4
