@@ -75,12 +75,13 @@ build: build-go
 build-go:
 	@echo "$(GREEN)Building Go GDExtension library...$(NC)"
 	@mkdir -p $(BUILD_DIR)
-	cd $(GAME_DIR) && $(GO) build -buildmode=c-shared \
+	@mkdir -p $(GODOT_DIR)/lib
+	cd $(GAME_DIR) && CGO_ENABLED=1 $(GO) build -buildmode=c-shared \
 		-ldflags "$(LDFLAGS)" \
-		-o ../$(TARGET) \
+		-o ../$(BUILD_DIR)/$(LIB_NAME) \
 		./cmd/gdextension
-	@cp $(TARGET) $(GODOT_DIR)/bin/$(LIB_NAME)
-	@echo "$(GREEN)✓ Build complete: $(TARGET)$(NC)"
+	@cp $(BUILD_DIR)/$(LIB_NAME) $(GODOT_DIR)/lib/$(LIB_NAME)
+	@echo "$(GREEN)✓ GDExtension library built: $(GODOT_DIR)/lib/$(LIB_NAME)$(NC)"
 
 # Build the Godot project
 build-godot:

@@ -1,251 +1,274 @@
-extends Control
+extends Node
 
-# Game API reference
-var game_api
-
-# UI nodes
-@onready var player_name_label = $MainContainer/LeftPanel/PlayerInfo/VBox/PlayerName
-@onready var gold_label = $MainContainer/LeftPanel/PlayerInfo/VBox/GoldLabel
-@onready var rank_label = $MainContainer/LeftPanel/PlayerInfo/VBox/RankLabel
-@onready var reputation_label = $MainContainer/LeftPanel/PlayerInfo/VBox/ReputationLabel
-@onready var day_label = $MainContainer/LeftPanel/PlayerInfo/VBox/DayLabel
-@onready var season_label = $MainContainer/LeftPanel/PlayerInfo/VBox/SeasonLabel
-
-@onready var weather_label = $MainContainer/LeftPanel/WeatherInfo/VBox/WeatherLabel
-@onready var weather_effect_label = $MainContainer/LeftPanel/WeatherInfo/VBox/WeatherEffect
-
-@onready var center_tabs = $MainContainer/CenterPanel
-@onready var shop_item_grid = $MainContainer/CenterPanel/Shop/ShopView/VBox/ItemGrid
-@onready var market_item_list = $MainContainer/CenterPanel/Market/MarketView/VBox/ItemList
-@onready var market_quantity_spin = $MainContainer/CenterPanel/Market/MarketView/VBox/BuyPanel/QuantitySpinBox
-@onready var shop_inventory_list = $MainContainer/CenterPanel/Inventory/InventoryView/VBox/HSplitContainer/ShopInventory/ShopList
-@onready var warehouse_inventory_list = $MainContainer/CenterPanel/Inventory/InventoryView/VBox/HSplitContainer/WarehouseInventory/WarehouseList
-@onready var bank_balance_label = $MainContainer/CenterPanel/Bank/BankView/VBox/BalanceLabel
-@onready var bank_amount_spin = $MainContainer/CenterPanel/Bank/BankView/VBox/HBoxContainer/AmountSpinBox
-
-@onready var notification_panel = $NotificationPanel
-@onready var notification_text = $NotificationPanel/NotificationText
-
-# Game state
-var player_info = {}
-var market_prices = {}
+# ゲーム状態
+var player_gold: float = 1000.0
+var current_day: int = 1
+var player_name: String = "Merchant"
 var inventory = {}
-var bank_account = {}
-var current_weather = {}
+var market_prices = {}
+
+# GDExtension library
+var gdextension = null
+
+# UI References
+@onready var main_container = $MainContainer
+@onready var player_info_label = $MainContainer/TopBar/PlayerInfo
+@onready var gold_label = $MainContainer/TopBar/GoldLabel
+@onready var day_label = $MainContainer/TopBar/DayLabel
+@onready var market_list = $MainContainer/MarketPanel/ItemList
+@onready var inventory_list = $MainContainer/InventoryPanel/ItemList
+@onready var notification_label = $MainContainer/NotificationPanel/Label
 
 func _ready():
-	# Initialize game API
-	_initialize_game_api()
-	
-	# Load game state
-	_load_game_state()
-	
-	# Update all UI elements
-	_update_player_info()
-	_update_market_prices()
-	_update_inventory()
-	_update_bank_info()
-	_update_weather()
-	
-	# Connect to game events
-	_connect_game_events()
+	print("Game Main ready")
+	_initialize_gdextension()
+	_initialize_game()
 
-func _initialize_game_api():
-	# Load the GDExtension
-	game_api = load("res://bin/merchant_game.gdextension")
+func _initialize_gdextension():
+	# Load the GDExtension library
+	if FileAccess.file_exists("res://lib/libmerchant_game.dylib"):
+		gdextension = load("res://merchant_game.gdextension")
+		if gdextension:
+			print("GDExtension loaded successfully")
+			# Initialize the extension
+			var init_result = OS.call_deferred("godot_gdextension_init")
+			if init_result:
+				print("GDExtension initialized")
+		else:
+			print("Failed to load GDExtension")
+	else:
+		print("GDExtension library not found, running in test mode")
+
+func _initialize_game():
+	if gdextension:
+		_load_game_data()
+	else:
+		_setup_test_data()
+
+func _load_game_data():
+	# Get data from Go GDExtension
+	player_gold = OS.call_deferred("get_player_gold")
+	current_day = OS.call_deferred("get_current_day")
 	
-	if not game_api:
-		push_error("Failed to load game API")
+	# Get market data
+	var market_json = OS.call_deferred("get_market_items_json")
+	if market_json:
+		var json = JSON.new()
+		var parse_result = json.parse(market_json)
+		if parse_result == OK:
+			market_prices = json.data
+		OS.call_deferred("free_string", market_json)
+	
+	# Get inventory data
+	var inventory_json = OS.call_deferred("get_inventory_json")
+	if inventory_json:
+		var json = JSON.new()
+		var parse_result = json.parse(inventory_json)
+		if parse_result == OK:
+			inventory = json.data
+		OS.call_deferred("free_string", inventory_json)
+	
+	_update_ui()
+
+func _setup_test_data():
+	# Test mode data
+	market_prices = {
+		"apple": 10,
+		"bread": 15,
+		"sword": 100,
+		"potion": 50,
+		"armor": 200,
+		"herb": 5
+	}
+	inventory = {
+		"apple": 5,
+		"bread": 3
+	}
+	_update_ui()
+
+func start_new_game(name: String):
+	player_name = name
+	if gdextension:
+		var success = OS.call_deferred("start_new_game", name)
+		if success:
+			_load_game_data()
+			_show_notification("New game started!")
+		else:
+			_show_notification("Failed to start new game", true)
+	else:
+		# Test mode
+		player_gold = 1000.0
+		current_day = 1
+		inventory.clear()
+		_update_ui()
+		_show_notification("New game started (test mode)")
+
+func save_game():
+	if gdextension:
+		var success = OS.call_deferred("save_game")
+		if success:
+			_show_notification("Game saved!")
+		else:
+			_show_notification("Failed to save game", true)
+	else:
+		_show_notification("Save not available in test mode", true)
+
+func load_game():
+	if gdextension:
+		var success = OS.call_deferred("load_game")
+		if success:
+			_load_game_data()
+			_show_notification("Game loaded!")
+		else:
+			_show_notification("No saved game found", true)
+	else:
+		_show_notification("Load not available in test mode", true)
+
+func advance_day():
+	if gdextension:
+		OS.call_deferred("advance_day")
+		current_day = OS.call_deferred("get_current_day")
+		_load_game_data()  # Reload to get updated prices
+	else:
+		current_day += 1
+		# Simulate price changes in test mode
+		for item_id in market_prices:
+			var factor = 0.8 + randf() * 0.4  # -20% to +20%
+			market_prices[item_id] = int(market_prices[item_id] * factor)
+	
+	_update_ui()
+	_show_notification("Advanced to day " + str(current_day))
+
+func buy_item(item_id: String, quantity: int):
+	if gdextension:
+		var success = OS.call_deferred("buy_item", item_id, quantity)
+		if success:
+			player_gold = OS.call_deferred("get_player_gold")
+			_load_game_data()
+			_show_notification("Bought %d %s" % [quantity, item_id])
+		else:
+			_show_notification("Purchase failed", true)
+	else:
+		# Test mode
+		var price = market_prices.get(item_id, 10)
+		var total_cost = price * quantity
+		if player_gold >= total_cost:
+			player_gold -= total_cost
+			if not inventory.has(item_id):
+				inventory[item_id] = 0
+			inventory[item_id] += quantity
+			_update_ui()
+			_show_notification("Bought %d %s for %d gold" % [quantity, item_id, total_cost])
+		else:
+			_show_notification("Not enough gold!", true)
+
+func sell_item(item_id: String, quantity: int):
+	if gdextension:
+		var success = OS.call_deferred("sell_item", item_id, quantity)
+		if success:
+			player_gold = OS.call_deferred("get_player_gold")
+			_load_game_data()
+			_show_notification("Sold %d %s" % [quantity, item_id])
+		else:
+			_show_notification("Sale failed", true)
+	else:
+		# Test mode
+		if inventory.has(item_id) and inventory[item_id] >= quantity:
+			inventory[item_id] -= quantity
+			if inventory[item_id] == 0:
+				inventory.erase(item_id)
+			var price = market_prices.get(item_id, 10) * 0.8
+			var total_revenue = price * quantity
+			player_gold += total_revenue
+			_update_ui()
+			_show_notification("Sold %d %s for %d gold" % [quantity, item_id, int(total_revenue)])
+		else:
+			_show_notification("Not enough items!", true)
+
+func _update_ui():
+	if player_info_label:
+		player_info_label.text = player_name
+	if gold_label:
+		gold_label.text = "Gold: " + str(int(player_gold))
+	if day_label:
+		day_label.text = "Day: " + str(current_day)
+	
+	_update_market_display()
+	_update_inventory_display()
+
+func _update_market_display():
+	if not market_list:
 		return
 	
-	# Initialize the game
-	if game_api.initialize_game():
-		print("Game initialized successfully")
-	else:
-		push_error("Failed to initialize game")
-
-func _load_game_state():
-	# Check if we're continuing or starting new
-	var save_exists = FileAccess.file_exists("user://savegame.dat")
-	
-	if save_exists:
-		# Load saved game
-		var result = game_api.load_game(0)
-		if result.success:
-			print("Game loaded successfully")
-		else:
-			push_error("Failed to load game: " + result.message)
-			_start_new_game()
-	else:
-		_start_new_game()
-
-func _start_new_game():
-	# Start a new game with default player name
-	var result = game_api.start_new_game("Player")
-	if result.success:
-		print("New game started")
-	else:
-		push_error("Failed to start new game: " + result.message)
-
-func _update_player_info():
-	player_info = game_api.get_player_info()
-	
-	player_name_label.text = player_info.name
-	gold_label.text = tr("UI_GOLD") + ": " + str(player_info.gold)
-	rank_label.text = tr("UI_RANK") + ": " + tr(player_info.rank)
-	reputation_label.text = tr("UI_REPUTATION") + ": " + str(player_info.reputation)
-	day_label.text = tr("UI_DAY") + ": " + str(player_info.day)
-	season_label.text = tr("UI_SEASON") + ": " + tr(player_info.season)
-
-func _update_market_prices():
-	market_prices = game_api.get_market_prices()
-	
-	# Clear and populate market list
-	market_item_list.clear()
+	market_list.clear()
 	for item_id in market_prices:
 		var price = market_prices[item_id]
-		var item_text = tr(item_id.to_upper()) + " - " + str(price) + " " + tr("UI_GOLD")
-		market_item_list.add_item(item_text)
+		if price is float:
+			price = int(price)
+		market_list.add_item("%s - %d gold" % [item_id.capitalize(), price])
 
-func _update_inventory():
-	inventory = game_api.get_inventory()
-	
-	# Update shop inventory
-	shop_inventory_list.clear()
-	if "shop" in inventory:
-		for item_id in inventory.shop:
-			var quantity = inventory.shop[item_id]
-			var item_text = tr(item_id.to_upper()) + " x" + str(quantity)
-			shop_inventory_list.add_item(item_text)
-	
-	# Update warehouse inventory
-	warehouse_inventory_list.clear()
-	if "warehouse" in inventory:
-		for item_id in inventory.warehouse:
-			var quantity = inventory.warehouse[item_id]
-			var item_text = tr(item_id.to_upper()) + " x" + str(quantity)
-			warehouse_inventory_list.add_item(item_text)
+func _update_inventory_display():
+	if not inventory_list:
+		return
+		
+	inventory_list.clear()
+	for item_id in inventory:
+		var quantity = inventory[item_id]
+		inventory_list.add_item("%s x%d" % [item_id.capitalize(), quantity])
 
-func _update_bank_info():
-	bank_account = game_api.get_bank_account()
-	
-	var balance_text = tr("UI_BALANCE") + ": " + str(bank_account.balance) + " " + tr("UI_GOLD")
-	bank_balance_label.text = balance_text
+var notification_timer: Timer
 
-func _update_weather():
-	current_weather = game_api.get_current_weather()
-	
-	weather_label.text = tr("UI_WEATHER") + ": " + tr(current_weather.type)
-	
-	var effect_text = ""
-	if current_weather.price_effect != 0:
-		effect_text += tr("UI_PRICE") + ": " + ("+" if current_weather.price_effect > 0 else "") + str(current_weather.price_effect * 100) + "%"
-	if current_weather.demand_effect != 0:
-		if effect_text != "":
-			effect_text += ", "
-		effect_text += tr("UI_DEMAND") + ": " + ("+" if current_weather.demand_effect > 0 else "") + str(current_weather.demand_effect * 100) + "%"
-	
-	weather_effect_label.text = effect_text
-
-func _connect_game_events():
-	# Connect to game events if API supports signals
-	if game_api.has_signal("price_updated"):
-		game_api.price_updated.connect(_on_price_updated)
-	if game_api.has_signal("transaction_complete"):
-		game_api.transaction_complete.connect(_on_transaction_complete)
-	if game_api.has_signal("day_changed"):
-		game_api.day_changed.connect(_on_day_changed)
-	if game_api.has_signal("weather_changed"):
-		game_api.weather_changed.connect(_on_weather_changed)
-
-func _on_price_updated(item_id: String, new_price: int):
-	market_prices[item_id] = new_price
-	_update_market_prices()
-
-func _on_transaction_complete(transaction: Dictionary):
-	_show_notification(tr("MSG_TRANSACTION_COMPLETE") + ": " + transaction.type + " " + str(transaction.quantity) + " " + tr(transaction.item_id.to_upper()))
-	_update_player_info()
-	_update_inventory()
-
-func _on_day_changed(new_day: int, season: String):
-	_update_player_info()
-	_update_weather()
-	_show_notification(tr("MSG_DAY_CHANGED") + ": " + str(new_day) + " (" + tr(season) + ")")
-
-func _on_weather_changed(weather: String):
-	_update_weather()
-	_show_notification(tr("MSG_WEATHER_CHANGED") + ": " + tr(weather))
-
-func _show_notification(message: String, duration: float = 3.0):
-	notification_text.text = message
-	notification_panel.visible = true
-	
-	# Hide after duration
-	await get_tree().create_timer(duration).timeout
-	notification_panel.visible = false
+func _show_notification(message: String, is_error: bool = false):
+	if notification_label:
+		notification_label.text = message
+		if is_error:
+			notification_label.modulate = Color.RED
+		else:
+			notification_label.modulate = Color.WHITE
+		
+		notification_label.get_parent().visible = true
+		
+		if not notification_timer:
+			notification_timer = Timer.new()
+			add_child(notification_timer)
+			notification_timer.timeout.connect(func(): 
+				if notification_label:
+					notification_label.get_parent().visible = false
+			)
+		
+		notification_timer.wait_time = 3.0
+		notification_timer.one_shot = true
+		notification_timer.start()
+	else:
+		print(message)
 
 # Button handlers
-func _on_market_button_pressed():
-	center_tabs.current_tab = 1  # Market tab
-
-func _on_inventory_button_pressed():
-	center_tabs.current_tab = 2  # Inventory tab
-
-func _on_bank_button_pressed():
-	center_tabs.current_tab = 3  # Bank tab
+func _on_new_game_button_pressed():
+	start_new_game("Player")
 
 func _on_save_button_pressed():
-	var result = game_api.save_game(0)
-	if result.success:
-		_show_notification(tr("MSG_GAME_SAVED"))
-	else:
-		_show_notification(tr("MSG_SAVE_FAILED") + ": " + result.message, 5.0)
+	save_game()
+
+func _on_load_button_pressed():
+	load_game()
+
+func _on_next_day_button_pressed():
+	advance_day()
 
 func _on_buy_button_pressed():
-	var selected_items = market_item_list.get_selected_items()
-	if selected_items.is_empty():
-		_show_notification(tr("MSG_NO_ITEM_SELECTED"))
-		return
-	
-	var selected_index = selected_items[0]
-	var item_keys = market_prices.keys()
-	if selected_index >= item_keys.size():
-		return
-	
-	var item_id = item_keys[selected_index]
-	var quantity = int(market_quantity_spin.value)
-	
-	var result = game_api.buy_item(item_id, quantity)
-	if result.success:
-		_show_notification(tr("MSG_PURCHASE_SUCCESS") + ": " + str(quantity) + " " + tr(item_id.to_upper()))
-		_update_player_info()
-		_update_inventory()
-	else:
-		_show_notification(tr("MSG_PURCHASE_FAILED") + ": " + result.message, 5.0)
+	# Buy selected item from market
+	if market_list and market_list.is_anything_selected():
+		var selected = market_list.get_selected_items()[0]
+		var items = market_prices.keys()
+		if selected < items.size():
+			var item_id = items[selected]
+			buy_item(item_id, 1)
 
-func _on_deposit_button_pressed():
-	var amount = bank_amount_spin.value
-	
-	var result = game_api.deposit_money(amount)
-	if result.success:
-		_show_notification(tr("MSG_DEPOSIT_SUCCESS") + ": " + str(amount) + " " + tr("UI_GOLD"))
-		_update_player_info()
-		_update_bank_info()
-	else:
-		_show_notification(tr("MSG_DEPOSIT_FAILED") + ": " + result.message, 5.0)
-
-func _on_withdraw_button_pressed():
-	var amount = bank_amount_spin.value
-	
-	var result = game_api.withdraw_money(amount)
-	if result.success:
-		_show_notification(tr("MSG_WITHDRAW_SUCCESS") + ": " + str(amount) + " " + tr("UI_GOLD"))
-		_update_player_info()
-		_update_bank_info()
-	else:
-		_show_notification(tr("MSG_WITHDRAW_FAILED") + ": " + result.message, 5.0)
-
-func _notification(what):
-	if what == NOTIFICATION_WM_CLOSE_REQUEST:
-		# Auto-save on close
-		game_api.save_game(0)
+func _on_sell_button_pressed():
+	# Sell selected item from inventory
+	if inventory_list and inventory_list.is_anything_selected():
+		var selected = inventory_list.get_selected_items()[0]
+		var items = inventory.keys()
+		if selected < items.size():
+			var item_id = items[selected]
+			sell_item(item_id, 1)

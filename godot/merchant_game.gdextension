@@ -1,0 +1,35 @@
+[configuration]
+
+entry_symbol = "merchant_game_init"
+compatibility_minimum = "4.2"
+reloadable = true
+
+[libraries]
+
+macos.debug = "res://lib/libmerchant_game.dylib"
+macos.release = "res://lib/libmerchant_game.dylib"
+windows.debug.x86_32 = "res://lib/merchant_game_x86.dll"
+windows.release.x86_32 = "res://lib/merchant_game_x86.dll"
+windows.debug.x86_64 = "res://lib/merchant_game_x64.dll"
+windows.release.x86_64 = "res://lib/merchant_game_x64.dll"
+linux.debug.x86_64 = "res://lib/libmerchant_game.so"
+linux.release.x86_64 = "res://lib/libmerchant_game.so"
+linux.debug.arm64 = "res://lib/libmerchant_game_arm64.so"
+linux.release.arm64 = "res://lib/libmerchant_game_arm64.so"
+linux.debug.rv64 = "res://lib/libmerchant_game_rv64.so"
+linux.release.rv64 = "res://lib/libmerchant_game_rv64.so"
+
+[dependencies]
+
+macos.debug = {}
+macos.release = {}
+windows.debug.x86_32 = {}
+windows.release.x86_32 = {}
+windows.debug.x86_64 = {}
+windows.release.x86_64 = {}
+linux.debug.x86_64 = {}
+linux.release.x86_64 = {}
+linux.debug.arm64 = {}
+linux.release.arm64 = {}
+linux.debug.rv64 = {}
+linux.release.rv64 = {}

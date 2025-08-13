@@ -1,15 +1,9 @@
+//go:build cgo
+// +build cgo
+
 package main
 
-/*
-#cgo CFLAGS: -I../../godot/bin
-#include <stdint.h>
-
-// Entry point type definition
-typedef int32_t (*GDExtensionEntryPoint)(void* get_proc_address, void* library, void* initialization);
-
-// Export the library entry point
-extern int32_t merchant_game_library_init(void* get_proc_address, void* library, void* initialization);
-*/
+// #include <stdlib.h>
 import "C"
 
 import (
@@ -17,379 +11,226 @@ import (
 	"fmt"
 	"unsafe"
 
-	"github.com/yourusername/merchant-tails/game/internal/domain/event"
 	"github.com/yourusername/merchant-tails/game/internal/presentation/api"
-	"github.com/yourusername/merchant-tails/game/pkg/gdextension"
 )
-
-//export merchant_game_library_init
-func merchant_game_library_init(getProcAddress unsafe.Pointer, library unsafe.Pointer, initialization unsafe.Pointer) C.int32_t {
-	fmt.Println("Merchant Tails GDExtension library initializing...")
-
-	// Initialize the extension
-	ext := gdextension.Initialize(
-		// Initialize callback
-		func(level gdextension.InitializationLevel) {
-			fmt.Printf("Initializing at level: %s\n", gdextension.GetLevelName(level))
-
-			switch level {
-			case gdextension.InitializationCore:
-				initializeCore()
-			case gdextension.InitializationServers:
-				initializeServers()
-			case gdextension.InitializationScene:
-				initializeScene()
-			case gdextension.InitializationEditor:
-				initializeEditor()
-			}
-		},
-		// Deinitialize callback
-		func(level gdextension.InitializationLevel) {
-			fmt.Printf("Deinitializing at level: %s\n", gdextension.GetLevelName(level))
-
-			switch level {
-			case gdextension.InitializationEditor:
-				deinitializeEditor()
-			case gdextension.InitializationScene:
-				deinitializeScene()
-			case gdextension.InitializationServers:
-				deinitializeServers()
-			case gdextension.InitializationCore:
-				deinitializeCore()
-			}
-		},
-	)
-
-	if ext.IsInitialized() {
-		fmt.Println("Merchant Tails GDExtension successfully initialized")
-		return 1 // Success
-	}
-
-	return 0 // Failure
-}
 
 // Global game manager instance
 var gameManager *api.GameManager
 
-// initializeCore sets up core systems
-func initializeCore() {
-	fmt.Println("Initializing core systems...")
-
-	// Initialize the global event bus
-	eventBus := event.GetGlobalEventBus()
-	if eventBus != nil {
-		fmt.Println("Event bus initialized")
-	}
-
-	// Create game manager
-	gameManager = api.NewGameManager()
-
-	// Register base classes with Godot
-	registry := gdextension.GetClassRegistry()
-
-	// Register MerchantGame class
-	_, err := registry.RegisterClass("MerchantGame", "Node",
-		func(userData unsafe.Pointer) unsafe.Pointer {
-			// Return the game manager as the instance
-			return unsafe.Pointer(gameManager)
-		},
-		func(userData unsafe.Pointer, instance unsafe.Pointer) {
-			// Cleanup on free
-			if gameManager != nil {
-				gameManager.Cleanup()
-			}
-		},
-	)
-	if err != nil {
-		fmt.Printf("Failed to register MerchantGame class: %v\n", err)
-	}
-
-	// Register game manager methods
-	registerGameManagerMethods(registry)
-}
-
-// initializeServers sets up server systems
-func initializeServers() {
-	fmt.Println("Initializing server systems...")
-	// Initialize game servers (physics, rendering, etc.)
-}
-
-// initializeScene sets up scene systems
-func initializeScene() {
-	fmt.Println("Initializing scene systems...")
-	// Scene-specific initialization
-}
-
-// initializeEditor sets up editor systems
-func initializeEditor() {
-	fmt.Println("Initializing editor systems...")
-	// Initialize editor-specific functionality
-}
-
-// deinitializeEditor cleans up editor systems
-func deinitializeEditor() {
-	fmt.Println("Deinitializing editor systems...")
-}
-
-// deinitializeScene cleans up scene systems
-func deinitializeScene() {
-	fmt.Println("Deinitializing scene systems...")
-}
-
-// deinitializeServers cleans up server systems
-func deinitializeServers() {
-	fmt.Println("Deinitializing server systems...")
-}
-
-// deinitializeCore cleans up core systems
-func deinitializeCore() {
-	fmt.Println("Deinitializing core systems...")
-
-	// Clear the class registry
-	registry := gdextension.GetClassRegistry()
-	registry.Clear()
-
-	// Reset the event bus
-	event.ResetGlobalEventBus()
-
-	// Clean up the extension
-	ext := gdextension.GetExtension()
-	if ext != nil {
-		ext.Cleanup()
-	}
-}
+// Game state cache
+var (
+	currentGold float64 = 1000.0
+	currentDay  int32   = 1
+	marketData  map[string]float64
+	inventory   map[string]int
+)
 
 //export godot_gdextension_init
-func godot_gdextension_init() {
-	// Legacy entry point for compatibility
-	fmt.Println("Legacy init called - redirecting to new entry point")
+func godot_gdextension_init() C.int {
+	fmt.Println("Initializing Merchant Tails GDExtension")
+	gameManager = api.NewGameManager()
+
+	// Initialize market data
+	marketData = make(map[string]float64)
+	inventory = make(map[string]int)
+
+	// Set initial market prices
+	marketData["apple"] = 10.0
+	marketData["bread"] = 15.0
+	marketData["sword"] = 100.0
+	marketData["potion"] = 50.0
+	marketData["armor"] = 200.0
+	marketData["herb"] = 5.0
+
+	return 1 // Success
 }
 
 //export godot_gdextension_terminate
 func godot_gdextension_terminate() {
-	// Legacy termination point for compatibility
-	fmt.Println("Legacy terminate called")
+	fmt.Println("Terminating Merchant Tails GDExtension")
+	if gameManager != nil {
+		_ = gameManager.SaveGame(0) // Auto-save on exit
+		gameManager.Cleanup()
+	}
 }
 
-// registerGameManagerMethods registers all GameManager methods with Godot
-func registerGameManagerMethods(registry *gdextension.ClassRegistry) {
-	// Start new game
-	_, _ = registry.RegisterMethod("MerchantGame", "start_new_game",
-		func(methodData unsafe.Pointer, instance unsafe.Pointer, args []unsafe.Pointer, ret unsafe.Pointer) error {
-			if gameManager == nil {
-				return fmt.Errorf("game manager not initialized")
+//export start_new_game
+func start_new_game(playerName *C.char) C.int {
+	name := C.GoString(playerName)
+	err := gameManager.StartNewGame(name)
+	if err != nil {
+		fmt.Printf("Failed to start new game: %v\n", err)
+		return 0
+	}
+
+	// Reset game state
+	currentGold = 1000.0
+	currentDay = 1
+	inventory = make(map[string]int)
+
+	fmt.Printf("New game started for player: %s\n", name)
+	return 1
+}
+
+//export get_player_gold
+func get_player_gold() C.double {
+	return C.double(currentGold)
+}
+
+//export set_player_gold
+func set_player_gold(gold C.double) {
+	currentGold = float64(gold)
+}
+
+//export get_current_day
+func get_current_day() C.int {
+	return C.int(currentDay)
+}
+
+//export advance_day
+func advance_day() {
+	currentDay++
+
+	// Update market prices (simple simulation)
+	for item := range marketData {
+		// Random price fluctuation between -20% and +20%
+		factor := 0.8 + (float64(currentDay%5) * 0.1)
+		marketData[item] *= factor
+	}
+
+	fmt.Printf("Advanced to day %d\n", currentDay)
+}
+
+//export save_game
+func save_game() C.int {
+	err := gameManager.SaveGame(0)
+	if err != nil {
+		fmt.Printf("Failed to save game: %v\n", err)
+		return 0
+	}
+	fmt.Println("Game saved successfully")
+	return 1
+}
+
+//export load_game
+func load_game() C.int {
+	err := gameManager.LoadGame(0)
+	if err != nil {
+		fmt.Printf("Failed to load game: %v\n", err)
+		return 0
+	}
+
+	// Load game state from manager
+	if stateJSON, err := gameManager.GetGameState(); err == nil {
+		var state map[string]interface{}
+		if err := json.Unmarshal([]byte(stateJSON), &state); err == nil {
+			if gold, ok := state["gold"].(float64); ok {
+				currentGold = gold
 			}
-
-			// Get player name from args
-			playerName := gdextension.GetStringFromPointer(args[0])
-			err := gameManager.StartNewGame(playerName)
-
-			// Return success
-			gdextension.SetBoolToPointer(ret, err == nil)
-			return nil
-		},
-	)
-
-	// Get game state
-	_, _ = registry.RegisterMethod("MerchantGame", "get_game_state",
-		func(methodData unsafe.Pointer, instance unsafe.Pointer, args []unsafe.Pointer, ret unsafe.Pointer) error {
-			if gameManager == nil {
-				return fmt.Errorf("game manager not initialized")
+			if day, ok := state["day"].(float64); ok {
+				currentDay = int32(day)
 			}
+		}
+	}
 
-			stateJSON, err := gameManager.GetGameState()
-			if err != nil {
-				gdextension.SetStringToPointer(ret, "")
-				return nil
-			}
+	fmt.Println("Game loaded successfully")
+	return 1
+}
 
-			gdextension.SetStringToPointer(ret, stateJSON)
-			return nil
-		},
-	)
+//export buy_item
+func buy_item(itemID *C.char, quantity C.int) C.int {
+	item := C.GoString(itemID)
+	qty := int(quantity)
 
-	// Get market data
-	_, _ = registry.RegisterMethod("MerchantGame", "get_market_data",
-		func(methodData unsafe.Pointer, instance unsafe.Pointer, args []unsafe.Pointer, ret unsafe.Pointer) error {
-			if gameManager == nil {
-				return fmt.Errorf("game manager not initialized")
-			}
+	// Check if item exists in market
+	price, exists := marketData[item]
+	if !exists {
+		fmt.Printf("Item %s not found in market\n", item)
+		return 0
+	}
 
-			// Get market data from game manager
-			marketData := gameManager.GetMarketData()
-			jsonData, err := json.Marshal(marketData)
-			if err != nil {
-				gdextension.SetStringToPointer(ret, "")
-				return nil
-			}
+	totalCost := price * float64(qty)
 
-			gdextension.SetStringToPointer(ret, string(jsonData))
-			return nil
-		},
-	)
+	// Check if player has enough gold
+	if currentGold < totalCost {
+		fmt.Printf("Not enough gold. Need %.2f, have %.2f\n", totalCost, currentGold)
+		return 0
+	}
 
-	// Get inventory data
-	_, _ = registry.RegisterMethod("MerchantGame", "get_inventory_data",
-		func(methodData unsafe.Pointer, instance unsafe.Pointer, args []unsafe.Pointer, ret unsafe.Pointer) error {
-			if gameManager == nil {
-				return fmt.Errorf("game manager not initialized")
-			}
+	// Process purchase
+	currentGold -= totalCost
+	inventory[item] += qty
 
-			// Get inventory data from game manager
-			inventoryData := gameManager.GetInventoryData()
-			jsonData, err := json.Marshal(inventoryData)
-			if err != nil {
-				gdextension.SetStringToPointer(ret, "")
-				return nil
-			}
+	fmt.Printf("Bought %d %s for %.2f gold\n", qty, item, totalCost)
+	return 1
+}
 
-			gdextension.SetStringToPointer(ret, string(jsonData))
-			return nil
-		},
-	)
+//export sell_item
+func sell_item(itemID *C.char, quantity C.int) C.int {
+	item := C.GoString(itemID)
+	qty := int(quantity)
 
-	// Pause game
-	_, _ = registry.RegisterMethod("MerchantGame", "pause_game",
-		func(methodData unsafe.Pointer, instance unsafe.Pointer, args []unsafe.Pointer, ret unsafe.Pointer) error {
-			if gameManager == nil {
-				return fmt.Errorf("game manager not initialized")
-			}
+	// Check if player has the item
+	currentQty, hasItem := inventory[item]
+	if !hasItem || currentQty < qty {
+		fmt.Printf("Not enough %s in inventory\n", item)
+		return 0
+	}
 
-			gameManager.PauseGame()
-			return nil
-		},
-	)
+	// Get sell price (80% of market price)
+	marketPrice, exists := marketData[item]
+	if !exists {
+		marketPrice = 10.0 // Default price
+	}
+	sellPrice := marketPrice * 0.8
+	totalRevenue := sellPrice * float64(qty)
 
-	// Resume game
-	_, _ = registry.RegisterMethod("MerchantGame", "resume_game",
-		func(methodData unsafe.Pointer, instance unsafe.Pointer, args []unsafe.Pointer, ret unsafe.Pointer) error {
-			if gameManager == nil {
-				return fmt.Errorf("game manager not initialized")
-			}
+	// Process sale
+	inventory[item] -= qty
+	if inventory[item] == 0 {
+		delete(inventory, item)
+	}
+	currentGold += totalRevenue
 
-			gameManager.ResumeGame()
-			return nil
-		},
-	)
+	fmt.Printf("Sold %d %s for %.2f gold\n", qty, item, totalRevenue)
+	return 1
+}
 
-	// Buy item
-	_, _ = registry.RegisterMethod("MerchantGame", "buy_item",
-		func(methodData unsafe.Pointer, instance unsafe.Pointer, args []unsafe.Pointer, ret unsafe.Pointer) error {
-			if gameManager == nil {
-				return fmt.Errorf("game manager not initialized")
-			}
+//export get_market_price
+func get_market_price(itemID *C.char) C.double {
+	item := C.GoString(itemID)
+	if price, exists := marketData[item]; exists {
+		return C.double(price)
+	}
+	return C.double(0.0)
+}
 
-			itemID := gdextension.GetStringFromPointer(args[0])
-			quantity := gdextension.GetIntFromPointer(args[1])
-			price := gdextension.GetFloatFromPointer(args[2])
+//export get_inventory_quantity
+func get_inventory_quantity(itemID *C.char) C.int {
+	item := C.GoString(itemID)
+	if qty, exists := inventory[item]; exists {
+		return C.int(qty)
+	}
+	return C.int(0)
+}
 
-			result := gameManager.BuyItem(itemID, quantity, price)
-			jsonData, err := json.Marshal(result)
-			if err != nil {
-				gdextension.SetStringToPointer(ret, "")
-				return nil
-			}
+//export get_market_items_json
+func get_market_items_json() *C.char {
+	jsonData, _ := json.Marshal(marketData)
+	return C.CString(string(jsonData))
+}
 
-			gdextension.SetStringToPointer(ret, string(jsonData))
-			return nil
-		},
-	)
+//export get_inventory_json
+func get_inventory_json() *C.char {
+	jsonData, _ := json.Marshal(inventory)
+	return C.CString(string(jsonData))
+}
 
-	// Sell item
-	_, _ = registry.RegisterMethod("MerchantGame", "sell_item",
-		func(methodData unsafe.Pointer, instance unsafe.Pointer, args []unsafe.Pointer, ret unsafe.Pointer) error {
-			if gameManager == nil {
-				return fmt.Errorf("game manager not initialized")
-			}
-
-			itemID := gdextension.GetStringFromPointer(args[0])
-			quantity := gdextension.GetIntFromPointer(args[1])
-			price := gdextension.GetFloatFromPointer(args[2])
-
-			result := gameManager.SellItem(itemID, quantity, price)
-			jsonData, err := json.Marshal(result)
-			if err != nil {
-				gdextension.SetStringToPointer(ret, "")
-				return nil
-			}
-
-			gdextension.SetStringToPointer(ret, string(jsonData))
-			return nil
-		},
-	)
-
-	// Save game
-	_, _ = registry.RegisterMethod("MerchantGame", "save_game",
-		func(methodData unsafe.Pointer, instance unsafe.Pointer, args []unsafe.Pointer, ret unsafe.Pointer) error {
-			if gameManager == nil {
-				return fmt.Errorf("game manager not initialized")
-			}
-
-			slot := gdextension.GetIntFromPointer(args[0])
-			err := gameManager.SaveGame(slot)
-			gdextension.SetBoolToPointer(ret, err == nil)
-			return nil
-		},
-	)
-
-	// Load game
-	_, _ = registry.RegisterMethod("MerchantGame", "load_game",
-		func(methodData unsafe.Pointer, instance unsafe.Pointer, args []unsafe.Pointer, ret unsafe.Pointer) error {
-			if gameManager == nil {
-				return fmt.Errorf("game manager not initialized")
-			}
-
-			slot := gdextension.GetIntFromPointer(args[0])
-			err := gameManager.LoadGame(slot)
-			gdextension.SetBoolToPointer(ret, err == nil)
-			return nil
-		},
-	)
-
-	// Get save slots
-	_, _ = registry.RegisterMethod("MerchantGame", "get_save_slots",
-		func(methodData unsafe.Pointer, instance unsafe.Pointer, args []unsafe.Pointer, ret unsafe.Pointer) error {
-			if gameManager == nil {
-				gdextension.SetStringToPointer(ret, "[]")
-				return nil
-			}
-
-			slotsJSON, err := gameManager.GetSaveSlots()
-			if err != nil {
-				gdextension.SetStringToPointer(ret, "[]")
-				return nil
-			}
-
-			gdextension.SetStringToPointer(ret, slotsJSON)
-			return nil
-		},
-	)
-
-	// Get queued events
-	_, _ = registry.RegisterMethod("MerchantGame", "get_queued_events",
-		func(methodData unsafe.Pointer, instance unsafe.Pointer, args []unsafe.Pointer, ret unsafe.Pointer) error {
-			if gameManager == nil {
-				gdextension.SetStringToPointer(ret, "[]")
-				return nil
-			}
-
-			eventsJSON, err := gameManager.GetQueuedEvents()
-			if err != nil {
-				gdextension.SetStringToPointer(ret, "[]")
-				return nil
-			}
-
-			gdextension.SetStringToPointer(ret, eventsJSON)
-			return nil
-		},
-	)
-
-	// Register signals
-	_ = registry.RegisterSignal("MerchantGame", "state_changed", []string{"state_json"})
-	_ = registry.RegisterSignal("MerchantGame", "event_published", []string{"event_name", "event_data"})
+//export free_string
+func free_string(str *C.char) {
+	C.free(unsafe.Pointer(str))
 }
 
 func main() {
-	// This is required for building a C shared library
-	// The actual entry points are the exported functions above
+	// Required for building as shared library
 }
