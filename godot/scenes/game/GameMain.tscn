@@ -10,245 +10,310 @@ anchor_bottom = 1.0
 theme = ExtResource("2")
 script = ExtResource("1")
 
+; --------------------------
+; Background layer
+; --------------------------
 [node name="Background" type="ColorRect" parent="."]
 anchor_right = 1.0
 anchor_bottom = 1.0
 color = Color(0.15, 0.15, 0.2, 1)
 
+; --------------------------
+; Optional top menu/status
+; --------------------------
+[node name="TopBar" type="HBoxContainer" parent="."]
+anchor_right = 1.0
+custom_minimum_size = Vector2(0, 28)
+theme_override_constants/separation = 12
+[node name="MenuBar" type="MenuBar" parent="TopBar"]
+size_flags_horizontal = 3
+[node name="TopFiller" type="Control" parent="TopBar"]
+size_flags_horizontal = 3
+[node name="ClockLabel" type="Label" parent="TopBar"]
+text = "—"
+
+; --------------------------
+; Main split (left info / right content)
+; --------------------------
 [node name="MainContainer" type="HSplitContainer" parent="."]
+anchor_top = 0.0
 anchor_right = 1.0
 anchor_bottom = 1.0
+offset_top = 28.0
 split_offset = 300
+theme_override_constants/separation = 0
 
+; ---------- Left column ----------
 [node name="LeftPanel" type="VBoxContainer" parent="MainContainer"]
-minimum_size = Vector2(300, 0)
+custom_minimum_size = Vector2(300, 0)
+size_flags_vertical = 3
 theme_override_constants/separation = 10
+mouse_filter = 1
 
+; Player info
 [node name="PlayerInfo" type="PanelContainer" parent="MainContainer/LeftPanel"]
-minimum_size = Vector2(0, 150)
-
-[node name="VBox" type="VBoxContainer" parent="MainContainer/LeftPanel/PlayerInfo"]
-layout_mode = 2
-margin = Rect2(10, 10, 10, 10)
-
-[node name="PlayerName" type="Label" parent="MainContainer/LeftPanel/PlayerInfo/VBox"]
+theme_override_constants/margin_left = 10
+theme_override_constants/margin_top = 10
+theme_override_constants/margin_right = 10
+theme_override_constants/margin_bottom = 10
+[node name="PlayerInfoVBox" type="VBoxContainer" parent="MainContainer/LeftPanel/PlayerInfo"]
+theme_override_constants/separation = 6
+[node name="PlayerName" type="Label" parent="MainContainer/LeftPanel/PlayerInfo/PlayerInfoVBox"]
 text = "Player Name"
 theme_override_font_sizes/font_size = 24
-
-[node name="GoldLabel" type="Label" parent="MainContainer/LeftPanel/PlayerInfo/VBox"]
+[node name="GoldLabel" type="Label" parent="MainContainer/LeftPanel/PlayerInfo/PlayerInfoVBox"]
 text = "UI_GOLD: 1000"
 theme_override_font_sizes/font_size = 20
-
-[node name="RankLabel" type="Label" parent="MainContainer/LeftPanel/PlayerInfo/VBox"]
+[node name="RankLabel" type="Label" parent="MainContainer/LeftPanel/PlayerInfo/PlayerInfoVBox"]
 text = "UI_RANK: Apprentice"
-
-[node name="ReputationLabel" type="Label" parent="MainContainer/LeftPanel/PlayerInfo/VBox"]
+[node name="ReputationLabel" type="Label" parent="MainContainer/LeftPanel/PlayerInfo/PlayerInfoVBox"]
 text = "UI_REPUTATION: 50"
-
-[node name="DayLabel" type="Label" parent="MainContainer/LeftPanel/PlayerInfo/VBox"]
+[node name="DayLabel" type="Label" parent="MainContainer/LeftPanel/PlayerInfo/PlayerInfoVBox"]
 text = "UI_DAY: 1"
-
-[node name="SeasonLabel" type="Label" parent="MainContainer/LeftPanel/PlayerInfo/VBox"]
+[node name="SeasonLabel" type="Label" parent="MainContainer/LeftPanel/PlayerInfo/PlayerInfoVBox"]
 text = "UI_SEASON: Spring"
 
+; Quick actions
 [node name="QuickActions" type="PanelContainer" parent="MainContainer/LeftPanel"]
-minimum_size = Vector2(0, 200)
-
-[node name="VBox" type="VBoxContainer" parent="MainContainer/LeftPanel/QuickActions"]
-layout_mode = 2
-margin = Rect2(10, 10, 10, 10)
-
-[node name="Label" type="Label" parent="MainContainer/LeftPanel/QuickActions/VBox"]
+theme_override_constants/margin_left = 10
+theme_override_constants/margin_top = 10
+theme_override_constants/margin_right = 10
+theme_override_constants/margin_bottom = 10
+[node name="QuickActionsVBox" type="VBoxContainer" parent="MainContainer/LeftPanel/QuickActions"]
+theme_override_constants/separation = 8
+[node name="Label" type="Label" parent="MainContainer/LeftPanel/QuickActions/QuickActionsVBox"]
 text = "Quick Actions"
 theme_override_font_sizes/font_size = 18
-
-[node name="MarketButton" type="Button" parent="MainContainer/LeftPanel/QuickActions/VBox"]
+[node name="MarketButton" type="Button" parent="MainContainer/LeftPanel/QuickActions/QuickActionsVBox"]
 text = "UI_MARKET"
-minimum_size = Vector2(0, 40)
-
-[node name="InventoryButton" type="Button" parent="MainContainer/LeftPanel/QuickActions/VBox"]
+custom_minimum_size = Vector2(0, 40)
+tooltip_text = "Open the market (UI_MARKET)"
+[node name="InventoryButton" type="Button" parent="MainContainer/LeftPanel/QuickActions/QuickActionsVBox"]
 text = "UI_INVENTORY"
-minimum_size = Vector2(0, 40)
-
-[node name="BankButton" type="Button" parent="MainContainer/LeftPanel/QuickActions/VBox"]
+custom_minimum_size = Vector2(0, 40)
+tooltip_text = "Open inventory (UI_INVENTORY)"
+[node name="BankButton" type="Button" parent="MainContainer/LeftPanel/QuickActions/QuickActionsVBox"]
 text = "UI_BANK"
-minimum_size = Vector2(0, 40)
-
-[node name="SaveButton" type="Button" parent="MainContainer/LeftPanel/QuickActions/VBox"]
+custom_minimum_size = Vector2(0, 40)
+tooltip_text = "Open bank (UI_BANK)"
+[node name="SaveButton" type="Button" parent="MainContainer/LeftPanel/QuickActions/QuickActionsVBox"]
 text = "Save Game"
-minimum_size = Vector2(0, 40)
+custom_minimum_size = Vector2(0, 40)
+tooltip_text = "Save your progress"
 
+; Weather
 [node name="WeatherInfo" type="PanelContainer" parent="MainContainer/LeftPanel"]
-minimum_size = Vector2(0, 100)
-
-[node name="VBox" type="VBoxContainer" parent="MainContainer/LeftPanel/WeatherInfo"]
-layout_mode = 2
-margin = Rect2(10, 10, 10, 10)
-
-[node name="WeatherLabel" type="Label" parent="MainContainer/LeftPanel/WeatherInfo/VBox"]
+theme_override_constants/margin_left = 10
+theme_override_constants/margin_top = 10
+theme_override_constants/margin_right = 10
+theme_override_constants/margin_bottom = 10
+[node name="WeatherVBox" type="VBoxContainer" parent="MainContainer/LeftPanel/WeatherInfo"]
+theme_override_constants/separation = 4
+[node name="WeatherLabel" type="Label" parent="MainContainer/LeftPanel/WeatherInfo/WeatherVBox"]
 text = "Weather: Sunny"
 theme_override_font_sizes/font_size = 16
-
-[node name="WeatherEffect" type="Label" parent="MainContainer/LeftPanel/WeatherInfo/VBox"]
+[node name="WeatherEffect" type="Label" parent="MainContainer/LeftPanel/WeatherInfo/WeatherVBox"]
 text = "Price: -5%, Demand: +10%"
 theme_override_font_sizes/font_size = 14
 
+; Stretch filler so left column pushes bottom content down
+[node name="LeftStretch" type="Control" parent="MainContainer/LeftPanel"]
+size_flags_vertical = 3
+
+; ---------- Right content (tabs) ----------
 [node name="CenterPanel" type="TabContainer" parent="MainContainer"]
+size_flags_horizontal = 3
+size_flags_vertical = 3
 tab_alignment = 0
+clip_tabs = false
 
+; ====== SHOP TAB ======
 [node name="Shop" type="Control" parent="MainContainer/CenterPanel"]
-layout_mode = 2
-
 [node name="ShopView" type="PanelContainer" parent="MainContainer/CenterPanel/Shop"]
 anchor_right = 1.0
 anchor_bottom = 1.0
-
-[node name="VBox" type="VBoxContainer" parent="MainContainer/CenterPanel/Shop/ShopView"]
-layout_mode = 2
-margin = Rect2(20, 20, 20, 20)
-
-[node name="Title" type="Label" parent="MainContainer/CenterPanel/Shop/ShopView/VBox"]
+[node name="ShopVBox" type="VBoxContainer" parent="MainContainer/CenterPanel/Shop/ShopView"]
+theme_override_constants/separation = 10
+theme_override_constants/margin_left = 20
+theme_override_constants/margin_top = 20
+theme_override_constants/margin_right = 20
+theme_override_constants/margin_bottom = 20
+[node name="Title" type="Label" parent="MainContainer/CenterPanel/Shop/ShopView/ShopVBox"]
 text = "UI_SHOP"
 theme_override_font_sizes/font_size = 24
-
-[node name="HSeparator" type="HSeparator" parent="MainContainer/CenterPanel/Shop/ShopView/VBox"]
-
-[node name="ItemGrid" type="GridContainer" parent="MainContainer/CenterPanel/Shop/ShopView/VBox"]
+[node name="HSeparator" type="HSeparator" parent="MainContainer/CenterPanel/Shop/ShopView/ShopVBox"]
+[node name="ShopScroll" type="ScrollContainer" parent="MainContainer/CenterPanel/Shop/ShopView/ShopVBox"]
+size_flags_vertical = 3
+[node name="ItemGrid" type="GridContainer" parent="MainContainer/CenterPanel/Shop/ShopView/ShopVBox/ShopScroll"]
 columns = 4
 theme_override_constants/h_separation = 10
 theme_override_constants/v_separation = 10
+size_flags_horizontal = 3
+size_flags_vertical = 3
 
+; ====== MARKET TAB ======
 [node name="Market" type="Control" parent="MainContainer/CenterPanel"]
-visible = false
-layout_mode = 2
-
 [node name="MarketView" type="PanelContainer" parent="MainContainer/CenterPanel/Market"]
 anchor_right = 1.0
 anchor_bottom = 1.0
-
-[node name="VBox" type="VBoxContainer" parent="MainContainer/CenterPanel/Market/MarketView"]
-layout_mode = 2
-margin = Rect2(20, 20, 20, 20)
-
-[node name="Title" type="Label" parent="MainContainer/CenterPanel/Market/MarketView/VBox"]
+[node name="MarketVBox" type="VBoxContainer" parent="MainContainer/CenterPanel/Market/MarketView"]
+theme_override_constants/separation = 10
+theme_override_constants/margin_left = 20
+theme_override_constants/margin_top = 20
+theme_override_constants/margin_right = 20
+theme_override_constants/margin_bottom = 20
+[node name="Title" type="Label" parent="MainContainer/CenterPanel/Market/MarketView/MarketVBox"]
 text = "UI_MARKET"
 theme_override_font_sizes/font_size = 24
-
-[node name="HSeparator" type="HSeparator" parent="MainContainer/CenterPanel/Market/MarketView/VBox"]
-
-[node name="ItemList" type="ItemList" parent="MainContainer/CenterPanel/Market/MarketView/VBox"]
-minimum_size = Vector2(0, 400)
-
-[node name="BuyPanel" type="HBoxContainer" parent="MainContainer/CenterPanel/Market/MarketView/VBox"]
-theme_override_constants/separation = 20
-
-[node name="QuantityLabel" type="Label" parent="MainContainer/CenterPanel/Market/MarketView/VBox/BuyPanel"]
+[node name="HSeparator" type="HSeparator" parent="MainContainer/CenterPanel/Market/MarketView/MarketVBox"]
+[node name="SearchBar" type="HBoxContainer" parent="MainContainer/CenterPanel/Market/MarketView/MarketVBox"]
+theme_override_constants/separation = 8
+[node name="Search" type="LineEdit" parent="MainContainer/CenterPanel/Market/MarketView/MarketVBox/SearchBar"]
+placeholder_text = "Search…"
+size_flags_horizontal = 3
+[node name="Filter" type="OptionButton" parent="MainContainer/CenterPanel/Market/MarketView/MarketVBox/SearchBar"]
+tooltip_text = "Filter items"
+[node name="MarketScroll" type="ScrollContainer" parent="MainContainer/CenterPanel/Market/MarketView/MarketVBox"]
+size_flags_vertical = 3
+[node name="ItemList" type="ItemList" parent="MainContainer/CenterPanel/Market/MarketView/MarketVBox/MarketScroll"]
+custom_minimum_size = Vector2(0, 400)
+size_flags_horizontal = 3
+size_flags_vertical = 3
+[node name="BuyPanel" type="HBoxContainer" parent="MainContainer/CenterPanel/Market/MarketView/MarketVBox"]
+theme_override_constants/separation = 12
+[node name="QuantityLabel" type="Label" parent="MainContainer/CenterPanel/Market/MarketView/MarketVBox/BuyPanel"]
 text = "TRADE_QUANTITY:"
-
-[node name="QuantitySpinBox" type="SpinBox" parent="MainContainer/CenterPanel/Market/MarketView/VBox/BuyPanel"]
+[node name="QuantitySpinBox" type="SpinBox" parent="MainContainer/CenterPanel/Market/MarketView/MarketVBox/BuyPanel"]
 min_value = 1.0
 max_value = 999.0
 value = 1.0
-
-[node name="BuyButton" type="Button" parent="MainContainer/CenterPanel/Market/MarketView/VBox/BuyPanel"]
+custom_minimum_size = Vector2(120, 0)
+[node name="BuyButton" type="Button" parent="MainContainer/CenterPanel/Market/MarketView/MarketVBox/BuyPanel"]
 text = "TRADE_BUY"
-minimum_size = Vector2(100, 40)
+custom_minimum_size = Vector2(100, 40)
 
+; ====== INVENTORY TAB ======
 [node name="Inventory" type="Control" parent="MainContainer/CenterPanel"]
-visible = false
-layout_mode = 2
-
 [node name="InventoryView" type="PanelContainer" parent="MainContainer/CenterPanel/Inventory"]
 anchor_right = 1.0
 anchor_bottom = 1.0
-
-[node name="VBox" type="VBoxContainer" parent="MainContainer/CenterPanel/Inventory/InventoryView"]
-layout_mode = 2
-margin = Rect2(20, 20, 20, 20)
-
-[node name="Title" type="Label" parent="MainContainer/CenterPanel/Inventory/InventoryView/VBox"]
+[node name="InventoryVBox" type="VBoxContainer" parent="MainContainer/CenterPanel/Inventory/InventoryView"]
+theme_override_constants/separation = 10
+theme_override_constants/margin_left = 20
+theme_override_constants/margin_top = 20
+theme_override_constants/margin_right = 20
+theme_override_constants/margin_bottom = 20
+[node name="Title" type="Label" parent="MainContainer/CenterPanel/Inventory/InventoryView/InventoryVBox"]
 text = "UI_INVENTORY"
 theme_override_font_sizes/font_size = 24
-
-[node name="HSplitContainer" type="HSplitContainer" parent="MainContainer/CenterPanel/Inventory/InventoryView/VBox"]
+[node name="HSplitContainer" type="HSplitContainer" parent="MainContainer/CenterPanel/Inventory/InventoryView/InventoryVBox"]
 split_offset = 400
+theme_override_constants/separation = 10
 
-[node name="ShopInventory" type="VBoxContainer" parent="MainContainer/CenterPanel/Inventory/InventoryView/VBox/HSplitContainer"]
-
-[node name="Label" type="Label" parent="MainContainer/CenterPanel/Inventory/InventoryView/VBox/HSplitContainer/ShopInventory"]
+[node name="ShopInventory" type="VBoxContainer" parent="MainContainer/CenterPanel/Inventory/InventoryView/InventoryVBox/HSplitContainer"]
+theme_override_constants/separation = 6
+size_flags_horizontal = 3
+[node name="Label" type="Label" parent="MainContainer/CenterPanel/Inventory/InventoryView/InventoryVBox/HSplitContainer/ShopInventory"]
 text = "UI_SHOP"
 theme_override_font_sizes/font_size = 18
+[node name="ShopScroll" type="ScrollContainer" parent="MainContainer/CenterPanel/Inventory/InventoryView/InventoryVBox/HSplitContainer/ShopInventory"]
+size_flags_vertical = 3
+[node name="ShopList" type="ItemList" parent="MainContainer/CenterPanel/Inventory/InventoryView/InventoryVBox/HSplitContainer/ShopInventory/ShopScroll"]
+custom_minimum_size = Vector2(0, 300)
+size_flags_vertical = 3
+size_flags_horizontal = 3
 
-[node name="ShopList" type="ItemList" parent="MainContainer/CenterPanel/Inventory/InventoryView/VBox/HSplitContainer/ShopInventory"]
-minimum_size = Vector2(0, 300)
-
-[node name="WarehouseInventory" type="VBoxContainer" parent="MainContainer/CenterPanel/Inventory/InventoryView/VBox/HSplitContainer"]
-
-[node name="Label" type="Label" parent="MainContainer/CenterPanel/Inventory/InventoryView/VBox/HSplitContainer/WarehouseInventory"]
+[node name="WarehouseInventory" type="VBoxContainer" parent="MainContainer/CenterPanel/Inventory/InventoryView/InventoryVBox/HSplitContainer"]
+theme_override_constants/separation = 6
+size_flags_horizontal = 3
+[node name="Label" type="Label" parent="MainContainer/CenterPanel/Inventory/InventoryView/InventoryVBox/HSplitContainer/WarehouseInventory"]
 text = "UI_WAREHOUSE"
 theme_override_font_sizes/font_size = 18
+[node name="WarehouseScroll" type="ScrollContainer" parent="MainContainer/CenterPanel/Inventory/InventoryView/InventoryVBox/HSplitContainer/WarehouseInventory"]
+size_flags_vertical = 3
+[node name="WarehouseList" type="ItemList" parent="MainContainer/CenterPanel/Inventory/InventoryView/InventoryVBox/HSplitContainer/WarehouseInventory/WarehouseScroll"]
+custom_minimum_size = Vector2(0, 300)
+size_flags_vertical = 3
+size_flags_horizontal = 3
 
-[node name="WarehouseList" type="ItemList" parent="MainContainer/CenterPanel/Inventory/InventoryView/VBox/HSplitContainer/WarehouseInventory"]
-minimum_size = Vector2(0, 300)
-
+; ====== BANK TAB ======
 [node name="Bank" type="Control" parent="MainContainer/CenterPanel"]
-visible = false
-layout_mode = 2
-
 [node name="BankView" type="PanelContainer" parent="MainContainer/CenterPanel/Bank"]
 anchor_right = 1.0
 anchor_bottom = 1.0
-
-[node name="VBox" type="VBoxContainer" parent="MainContainer/CenterPanel/Bank/BankView"]
-layout_mode = 2
-margin = Rect2(20, 20, 20, 20)
-
-[node name="Title" type="Label" parent="MainContainer/CenterPanel/Bank/BankView/VBox"]
+[node name="BankVBox" type="VBoxContainer" parent="MainContainer/CenterPanel/Bank/BankView"]
+theme_override_constants/separation = 10
+theme_override_constants/margin_left = 20
+theme_override_constants/margin_top = 20
+theme_override_constants/margin_right = 20
+theme_override_constants/margin_bottom = 20
+[node name="Title" type="Label" parent="MainContainer/CenterPanel/Bank/BankView/BankVBox"]
 text = "UI_BANK"
 theme_override_font_sizes/font_size = 24
-
-[node name="HSeparator" type="HSeparator" parent="MainContainer/CenterPanel/Bank/BankView/VBox"]
-
-[node name="BalanceLabel" type="Label" parent="MainContainer/CenterPanel/Bank/BankView/VBox"]
+[node name="HSeparator" type="HSeparator" parent="MainContainer/CenterPanel/Bank/BankView/BankVBox"]
+[node name="BalanceLabel" type="Label" parent="MainContainer/CenterPanel/Bank/BankView/BankVBox"]
 text = "Balance: 0 Gold"
 theme_override_font_sizes/font_size = 20
-
-[node name="InterestLabel" type="Label" parent="MainContainer/CenterPanel/Bank/BankView/VBox"]
+[node name="InterestLabel" type="Label" parent="MainContainer/CenterPanel/Bank/BankView/BankVBox"]
 text = "Interest Rate: 2% per year"
-
-[node name="HBoxContainer" type="HBoxContainer" parent="MainContainer/CenterPanel/Bank/BankView/VBox"]
-theme_override_constants/separation = 20
-
-[node name="AmountSpinBox" type="SpinBox" parent="MainContainer/CenterPanel/Bank/BankView/VBox/HBoxContainer"]
+[node name="HBoxContainer" type="HBoxContainer" parent="MainContainer/CenterPanel/Bank/BankView/BankVBox"]
+theme_override_constants/separation = 12
+[node name="AmountSpinBox" type="SpinBox" parent="MainContainer/CenterPanel/Bank/BankView/BankVBox/HBoxContainer"]
 min_value = 1.0
 max_value = 999999.0
 value = 100.0
-
-[node name="DepositButton" type="Button" parent="MainContainer/CenterPanel/Bank/BankView/VBox/HBoxContainer"]
+custom_minimum_size = Vector2(140, 0)
+[node name="DepositButton" type="Button" parent="MainContainer/CenterPanel/Bank/BankView/BankVBox/HBoxContainer"]
 text = "Deposit"
-minimum_size = Vector2(100, 40)
-
-[node name="WithdrawButton" type="Button" parent="MainContainer/CenterPanel/Bank/BankView/VBox/HBoxContainer"]
+custom_minimum_size = Vector2(100, 40)
+[node name="WithdrawButton" type="Button" parent="MainContainer/CenterPanel/Bank/BankView/BankVBox/HBoxContainer"]
 text = "Withdraw"
-minimum_size = Vector2(100, 40)
+custom_minimum_size = Vector2(100, 40)
 
+; =========== HUD / Notifications ===========
 [node name="HUD" parent="." instance=ExtResource("3")]
 
 [node name="NotificationPanel" type="PanelContainer" parent="."]
 anchor_left = 1.0
 anchor_right = 1.0
 offset_left = -300.0
-offset_bottom = 100.0
+offset_top = 40.0
+offset_bottom = 140.0
 visible = false
-
 [node name="NotificationText" type="RichTextLabel" parent="NotificationPanel"]
-layout_mode = 2
 text = "Notification"
+fit_content = true
+autowrap_mode = 2
 
-[connection signal="pressed" from="MainContainer/LeftPanel/QuickActions/VBox/MarketButton" to="." method="_on_market_button_pressed"]
-[connection signal="pressed" from="MainContainer/LeftPanel/QuickActions/VBox/InventoryButton" to="." method="_on_inventory_button_pressed"]
-[connection signal="pressed" from="MainContainer/LeftPanel/QuickActions/VBox/BankButton" to="." method="_on_bank_button_pressed"]
-[connection signal="pressed" from="MainContainer/LeftPanel/QuickActions/VBox/SaveButton" to="." method="_on_save_button_pressed"]
-[connection signal="pressed" from="MainContainer/CenterPanel/Market/MarketView/VBox/BuyPanel/BuyButton" to="." method="_on_buy_button_pressed"]
-[connection signal="pressed" from="MainContainer/CenterPanel/Bank/BankView/VBox/HBoxContainer/DepositButton" to="." method="_on_deposit_button_pressed"]
-[connection signal="pressed" from="MainContainer/CenterPanel/Bank/BankView/VBox/HBoxContainer/WithdrawButton" to="." method="_on_withdraw_button_pressed"]
+; Simple bottom status bar (for contextual messages)
+[node name="StatusBar" type="PanelContainer" parent="."]
+anchor_left = 0.0
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_bottom = 0.0
+custom_minimum_size = Vector2(0, 26)
+[node name="StatusHBox" type="HBoxContainer" parent="StatusBar"]
+anchor_right = 1.0
+anchor_bottom = 1.0
+theme_override_constants/separation = 10
+[node name="StatusLabel" type="Label" parent="StatusBar/StatusHBox"]
+text = "Ready."
+size_flags_horizontal = 3
+
+; A timer you can start from script to auto-hide notifications
+[node name="NotificationTimer" type="Timer" parent="."]
+one_shot = true
+wait_time = 2.0
+
+; --------------------------
+; Connections
+; --------------------------
+[connection signal="pressed" from="MainContainer/LeftPanel/QuickActions/QuickActionsVBox/MarketButton" to="." method="_on_market_button_pressed"]
+[connection signal="pressed" from="MainContainer/LeftPanel/QuickActions/QuickActionsVBox/InventoryButton" to="." method="_on_inventory_button_pressed"]
+[connection signal="pressed" from="MainContainer/LeftPanel/QuickActions/QuickActionsVBox/BankButton" to="." method="_on_bank_button_pressed"]
+[connection signal="pressed" from="MainContainer/LeftPanel/QuickActions/QuickActionsVBox/SaveButton" to="." method="_on_save_button_pressed"]
+[connection signal="pressed" from="MainContainer/CenterPanel/Market/MarketView/MarketVBox/BuyPanel/BuyButton" to="." method="_on_buy_button_pressed"]
+[connection signal="pressed" from="MainContainer/CenterPanel/Bank/BankView/BankVBox/HBoxContainer/DepositButton" to="." method="_on_deposit_button_pressed"]
+[connection signal="pressed" from="MainContainer/CenterPanel/Bank/BankView/BankVBox/HBoxContainer/WithdrawButton" to="." method="_on_withdraw_button_pressed"]
+[connection signal="tab_changed" from="MainContainer/CenterPanel" to="." method="_on_center_panel_tab_changed"]
+[connection signal="timeout" from="NotificationTimer" to="." method="_on_notification_timer_timeout"]
