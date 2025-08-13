@@ -1,0 +1,36 @@
+[gd_scene load_steps=2 format=3 uid="uid://dqmx5x"]
+
+[ext_resource type="Script" path="res://scripts/ui/HUD.gd" id="1"]
+
+[node name="HUD" type="CanvasLayer"]
+script = ExtResource("1")
+
+[node name="TopBar" type="HBoxContainer" parent="."]
+anchor_right = 1.0
+offset_bottom = 40.0
+theme_override_constants/separation = 20
+
+[node name="TimeInfo" type="HBoxContainer" parent="TopBar"]
+layout_mode = 2
+
+[node name="DayLabel" type="Label" parent="TopBar/TimeInfo"]
+text = "Day: 1"
+
+[node name="SeasonLabel" type="Label" parent="TopBar/TimeInfo"]
+text = "Spring"
+
+[node name="WeatherLabel" type="Label" parent="TopBar/TimeInfo"]
+text = "Sunny"
+
+[node name="Spacer" type="Control" parent="TopBar"]
+layout_mode = 2
+size_flags_horizontal = 3
+
+[node name="PlayerInfo" type="HBoxContainer" parent="TopBar"]
+layout_mode = 2
+
+[node name="GoldLabel" type="Label" parent="TopBar/PlayerInfo"]
+text = "Gold: 1000"
+
+[node name="ReputationLabel" type="Label" parent="TopBar/PlayerInfo"]
+text = "Rep: 50"

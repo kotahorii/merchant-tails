@@ -11,10 +11,10 @@ msgstr ""
 
 # Main Menu
 msgid "TITLE_GAME"
-msgstr "マーチャントテイル"
+msgstr "マーチャントテイルズ"
 
 msgid "MENU_START_GAME"
-msgstr "ゲームを始める"
+msgstr "ゲーム開始"
 
 msgid "MENU_CONTINUE"
 msgstr "続きから"
@@ -26,10 +26,10 @@ msgid "MENU_QUIT"
 msgstr "終了"
 
 msgid "MENU_NEW_GAME"
-msgstr "新規ゲーム"
+msgstr "新しいゲーム"
 
 msgid "MENU_LOAD_GAME"
-msgstr "ロード"
+msgstr "ゲームをロード"
 
 msgid "MENU_TUTORIAL"
 msgstr "チュートリアル"
@@ -54,7 +54,7 @@ msgid "UI_INVENTORY"
 msgstr "在庫"
 
 msgid "UI_SHOP"
-msgstr "店舗"
+msgstr "ショップ"
 
 msgid "UI_WAREHOUSE"
 msgstr "倉庫"
@@ -70,7 +70,7 @@ msgid "TRADE_BUY"
 msgstr "購入"
 
 msgid "TRADE_SELL"
-msgstr "販売"
+msgstr "売却"
 
 msgid "TRADE_PRICE"
 msgstr "価格"
@@ -82,7 +82,7 @@ msgid "TRADE_TOTAL"
 msgstr "合計"
 
 msgid "TRADE_CONFIRM"
-msgstr "確認"
+msgstr "確定"
 
 msgid "TRADE_CANCEL"
 msgstr "キャンセル"
@@ -91,14 +91,14 @@ msgid "TRADE_INSUFFICIENT_GOLD"
 msgstr "ゴールドが不足しています！"
 
 msgid "TRADE_INSUFFICIENT_SPACE"
-msgstr "在庫スペースが不足しています！"
+msgstr "在庫スペースが足りません！"
 
 msgid "TRADE_SUCCESS"
 msgstr "取引成功！"
 
 # Items
 msgid "ITEM_APPLE"
-msgstr "りんご"
+msgstr "リンゴ"
 
 msgid "ITEM_ORANGE"
 msgstr "オレンジ"
@@ -158,20 +158,20 @@ msgstr "曇り"
 
 # Difficulty
 msgid "DIFFICULTY_EASY"
-msgstr "かんたん"
+msgstr "簡単"
 
 msgid "DIFFICULTY_NORMAL"
-msgstr "ふつう"
+msgstr "普通"
 
 msgid "DIFFICULTY_HARD"
-msgstr "むずかしい"
+msgstr "難しい"
 
 # Tutorial
 msgid "TUTORIAL_WELCOME"
-msgstr "マーチャントテイルへようこそ！"
+msgstr "マーチャントテイルズへようこそ！"
 
 msgid "TUTORIAL_BUY_ITEMS"
-msgstr "市場で商品を仕入れましょう。"
+msgstr "市場でアイテムを購入しましょう。"
 
 msgid "TUTORIAL_SET_PRICES"
 msgstr "販売価格を賢く設定しましょう。"
@@ -180,10 +180,10 @@ msgid "TUTORIAL_MANAGE_INVENTORY"
 msgstr "在庫を管理しましょう。"
 
 msgid "TUTORIAL_WATCH_MARKET"
-msgstr "価格は需要と供給で変動します。"
+msgstr "価格は需要と供給によって変動します。"
 
 msgid "TUTORIAL_MAKE_PROFIT"
-msgstr "利益を上げることが目標です。"
+msgstr "目標は利益を上げることです。"
 
 msgid "TUTORIAL_USE_BANK"
 msgstr "銀行に預金して利息を得ましょう。"
@@ -192,7 +192,7 @@ msgid "TUTORIAL_COMPLETE"
 msgstr "チュートリアル完了！頑張ってください！"
 
 msgid "TUTORIAL_SKIP"
-msgstr "スキップ"
+msgstr "チュートリアルをスキップ"
 
 msgid "TUTORIAL_NEXT"
 msgstr "次へ"
@@ -229,7 +229,7 @@ msgid "SETTINGS_MASTER_VOLUME"
 msgstr "マスター音量"
 
 msgid "SETTINGS_MUSIC_VOLUME"
-msgstr "BGM音量"
+msgstr "音楽音量"
 
 msgid "SETTINGS_SFX_VOLUME"
 msgstr "効果音音量"
@@ -242,16 +242,16 @@ msgstr "戻る"
 
 # Messages
 msgid "MSG_SAVE_SUCCESS"
-msgstr "セーブしました！"
+msgstr "セーブ成功！"
 
 msgid "MSG_LOAD_SUCCESS"
-msgstr "ロードしました！"
+msgstr "ロード成功！"
 
 msgid "MSG_CONFIRM_QUIT"
-msgstr "本当に終了しますか？"
+msgstr "終了しますか？"
 
 msgid "MSG_CONFIRM_NEW_GAME"
-msgstr "新規ゲームを開始すると現在の進行状況が失われます。続けますか？"
+msgstr "新しいゲームを開始すると現在の進行状況が上書きされます。続けますか？"
 
 msgid "MSG_YES"
 msgstr "はい"
@@ -283,10 +283,10 @@ msgid "MSG_WEATHER_CHANGED"
 msgstr "天気が変わりました"
 
 msgid "MSG_GAME_SAVED"
-msgstr "セーブしました"
+msgstr "ゲームを保存しました"
 
 msgid "MSG_SAVE_FAILED"
-msgstr "セーブに失敗しました"
+msgstr "保存に失敗しました"
 
 msgid "MSG_NO_ITEM_SELECTED"
 msgstr "アイテムが選択されていません"
